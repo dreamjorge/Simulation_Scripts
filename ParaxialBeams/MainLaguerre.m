@@ -1,14 +1,16 @@
-%Color of beam
-mapgreen = AdvancedColormap('kgg',256,[0 70 255]/255);  %color of beam
+
 
 %adding guassian parameters folders in subfolder
 here = mfilename('fullpath');
 [path, ~, ~] = fileparts(here);
 addpath(genpath(path));
 
+%Color of beam
+mapgreen = AdvancedColormap('kgg',256,[0 70 255]/255);  %color of beam
+
 %-------------------- indices of Laguerre Gaussian Beams -----------------%
 nu     = 8;
-mu     = 0;
+mu     = 2;
 
 % Physical parameters [microns]
 wo     = 1000;
@@ -147,35 +149,35 @@ for jj = 1:pn
     fz   = unwrap(angle(H1z));  
             
     % Calculating slopes of H1
-    [mzxH1,mzyH1,mxyH1] = gradientxyz(fx,fy,fz,k,dx,dx,dz,xi,yi,z(1));
+    [ray(jj).mzxH1,ray(jj).mzyH1,ray(jj).mxyH1] = gradientxyz(fx,fy,fz,k,dx,dx,dz,xi,yi,z(1));
 
     % H2 with y = cte, z = cte
     Rhop = sqrt(x.^2+yi.^2);
     Thp  = atan2(yi,x);
     H2x  =     laguerrePhysicalGaussBeam(nu,mu,wo,zo,Rhop,Thp,z(1))...
          - 1i*xLaguerrePhysicalGaussBeam(nu,mu,wo,zo,Rhop,Thp,z(1));
-    fx   = unwrap(angle(H1x));
+    fx   = unwrap(angle(H2x));
     
     % H2 with x = cte, z = cte
     Rhop = sqrt(xi.^2+y.^2);
     Thp  = atan2(y,xi);
     H2y  =     laguerrePhysicalGaussBeam(nu,mu,wo,zo,Rhop,Thp,z(1))...
          - 1i*xLaguerrePhysicalGaussBeam(nu,mu,wo,zo,Rhop,Thp,z(1));
-    fy   = unwrap(angle(H1y));
+    fy   = unwrap(angle(H2y));
     
     % H2 with x = cte, y = cte
     Rhop = sqrt(xi.^2+yi.^2);
     Thp  = atan2(yi,xi);
     H2z  =     laguerrePhysicalGaussBeam(nu,mu,wo,zo,Rhop,Thp,z)...
          - 1i*xLaguerrePhysicalGaussBeam(nu,mu,wo,zo,Rhop,Thp,z);
-    fz   = unwrap(angle(H1z));  
+    fz   = unwrap(angle(H2z));  
             
     % Calculating slopes of H2
-    [mzxH2,mzyH2,mxyH2] = gradientxyz(fx,fy,fz,k,dx,dx,dz,xi,yi,z(1));               
+    [ray(jj).mzxH2,ray(jj).mzyH2,ray(jj).mxyH2] = gradientxyz(fx,fy,fz,k,dx,dx,dz,xi,yi,z(1));               
  
 end
 
-% Graficando los puntos que se propagaran
+% Initial Field with rays in this init conditions
 figure(3)
 pcolor(x/(sqrt(2)*wo),x/(sqrt(2)*wo),abs(g).^2)
 axis square
@@ -214,9 +216,9 @@ for ii = 2:length(z) % propagation with respect to z
     pxyz         = g(1,1);
     g(1,1)       = pxy;
     fig          = figure(6);
-   % fig.MenuBar  = 'none';
-   % fig.Position = [1,1,1354.0,733];
-    fig.Position = [2169 217 1354 733];
+
+    fig.Position = [ 239 135 1354 733];
+
     set(gca,'un','n','pos',[0,0,1,1])
     imagesc(x/(sqrt(2)*wo),x/(sqrt(2)*wo),abs(g).^1)
     axis off
@@ -227,8 +229,8 @@ for ii = 2:length(z) % propagation with respect to z
    hold on
    % propagated points of H1 and H2
     for jj=1:pn
-        plot(ray(jj).rxH1(ii-1)/(sqrt(2)*wo),ray(jj).ryH1(ii-1)/(sqrt(2)*wo),'.','MarkerSize',10,'LineWidth',2,'color','r')
-        plot(ray(jj).rxH2(ii-1)/(sqrt(2)*wo),ray(jj).ryH2(ii-1)/(sqrt(2)*wo),'.','MarkerSize',10,'LineWidth',2,'color','y')
+        plot(ray(jj).rxH1(ii-1)/(sqrt(2)*wo),ray(jj).ryH1(ii-1)/(sqrt(2)*wo),'.','MarkerSize',20,'LineWidth',2,'color','r')
+        plot(ray(jj).rxH2(ii-1)/(sqrt(2)*wo),ray(jj).ryH2(ii-1)/(sqrt(2)*wo),'.','MarkerSize',20,'LineWidth',2,'color','y')
     end
    hold off
    pause(1)
@@ -240,11 +242,11 @@ for ii = 2:length(z) % propagation with respect to z
     for jj=1:pn
         % step of ray in z-direction, equation or ray r(z) = mrz*dz+r(z-1)
         % dependece of last point, new vector
-        ray(jj).rxH1(ii)   = ray(jj).rxH1(ii-1) + (1/mzxH1)*(z(ii)-z(ii-1));
-        ray(jj).ryH1(ii)   = ray(jj).ryH1(ii-1) + (1/mzyH1)*(z(ii)-z(ii-1));
+        ray(jj).rxH1(ii)   = ray(jj).rxH1(ii-1) + (1/ray(jj).mzxH1)*(z(ii)-z(ii-1));
+        ray(jj).ryH1(ii)   = ray(jj).ryH1(ii-1) + (1/ray(jj).mzyH1)*(z(ii)-z(ii-1));
         
-        ray(jj).rxH2(ii)   = ray(jj).rxH2(ii-1) + (1/mzxH2)*(z(ii)-z(ii-1));
-        ray(jj).ryH2(ii)   = ray(jj).ryH2(ii-1) + (1/mzyH2)*(z(ii)-z(ii-1));
+        ray(jj).rxH2(ii)   = ray(jj).rxH2(ii-1) + (1/ray(jj).mzxH2)*(z(ii)-z(ii-1));
+        ray(jj).ryH2(ii)   = ray(jj).ryH2(ii-1) + (1/ray(jj).mzyH2)*(z(ii)-z(ii-1));
   
         % ------------------ Calculating Slopes ------------------------- %
 
@@ -270,31 +272,31 @@ for ii = 2:length(z) % propagation with respect to z
         fz   = unwrap(angle(H1z));  
 
         % Calculating slopes of H1
-        [mzxH1,mzyH1,mxyH1] = gradientxyz(fx,fy,fz,k,dx,dx,dz,ray(jj).rxH1(ii),ray(jj).ryH1(ii),z(ii));
+        [ray(jj).mzxH1,ray(jj).mzyH1,ray(jj).mxyH1] = gradientxyz(fx,fy,fz,k,dx,dx,dz,ray(jj).rxH1(ii),ray(jj).ryH1(ii),z(ii));
 
         % H2 with y = cte, z = cte
         Rhop = sqrt(x.^2+ray(jj).ryH2(ii).^2);
         Thp  = atan2(ray(jj).ryH2(ii),x);
         H2x  =     laguerrePhysicalGaussBeam(nu,mu,wo,zo,Rhop,Thp,z(ii))...
              - 1i*xLaguerrePhysicalGaussBeam(nu,mu,wo,zo,Rhop,Thp,z(ii));
-        fx   = unwrap(angle(H1x));
+        fx   = unwrap(angle(H2x));
 
         % H2 with x = cte, z = cte
         Rhop = sqrt(ray(jj).rxH2(ii).^2+y.^2);
         Thp  = atan2(y,ray(jj).rxH2(ii));
         H2y  =     laguerrePhysicalGaussBeam(nu,mu,wo,zo,Rhop,Thp,z(ii))...
              - 1i*xLaguerrePhysicalGaussBeam(nu,mu,wo,zo,Rhop,Thp,z(ii));
-        fy   = unwrap(angle(H1y));
+        fy   = unwrap(angle(H2y));
 
         % H2 with x = cte, y = cte
         Rhop = sqrt(ray(jj).rxH2(ii).^2+ray(jj).ryH2(ii).^2);
         Thp  = atan2(ray(jj).ryH2(ii),ray(jj).rxH2(ii));
         H2z  =     laguerrePhysicalGaussBeam(nu,mu,wo,zo,Rhop,Thp,z)...
              - 1i*xLaguerrePhysicalGaussBeam(nu,mu,wo,zo,Rhop,Thp,z);
-        fz   = unwrap(angle(H1z));  
+        fz   = unwrap(angle(H2z));  
 
         % Calculating slopes of H2
-        [mzxH2,mzyH2,mxyH2] = gradientxyz(fx,fy,fz,k,dx,dx,dz,ray(jj).rxH2(ii),ray(jj).ryH2(ii),z(ii));               
+        [ray(jj).mzxH2,ray(jj).mzyH2,ray(jj).mxyH2] = gradientxyz(fx,fy,fz,k,dx,dx,dz,ray(jj).rxH2(ii),ray(jj).ryH2(ii),z(ii));               
        
     end
     %------------------------ End calculating rays -----------------------%   

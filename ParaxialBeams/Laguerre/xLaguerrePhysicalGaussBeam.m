@@ -6,6 +6,6 @@ function [XLGB]=xLaguerrePhysicalGaussBeam(nu,mu,wo,zo,r,th,z)
 
     thr  = 45;
     
-    XLGB = (2*r.^2./(wz.^2)).^(mu/2).*XAssociatedLaguerrePolynomial(thr,nu,mu,2*r.^2./(wz.^2)).*physicalRadialGaussianBeam(wo,zo,r,z);%%.*exp(1i*mu*th);
+    XLGB = (2*r.^2./(wz.^2)).^(mu/2).*XAssociatedLaguerrePolynomial(thr,nu,mu,2*r.^2./(wz.^2)).*physicalRadialGaussianBeam(wo,zo,r,z).*exp(1i*mu*th);
     
 end
