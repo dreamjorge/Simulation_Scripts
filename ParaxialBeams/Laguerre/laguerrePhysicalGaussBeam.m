@@ -3,6 +3,6 @@ function [LGB] = laguerrePhysicalGaussBeam(nu,mu,wo,zo,r,th,z)
     
     wz  = waistPhysicalGaussianBeam(z,wo,zo);
 
-    LGB = AssociatedLaguerrePolynomial(nu,abs(mu),2*r.^2./(wz.^2)).*physicalRadialGaussianBeam(wo,zo,r,z);%%.*exp(1i*mu*th);
+    LGB = AssociatedLaguerrePolynomial(nu,abs(mu),2*r.^2./(wz.^2)).*physicalRadialGaussianBeam(wo,zo,r,z).*exp(1i*mu*th);
     
 end
