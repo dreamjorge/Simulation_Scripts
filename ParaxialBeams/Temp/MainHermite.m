@@ -137,7 +137,9 @@ for jj=1:numberpoints
     ray(jj).ryHH12(1) = yp;
     ray(jj).ryHH21(1) = yp;
     ray(jj).ryHH22(1) = yp;
-    
+    figure(100)
+    hold on
+    plot(ray(jj).rxHH11(1)/(sqrt(2)*wo),ray(jj).ryHH11(1)/(sqrt(2)*wo),'+')
     %Hankel 11
     HH11x = hankelHermite2D(1,1,nu,mu,wo,zo,x,yp,zp);
     HH11y = hankelHermite2D(1,1,nu,mu,wo,zo,xp,y,zp);
@@ -183,7 +185,7 @@ for jj=1:numberpoints
     [ray(jj).mzx22,ray(jj).mzy22,ray(jj).mxy22] = gradientxyz(fx,fy,fz,k,dx,dx,dz,xp,yp,zp); 
 
 end
-
+hold off
 %propagador
 prop=exp(-1i*pi*lamb*dz*(U.^2+(U').^2));
 figure(3)
@@ -192,12 +194,38 @@ imagesc((angle(prop)))
 g=HGo;
 
 %matrices de campos transversales para guardar los datos
-gx=zeros(N,sizezp(2)); gy=zeros(N,sizezp(2));
+gx=zeros(N,size(z,2)); gy=zeros(N,size(z,2));
 
 gy(:,1)=g(N/2+1,:);
 gx(:,1)=g(:,N/2+1);
 
-for ii=2:sizezp(2) %corriendo todos los valores de zp
+for ii=2:size(z,2) %corriendo todos los valores de zp
+    
+    
+    figure(10)
+    fig10=figure(10);
+    fig10.Name=([' z = ',num2str(z(ii))]);
+    imagesc(x/(sqrt(2)*wo),x/(sqrt(2)*wo),abs(g))
+    axis square
+    colormap(mapgreen)
+    set(gca,'YDir','normal')
+    axis1=gca;
+    set(axis1,'FontSize',28);
+    xlabel('$x$','Interpreter','latex','FontSize',28) 
+    ylabel('$y$','Interpreter','latex','FontSize',28)
+    hold on
+    
+    for jj=1:numberpoints
+       
+      plot(ray(jj).rxHH11(ii-1)/(sqrt(2)*wo),ray(jj).ryHH11(ii-1)/(sqrt(2)*wo),'+','Color','b')
+      plot(ray(jj).rxHH12(ii-1)/(sqrt(2)*wo),ray(jj).ryHH12(ii-1)/(sqrt(2)*wo),'+','Color','y')
+      plot(ray(jj).rxHH21(ii-1)/(sqrt(2)*wo),ray(jj).ryHH21(ii-1)/(sqrt(2)*wo),'+','Color','m')
+      plot(ray(jj).rxHH22(ii-1)/(sqrt(2)*wo),ray(jj).ryHH22(ii-1)/(sqrt(2)*wo),'+','Color','c')  
+        
+    end
+    hold off
+    
+    
     
     %Transformada de fourier de campo a propagar
     G=fftshift(fft2(g));
@@ -214,23 +242,23 @@ for ii=2:sizezp(2) %corriendo todos los valores de zp
         ray(jj).rxHH12(ii) = ray(jj).rxHH12(ii-1) + (1/ray(jj).mzx12)*(z(ii)-z(ii-1));
         ray(jj).rxHH21(ii) = ray(jj).rxHH21(ii-1) + (1/ray(jj).mzx21)*(z(ii)-z(ii-1));
         ray(jj).rxHH22(ii) = ray(jj).rxHH22(ii-1) + (1/ray(jj).mzx22)*(z(ii)-z(ii-1));
-        ray(jj).ryHH11(ii) = ray(jj).ryHH11(ii-1) + (1/ray(jj).mzx11)*(z(ii)-z(ii-1));
-        ray(jj).ryHH12(ii) = ray(jj).ryHH12(ii-1) + (1/ray(jj).mzx12)*(z(ii)-z(ii-1));
-        ray(jj).ryHH21(ii) = ray(jj).ryHH21(ii-1) + (1/ray(jj).mzx21)*(z(ii)-z(ii-1));
-        ray(jj).ryHH22(ii) = ray(jj).ryHH22(ii-1) + (1/ray(jj).mzx22)*(z(ii)-z(ii-1));
+        ray(jj).ryHH11(ii) = ray(jj).ryHH11(ii-1) + (1/ray(jj).mzy11)*(z(ii)-z(ii-1));
+        ray(jj).ryHH12(ii) = ray(jj).ryHH12(ii-1) + (1/ray(jj).mzy12)*(z(ii)-z(ii-1));
+        ray(jj).ryHH21(ii) = ray(jj).ryHH21(ii-1) + (1/ray(jj).mzy21)*(z(ii)-z(ii-1));
+        ray(jj).ryHH22(ii) = ray(jj).ryHH22(ii-1) + (1/ray(jj).mzy22)*(z(ii)-z(ii-1));
 
         %Hankel 11
         xp11  = ray(jj).rxHH11(ii);
         yp11  = ray(jj).ryHH11(ii);
-        HH11x = hankelHermite2D(1,1,nu,mu,wo,zo,x,yp11,zp);
-        HH11y = hankelHermite2D(1,1,nu,mu,wo,zo,xp11,y,zp);
-        HH11z = hankelHermite2D(1,1,nu,mu,wo,zo,xp11,yp11,z(ii));
+        HH11x = hankelHermite2D(1,1,nu,mu,wo,zo,x,yp11,z(ii));
+        HH11y = hankelHermite2D(1,1,nu,mu,wo,zo,xp11,y,z(ii));
+        HH11z = hankelHermite2D(1,1,nu,mu,wo,zo,xp11,yp11,z);
         %components for gradient
         fx    = unwrap(angle(HH11x));
         fy    = unwrap(angle(HH11y));
         fz    = unwrap(angle(HH11z));
         %Slopes
-        [ray(jj).mzx11,ray(jj).mzy11,ray(jj).mxy11] = gradientxyz(fx,fy,fz,k,dx,dx,dz,xp,yp,zp);
+        [ray(jj).mzx11,ray(jj).mzy11,ray(jj).mxy11] = gradientxyz(fx,fy,fz,k,dx,dx,dz,xp11,yp11,z(ii));
 
 
         %Hankel 12
@@ -244,7 +272,7 @@ for ii=2:sizezp(2) %corriendo todos los valores de zp
         fy    = unwrap(angle(HH12y));
         fz    = unwrap(angle(HH12z));
         %Slopes
-        [ray(jj).mzx12,ray(jj).mzy12,ray(jj).mxy12] = gradientxyz(fx,fy,fz,k,dx,dx,dz,xp,yp,zp); 
+        [ray(jj).mzx12,ray(jj).mzy12,ray(jj).mxy12] = gradientxyz(fx,fy,fz,k,dx,dx,dz,xp12,yp12,z(ii)); 
 
         %Hankel 21
         xp21  = ray(jj).rxHH21(ii);
@@ -257,7 +285,7 @@ for ii=2:sizezp(2) %corriendo todos los valores de zp
         fy    = unwrap(angle(HH21y));
         fz    = unwrap(angle(HH21z));
         %Slopes
-        [ray(jj).mzx21,ray(jj).mzy21,ray(jj).mxy21] = gradientxyz(fx,fy,fz,k,dx,dx,dz,xp,yp,zp); 
+        [ray(jj).mzx21,ray(jj).mzy21,ray(jj).mxy21] = gradientxyz(fx,fy,fz,k,dx,dx,dz,xp21,yp21,z(ii)); 
 
         %Hankel 22
         xp22  = ray(jj).rxHH22(ii);
@@ -270,34 +298,15 @@ for ii=2:sizezp(2) %corriendo todos los valores de zp
         fy    = unwrap(angle(HH22y));
         fz    = unwrap(angle(HH22z));
         %Slopes
-        [ray(jj).mzx22,ray(jj).mzy22,ray(jj).mxy22] = gradientxyz(fx,fy,fz,k,dx,dx,dz,xp,yp,zp); 
+        [ray(jj).mzx22,ray(jj).mzy22,ray(jj).mxy22] = gradientxyz(fx,fy,fz,k,dx,dx,dz,xp22,yp22,z(ii)); 
 
     end
 
-    figure(10)
-    fig10=figure(10);
-    fig10.Name=([' z = ',num2str(z(ii))]);
-    imagesc(x/(sqrt(2)*wo),x/(sqrt(2)*wo),abs(g))
-    axis square
-    colormap(mapgreen)
-    set(gca,'YDir','normal')
-    axis1=gca;
-    set(axis1,'FontSize',28);
-    xlabel('$x$','Interpreter','latex','FontSize',28) 
-    ylabel('$y$','Interpreter','latex','FontSize',28)
-    hold on
+    
     %cuadro de la cintura en del Hermite en z
     %rectangle('Position',[-sigmaHx(ii)/(sqrt(2)*wo) -sigmaHy(ii)/(sqrt(2)*wo) 2*sigmaHx(ii)/(sqrt(2)*wo) 2*sigmaHy(ii)/(sqrt(2)*wo)],'EdgeColor','b','LineStyle','--','LineWidth',2)
     %Propagacion de las cuatro hankel en la esquina superior derecha
-    for jj=1:numberpoints
-       
-      plot(ray(jj).rxHH11(ii)/(sqrt(2)*wo),ray(jj).ryHH11(ii)/(sqrt(2)*wo))
-      plot(ray(jj).rxHH12(ii)/(sqrt(2)*wo),ray(jj).ryHH12(ii)/(sqrt(2)*wo))
-      plot(ray(jj).rxHH21(ii)/(sqrt(2)*wo),ray(jj).ryHH21(ii)/(sqrt(2)*wo))
-      plot(ray(jj).rxHH22(ii)/(sqrt(2)*wo),ray(jj).ryHH22(ii)/(sqrt(2)*wo))  
-        
-    end
-    hold off
+
     pause(.001)
 %     writeVideo(vidObj1, getframe(gca));
 end  
