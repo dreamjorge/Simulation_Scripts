@@ -1,12 +1,12 @@
-function [Xnmr]= XAssociatedLaguerrePolynomial(r,n,m,x)
+function [Xnmr]= XAssociatedLaguerrePolynomial(n,m,x)
 %This function calculates second solution of associated laguerre equation
 %for n,m integers.
-
+nrterms = 48;
 
     % first term
     a1 = x.^(n+1)/(gamma(n+2)*gamma(m+1+n+1));
 
-    for k = n+2:r % summing terms
+    for k = n+2:nrterms % summing terms
 
         a1 = a1+gamma(k-n)*x.^k/(gamma(k+1)*gamma(m+1+k));
 

@@ -1,11 +1,5 @@
 %% This script generates plots of Normalized Gaussian Beams Parameters
 % For this we have used different ways of normalization.
-
-%adding guassian parameters folders in subfolder
-here = mfilename('fullpath');
-[path, ~, ~] = fileparts(here);
-addpath(genpath(path));
-
 %% Initial parameters
 
 % Diffent definitions of "waist" of Gaussian Beams
@@ -18,13 +12,12 @@ so      = wo^2;
 % Quantities for generate vector in s direction
 Ns      = 2^9;            % Number of points of vector
 ns      = -Ns/2:Ns/2-1;   % Index vector with 1 of resolution
-timesso = 12;             % Number of times so 
+timesso = 4;             % Number of times so 
 Ds      = timesso*so;     % Size of vector's window
 ds      = Ds/Ns;          % Resolution of vector
 s       = ns.*ds;         % Vector
 
 %% Normalized Radius of Curvature of Guassian Beams
-
 set(groot,'defaultAxesTickLabelInterpreter','latex');                       % Using latex in labels.
 %Plot Normalized Radius of Curvature and Normalized Elegant Radius of Curvature
 figure(1)
@@ -37,41 +30,11 @@ ylabel('$R(s)$','Interpreter','latex')
 title('Radius of Curvature of Normalized Gaussian Beam')
 
 %generate x-ticks in terms of so
-nrticksx     = timesso+1;                                                   % Number of ticks symetric of 0.
-xticksv      = zeros(1,nrticksx);                                           % Vector for values in ticks.
-xticklabelsv = cell(1,nrticksx);                                            % Cell for strings of labels in ticks.
-%cycle for how many times of so
-for ii = 1:nrticksx
-    xticksv(ii)      = (ii-floor(nrticksx/2)-1)*so;                         % How many times of so.
-    if ( xticksv(ii) == 0)                                                  % If x is zero only put 0 in xlabel.
-         xticklabelsv{ii} = 0;                                              
-    else                                                                    % Else It takes value of times so.
-         xticklabelsv{ii} = [num2str(xticksv(ii)),'$s_0$'];                    
-    end
-end
-set(gca,'xtick',xticksv);                                                   % Set values of ticks. 
-set(gca,'xticklabel',xticklabelsv)                                          % Set labels in ticks. 
-xlim([-1.05*Ds/2 1.05*Ds/2])                                                % Limit axes
-
-%generate y-ticks in terms of so
-nrticksy     = timesso+1;                                                   % Number of ticks symetric of 0.   
-yticksv      = zeros(1,nrticksx);                                           % Vector for values in ticks.
-yticklabelsv = cell(1,nrticksx);                                            % Cell for strings of labels in ticks.
-%cycle for how many times of so is evaluated in Radius functions
-for jj =1:nrticksy
-    yticksv(jj) = radiusGaussianBeam((jj-floor(nrticksx/2)-1)*so,wo);       % How many times of so evalued in Radius.
-    if (isnan(yticksv(jj)) == 1)                                            % If y is nan only put 0 in ylabel
-        yticksv(jj)      = 0;
-        yticklabelsv{jj} = 0;
-    else
-        yticklabelsv{jj} = [num2str(rats(yticksv(jj))),' $s_0$'];           % Else It takes value of times so in Radius.
-    end
-end
-set(gca,'ytick',yticksv);                                                   % Set values of ticks. 
-set(gca,'yticklabel',yticklabelsv)                                          % Set labels in ticks. 
+nrticksx     = timesso+1;
+nrticksy     = timesso+1;  % Number of ticks symetric of 0.
+ticksf(@radiusGaussianBeam,so,'so',nrticksx,nrticksy) 
 ylim([1.05*radiusGaussianBeam(-(timesso/2)*so,wo) ...                       % Limit axes
      ,1.05*radiusGaussianBeam( (timesso/2)*so,wo)])
-
 grid
 leg = legend({'$R(s)$','$R_e(s)$'},'Interpreter','latex');                  % Legends
 leg.Position = [0.6326    0.4531    0.1514    0.0978];                      % Change position of legends
@@ -79,7 +42,7 @@ leg.Position = [0.6326    0.4531    0.1514    0.0978];                      % Ch
 daspect([1 1 1])                                                            % relation aspect 1:1 in axes
 
 %% Normalized Waist, Elegant Waist and Sigma of Gaussian Beams
-
+set(groot,'defaultAxesTickLabelInterpreter','latex');  
 %Plot different waist of Gaussian Beams
 figure(2)
 plot(s,waistGaussianBeam(s,wo),'b','LineWidth',1.5)
@@ -91,65 +54,18 @@ plot(s,-sigmaGaussianBeam(s,wo),'r','LineWidth',1.5)
 plot(s,-elegantWaistGaussianBeam(s,wo),'g','LineWidth',1.5)
 hold off
 xlabel('$s$','Interpreter','latex')
-%generate x-ticks in terms of so
-nrticksx     = timesso+1;                                                   % Number of ticks symetric of 0.
-xticksv      = zeros(1,nrticksx);                                           % Vector for values in ticks.
-xticklabelsv = cell(1,nrticksx);                                            % Cell for strings of labels in ticks.
-%cycle for how many times of so
-for ii = 1:nrticksx
-    xticksv(ii)      = (ii-floor(nrticksx/2)-1)*so;                         % How many times of so.
-    if ( xticksv(ii) == 0)                                                  % If x is zero only put 0 in xlabel.
-         xticklabelsv{ii} = 0;                                              
-    else                                                                    % Else It takes value of times so.
-         xticklabelsv{ii} = [num2str(xticksv(ii)),'$s_0$'];                    
-    end
-end
-set(gca,'xtick',xticksv);                                                   % Set values of ticks. 
-set(gca,'xticklabel',xticklabelsv)                                          % Set labels in ticks. 
-xlim([-1.05*Ds/2 1.05*Ds/2])                                                % Limit axes
-
-%generate y-ticks in terms of so
-nrticksy     = timesso+1;                                                   % Number of ticks symetric of 0.   
-yticksv      = zeros(1,nrticksx);                                           % Vector for values in ticks.
-yticklabelsv = cell(1,nrticksx);                                            % Cell for strings of labels in ticks.
-%cycle for how many times of so is evaluated in Radius functions
-ntimesso = 0;
-for jj =1:nrticksy
-    ntimesso=(jj-floor(nrticksx/2)-1)*so;
-    if (ntimesso < 0)    
-        yticksv(jj) = -waistGaussianBeam(ntimesso,wo);                      % How many times of so evalued in Waist.
-        yticklabelsv{jj} = [num2str(rats(yticksv(jj))),' $s_0$'];           % takes value of times so in Waist.
-    else
-        yticksv(jj) = waistGaussianBeam(ntimesso,wo);                       % How many times of so evalued in Waist.
-        yticklabelsv{jj} = [num2str(rats(yticksv(jj))),' $s_0$'];           % takes value of times so in Waist.
-    end    
-end
-set(gca,'ytick',yticksv);                                                   % Set values of ticks. 
-set(gca,'yticklabel',yticklabelsv)                                          % Set labels in ticks. 
-ylim([1.05*waistGaussianBeam(-(timesso/2)*so,wo) ...                        % Limit axes
-     ,1.05*waistGaussianBeam( (timesso/2)*so,wo)])
-
-
-%%ylabel('$w(s)$','Interpreter','latex')
-xticksv =[-4*so,-3*so,-2*so,-3*so/2,-so,-so/2,0,so/2,so,3*so/2,2*so,3*so,4*so];
-xticklabelsv={'$-4s_0$','$-3s_0$','$-2s_0$','$-\frac{3s_0}{2}$','$-s_0$','$-\frac{s_0}{2}$','$0$','$\frac{s_0}{2}$','$s_0$','$\frac{3s_0}{2}$','$2s_0$','$3s_0$','$4s_0$'};
-set(gca,'xtick',xticksv); 
-set(gca,'xticklabel',xticklabelsv)
-yticksv =[-waistGaussianBeam(2*so,wo),-waistGaussianBeam(3*so/2,wo),-waistGaussianBeam(so,wo), -waistGaussianBeam(so/2,wo),-  waistGaussianBeam(0,wo),-wo/2,0,...
-          wo/2,    waistGaussianBeam(0,wo),   waistGaussianBeam(so/2,wo), waistGaussianBeam(so,wo),waistGaussianBeam(3*so/2,wo),waistGaussianBeam(2*so,wo)];
-yticklabelsv={'$-\sqrt{5}w_0$','$-\frac{\sqrt{13}}{2}w_0$','$-\sqrt{2}w_0$','$-\frac{\sqrt{5}}{2}w_0\quad$','$-w_0$','$-\frac{w_0}{2}$','$0$'...
-               '$\frac{w_0}{2}$','$w_0$','$\frac{\sqrt{5}}{2}w_0\quad$','$\sqrt{2}w_0$','$\frac{\sqrt{13}}{2}w_0$','$\sqrt{5}w_0$'};
-set(gca,'ytick',yticksv); 
-set(gca,'yticklabel',yticklabelsv)
-title('Waist, Standard Devation and Elegant Term of Normalized Gaussian Beam')
-xlim([-1.02*4*so 1.02*4*so])
-ylim([-1.02*sigmaGaussianBeam(7*so,wo) 1.02*sigmaGaussianBeam(7*so,wo)])
+ticksx(2*timesso+1,Ds,so)
+xlim([-1.05*Ds/2 1.05*Ds/2])
+tickswaist(9,Ds,so,wo);
 daspect([1 1 1])
 grid
 ax=gca;
 ax.GridLineStyle = '--';
 ax.GridAlpha = 0.5;
 legend('w(s) Waist of Gaussian Beam','\sigma(s) Standard Deviation of Gaussian Beam','w_e(s) Elegant Term of Gaussian Beam')
+
+ylim([-1.05*waistGaussianBeam(-(timesso/2)*so,wo) ...                       % Limit axes
+    , 1.05*waistGaussianBeam( (timesso/2)*so,wo)])
 %% Slopes Normalized Waist, Elegant Waist and Sigma of Gaussian Beams 
 Ns = 2^9;                     % number of points
 ns = -Ns/2:Ns/2-1;            % index vector with 1 of resolution
@@ -204,8 +120,6 @@ set(gca,'ytick',yticksv);
 set(gca,'yticklabel',yticklabelsv)
 
 grid
-
-
 
 ylim([-1.02*waistGaussianBeam(5*so,wo) 1.02*waistGaussianBeam(5*so,wo)])
 xlim([-10*so 10*so])

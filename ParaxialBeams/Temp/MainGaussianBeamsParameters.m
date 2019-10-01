@@ -1,5 +1,11 @@
 %% This script generates plots of Normalized Gaussian Beams Parameters
 % For this we have used different ways of normalization.
+
+%adding guassian parameters folders in subfolder
+here = mfilename('fullpath');
+[path, ~, ~] = fileparts(here);
+addpath(genpath(path));
+
 %% Initial parameters
 
 % Diffent definitions of "waist" of Gaussian Beams
@@ -120,8 +126,9 @@ for jj =1:nrticksy
 end
 set(gca,'ytick',yticksv);                                                   % Set values of ticks. 
 set(gca,'yticklabel',yticklabelsv)                                          % Set labels in ticks. 
-ylim([1.05*waistGaussianBeam(-(timesso/2)*so,wo) ...                        % Limit axes
-     ,1.05*waistGaussianBeam( (timesso/2)*so,wo)])
+minylim = -1.05*waistGaussianBeam(-(timesso/2)*so,wo);
+maxylim = 1.05*waistGaussianBeam( (timesso/2)*so,wo);
+ylim([minylim ,maxylim])                                                   % Limit axes
 
 
 %%ylabel('$w(s)$','Interpreter','latex')
