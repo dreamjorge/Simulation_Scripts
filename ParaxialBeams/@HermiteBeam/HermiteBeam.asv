@@ -17,24 +17,23 @@ classdef HermiteBeam <  GaussianBeam
   
   methods(Static) 
     [HG,NHG] = hermiteSolutions(nu,x);
-    wh       = waistHermite(zDistance,initialWaist,rayleighDistance,n,m);
   end
   
   methods 
     function PhiPhase = get.PhiPhase(obj)
-      PhiPhase = (obj.n+obj.m).*obj.GouyPhase;
+      PhiPhase = (abs(obj.l)+2*obj.p+1).*obj.GouyPhase;
     end
 
     function HermiteWaist = get.HermiteWaist(obj)
-      HermiteWaist = HermiteBeam.waistHermite(obj.PropagationDistance,obj.InitialWaist,obj.RayleighDistance,obj.n,obj.m);
+      HermiteWaist = HermiteBeam.waistHermite(obj.PropagationDistance,obj.InitialWaist,obj.RayleighDistance,obj.l,obj.p);
     end
     
     function HermiteAmplitude = get.HermiteAmplitude(obj)
-      HermiteAmplitude = 1;
+      HermiteAmplitude = (sqrt(2)*(obj.RadialCoordinate)./obj.Waist).^(obj.l);
     end
     
     function Normalization = get.Normalization(obj)
-      Normalization =  1;
+      Normalization =  sqrt(2*factorial(obj.p)/(pi*factorial(obj.p+abs(obj.l))));
     end
 
     function Hermite = HermiteBeam(x,y,PropagationDistance, InitialWaist,Wavelength,n,m)
@@ -43,15 +42,15 @@ classdef HermiteBeam <  GaussianBeam
       
       Hermite.n = n;
       Hermite.m = m;
-      [Hn,~]    = Hermite.hermiteSolutions(n,(sqrt(2)/Hermite.Waist)*x);
-      [Hm,~]    = Hermite.hermiteSolutions(m,(sqrt(2)/Hermite.Waist)*y);
+      Hn        = Hermite.hermiteSolutions(nu,sqrt(2)*x/Hermite.Waist);
+      Hm        = Hermite.hermiteSolutions(nu,y);
 
       
       %% Optical Field
       Hermite.OpticalField = Hermite.Normalization.*...
                              Hermite.HermiteAmplitude.*... 
-                             exp(1i*Hermite.PhiPhase).*...
-                             Hn.*Hm.*...
+                             exp(-1i*Hermite.PhiPhase).*exp(1i*abs(l)*Hermite.ThetaCoordinate).*...
+                             HermiteBeam.AssociatedHermitePolynomial(p,abs(l),(2*Hermite.RadialCoordinate.^2)./Hermite.Waist.^2).*...
                              Hermite.OpticalField;
     end
   end
