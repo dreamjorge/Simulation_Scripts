@@ -1,16 +1,14 @@
-classdef HankelLaguerre 
+classdef HankelLaguerre... < LaguerreBeam & XLaguerreBeam
   
   properties   
-    OpticalField
     HankelType
-    l
-    p
+    OpticalField
   end
   
-  properties (Dependent)
-    LaguerreWaist
-  end
-  
+%   properties (Dependent)
+%     LaguerreWaist
+%   end
+%   
   methods(Static)
     [ray] = getLaguerreSlopes(ray,x,y,z,...
                               dx,dy,dz,...
@@ -20,16 +18,13 @@ classdef HankelLaguerre
   
   methods
     
-    function LaguerreWaist = get.LaguerreWaist(obj)
-      LaguerreWaist = obj.l+obj.p;
-
-    end
+%     function LaguerreWaist = get.LaguerreWaist(obj)
+%       LaguerreWaist = obj.l+obj.p;
+%     end
     
-    function Hankel = HankelLaguerre(x,y,PropagationDistance,InitialWaist,Wavelength,l,p,nh)
+    function Hankel = HankelLaguerre(x,y,PropagationDistance,InitialWaist,Wavelength,p,l,nh)
     
       
-      Hankel.l          = l;
-      Hankel.p          = p;
       Hankel.HankelType = nh;
       
       LB  = LaguerreBeam(x,y,PropagationDistance,InitialWaist,Wavelength,l,p);

@@ -5,13 +5,13 @@ addpath ParaxialBeams\Addons
 mapgreen = AdvancedColormap('kgg',256,[0 100 255]/255);  %color of beam
 
 %-------------------- indices of Laguerre Gaussian Beams -----------------%
-nu      = 6;
+nu      = 10;
 mu      = 0;
 
 % Physical parameters [microns]
-LaguerreInitialWaist = 1000;
-InitialWaist         = LaguerreInitialWaist/sqrt(2*(2*nu+mu+1));
-Wavelength           = 0.6328;
+% LaguerreInitialWaist = 1000;
+% InitialWaist         = LaguerreInitialWaist/sqrt(2*(2*nu+mu+1));
+% Wavelength           = 0.6328;
 
 % Calculating gaussian parameters
 GP                   = GaussianParameters(0,InitialWaist,Wavelength);
@@ -20,7 +20,13 @@ k                    = GP.k;
 RayleighDistance     = GP.RayleighDistance;
 
 % normalized parameters
-% 
+%
+InitialWaist        = 1;
+Wavelength           = pi;
+GP                   = GaussianParameters(0,InitialWaist,Wavelength);
+k                    = GP.k;
+RayleighDistance     = GP.RayleighDistance;
+LaguerreInitialWaist = LaguerreBeam.waistLaguerre(0,InitialWaist,RayleighDistance,nu,mu);
 % lamb    = pi;
 % wo      = 1;
 % sigmaLo = wo*sqrt(2*(2*nu+mu+1)); 
@@ -205,7 +211,7 @@ for ii = 2:length(z) % propagation with respect to z
         [rayH1(jj)] = HankelLaguerre.getLaguerreSlopes(rayH1(jj),x,y,z,...
                                                        dx,dx,dz,...
                                                        xi,yi,zi,...
-                                                       InitialWaist,Wavelength,mu,mu,1);
+                                                       InitialWaist,Wavelength,nu,mu,1);
         % point of H2 
         xi = rayH2(jj).xCoordinate(ii);
         yi = rayH2(jj).yCoordinate(ii);
