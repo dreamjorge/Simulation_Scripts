@@ -14,10 +14,10 @@ mu      = 0;
 % Wavelength           = 0.6328;
 
 % Calculating gaussian parameters
-GP                   = GaussianParameters(0,InitialWaist,Wavelength);
-
-k                    = GP.k;
-RayleighDistance     = GP.RayleighDistance;
+% GP                   = GaussianParameters(0,InitialWaist,Wavelength);
+% 
+% k                    = GP.k;
+% RayleighDistance     = GP.RayleighDistance;
 
 % normalized parameters
 %
@@ -26,7 +26,7 @@ Wavelength           = pi;
 GP                   = GaussianParameters(0,InitialWaist,Wavelength);
 k                    = GP.k;
 RayleighDistance     = GP.RayleighDistance;
-LaguerreInitialWaist = LaguerreBeam.waistLaguerre(0,InitialWaist,RayleighDistance,nu,mu);
+LaguerreInitialWaist = LaguerreParameters(0,InitialWaist,Wavelength,nu,mu);
 % lamb    = pi;
 % wo      = 1;
 % sigmaLo = wo*sqrt(2*(2*nu+mu+1)); 
@@ -102,7 +102,7 @@ ylabel('$y$','Interpreter','latex','FontSize',18)
 
 %% ----------------------- Ray tracing (rx,z=0)  ----------------------- %%
 
-pn        =  50;          % Number of rays
+pn        =  8;          % Number of rays
 rayH1(pn) = OpticalRay;
 rayH2(pn) = OpticalRay;
 

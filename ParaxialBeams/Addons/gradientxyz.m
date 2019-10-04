@@ -11,8 +11,8 @@ gz=gradient(fz)/dz+k;
 N=size(gx,2);
 
 %pendientes
-mzx=gz(floor(z/dz+1))/gx(N/2+1+floor(x/dx));
-mzy=gz(floor(z/dz+1))/gy(N/2+1+floor(y/dy));
+mzx=gz(floor(z/dz+1))    /gx(N/2+1+floor(x/dx));
+mzy=gz(floor(z/dz+1))    /gy(N/2+1+floor(y/dy));
 mxy=gx(N/2+1+floor(x/dx))/gy(N/2+1+floor(y/dy));
 
 
