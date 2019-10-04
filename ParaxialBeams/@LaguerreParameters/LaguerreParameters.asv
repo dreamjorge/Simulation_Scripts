@@ -1,0 +1,38 @@
+classdef LaguerreParameters <  handle & GaussianParameters
+  
+  properties
+    l
+    p
+  end
+  
+  properties (Dependent)
+    LaguerreWaist
+    PhiPhase
+  end
+  
+  methods(Static)
+    waistL = Waist(zDistance,InitialWaist,RayleighDistance,nu,mu);
+  end
+  
+   methods
+    
+    function PhiPhase = get.PhiPhase(obj)
+      PhiPhase = (abs(obj.l)+2*obj.p).*obj.GouyPhase;
+    end
+
+    function LaguerreWaist = get.LaguerreWaist(obj)
+      LaguerreWaist = LaguerreParameters.Waist(obj.PropagationDistance,obj.InitialWaist,obj.RayleighDistance,obj.l,obj.p);
+    end
+   
+    %% Constructor
+    function Parameters = GaussianParameters(PropagationDistance,InitialWaist,Wavelength)
+       if nargin == 3 
+        Parameters.PropagationDistance = PropagationDistance;
+        Parameters.InitialWaist        = InitialWaist;
+        Parameters.Wavelength          = Wavelength;
+       else
+        error('You need introduce PropagationDistance, InitialWaist and Wavelength inputs')
+       end
+    end
+  end
+end
