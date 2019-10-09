@@ -1,4 +1,4 @@
-classdef LaguerreParameters <  handle & GaussianParameters
+classdef LaguerreParameters < GaussianParameters
   
   properties
     l
@@ -12,8 +12,9 @@ classdef LaguerreParameters <  handle & GaussianParameters
   
   methods(Static)
     waistL = Waist(zDistance,InitialWaist,RayleighDistance,nu,mu);
+    GP = GaussianParameters(PropagationDistance,InitialWaist,Wavelength);
   end
-  
+    
    methods
     
     function PhiPhase = get.PhiPhase(obj)
@@ -26,14 +27,18 @@ classdef LaguerreParameters <  handle & GaussianParameters
    
     %% Constructor
     function Parameters = LaguerreParameters(PropagationDistance,InitialWaist,Wavelength,nu,mu)
-       if nargin == 5 
-        Parameters.l                   = nu;
-        Parameters.p                   = mu;
-       else
+     
+     Parameters@GaussianParameters(PropagationDistance,InitialWaist,Wavelength);
+     
+     if nargin == 5 
+       Parameters.l             = nu;
+       Parameters.p             = mu;
+       %Parameters.LaguerreWaist = get.LaguerreWaist(PropagationDistance,InitialWaist,Parameters.RayleighDistance,nu,mu);
+       %Parameters.PhiPhase      = get.PhiPhase(l,p,Parameters.GouyPhase);
+     else
         error('You need introduce PropagationDistance, InitialWaist and Wavelength, l, p inputs')
-       end
-       
-       %Parameters.GaussianParameters(PropagationDistance,InitialWaist,Wavelength);
+     end
+
     end
   end
 end

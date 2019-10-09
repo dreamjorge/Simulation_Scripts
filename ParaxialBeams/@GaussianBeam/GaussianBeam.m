@@ -1,4 +1,4 @@
-classdef GaussianBeam < ParaxialBeams.GaussianParameters
+classdef GaussianBeam < GaussianParameters
   % Gaussian Beam is a scalar optical field with its parameters defined in
   % properties.
   % Example:
@@ -20,7 +20,7 @@ classdef GaussianBeam < ParaxialBeams.GaussianParameters
       else
          error('You need introduce x, y, PropagationDistance, InitialWaist and Wavelength inputs')
       end 
-       beam@ParaxialBeams.GaussianParameters(super_args{:});
+       beam@GaussianParameters(super_args{:});
        
        beam.OpticalField = beam.Amplitude.*exp(-(x.^2+y.^2)./(beam.Waist.^2))...
                          .*exp(-1i*beam.k*(x.^2+y.^2)./(2*beam.Radius))...
