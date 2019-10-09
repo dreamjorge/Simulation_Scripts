@@ -5,7 +5,7 @@ addpath ParaxialBeams\Addons
 mapgreen = AdvancedColormap('kgg',256,[0 100 255]/255);  %color of beam
 
 %-------------------- indices of Laguerre Gaussian Beams -----------------%
-nu      = 10;
+nu      = 40;
 mu      = 0;
 
 % Physical parameters [microns]
@@ -26,7 +26,7 @@ Wavelength           = pi;
 GP                   = GaussianParameters(0,InitialWaist,Wavelength);
 k                    = GP.k;
 RayleighDistance     = GP.RayleighDistance;
-LaguerreInitialWaist = LaguerreParameters(0,InitialWaist,Wavelength,nu,mu);
+LP                   = LaguerreParameters(0,InitialWaist,Wavelength,nu,mu);
 % lamb    = pi;
 % wo      = 1;
 % sigmaLo = wo*sqrt(2*(2*nu+mu+1)); 
@@ -41,7 +41,7 @@ dz     = Dz/Nz;                   % Resolution in z
 z      = 0:dz:Dz;                 % z-vector z of propagation 
 
 % waist of Laguerre Gauss Beam until z-propagation
-MaxLaguerreWaist = LaguerreBeam.waistLaguerre(z(end),InitialWaist,RayleighDistance,nu,mu);
+MaxLaguerreWaist = LaguerreParameters.Waist(z(end),InitialWaist,RayleighDistance,nu,mu);
 
 %Second we estimage sampling in x,y-direction in terms of waist of Guassian
 %Laguerre Beam
@@ -70,7 +70,7 @@ LG  = LaguerreBeam(X,Y,0,InitialWaist,Wavelength,nu,mu);
 g   = LG.OpticalField;
 % Plot of Function
 figure(1)
-pcolor(x/(sqrt(2)*InitialWaist), x/(sqrt(2)*InitialWaist), abs(g).^2)
+pcolor(x/(sqrt(2)*InitialWaist), x/(sqrt(2)*InitialWaist), abs(g))
 axis square
 shading flat
 colormap(mapgreen)
