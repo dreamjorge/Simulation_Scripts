@@ -1,6 +1,6 @@
 function [Ln] = AssociatedLaguerrePolynomial(n,m,x)
 %This function calculates Asociated Laguerre Polinomyal with recursive
-%method (Alfonso formula)
+%method (Alfonso's formula)
 
     if (n == 0)
 
@@ -26,13 +26,11 @@ function [Ln] = AssociatedLaguerrePolynomial(n,m,x)
             end
 
         end
-
-        
+   
         Ln=(gamma(n+1)/gamma(n+m+1))./(((n+(m+1)/2)*x).^(-m/2)).*Ln;
         
     end
-
-          
+ 
             
 end 
     

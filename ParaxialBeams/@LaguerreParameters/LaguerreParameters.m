@@ -17,7 +17,7 @@ classdef LaguerreParameters < GaussianParameters
     
    methods
     
-    function PhiPhase = get.PhiPhase(obj)
+    function PhiPhase = get.PhiPhase(obj) 
       PhiPhase = (abs(obj.l)+2*obj.p).*obj.GouyPhase;
     end
 

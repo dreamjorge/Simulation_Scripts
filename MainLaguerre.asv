@@ -5,20 +5,19 @@ addpath ParaxialBeams\Addons
 mapgreen = AdvancedColormap('kgg',256,[0 100 255]/255);  %color of beam
 
 %-------------------- indices of Laguerre Gaussian Beams -----------------%
-nu      = 4;
+nu      = 40;
 mu      = 0;
 
 % Calculating Laguerre Parameters in z = 0
 
 % Physical parameters [microns]
-LaguerreInitialWaist = 1000;
-InitialWaist         = LaguerreInitialWaist/sqrt(2*(2*nu+mu+1));
-Wavelength           = 0.6328;
+% LaguerreInitialWaist = 1000;
+% InitialWaist         = LaguerreInitialWaist/sqrt(2*(2*nu+mu+1));
+% Wavelength           = 0.6328;
 
 % normalized parameters
-% InitialWaist = 1;
-% Wavelength   = pi;
-
+InitialWaist = 1;
+Wavelength   = pi;
 LP           = LaguerreParameters(0,InitialWaist,Wavelength,nu,mu);
 % %------------------------ sampling of vectors ----------------------------%
 %First we estimate sampling in z-direction with propagation distance 
@@ -33,13 +32,13 @@ z  = 0:dz:Dz;                % z-vector z of propagation
 
 MaxLaguerreWaist = LaguerreParameters.Waist(z(end),InitialWaist,LP.RayleighDistance,nu,mu);
 
-N   = 2^10;                  % Number of points in x,y axis
-n   = -N/2+.05:N/2-1+.05;    % vector with N-points with resolution 1
-Dx  = 2*MaxLaguerreWaist;    % Size of window 
-dx  = Dx/N;                  % Resolution
-x   = n*dx;                  % Vector with dimentions
-y   = x;
-[X] = meshgrid(x,y);
+N     = 2^10;                % Number of points in x,y axis
+n     = -N/2+.05:N/2-1+.05;  % vector with N-points with resolution 1
+Dx    = 2*MaxLaguerreWaist;  % Size of window 
+dx    = Dx/N;                % Resolution
+x     = n*dx;                % Vector with dimentions
+y     = x;
+[X,Y] = meshgrid(x,y);
 
 %Last we estimate vectors of frequency for Fourier Transforms associated
 %with x,y
@@ -53,29 +52,27 @@ kx   = 2*pi*u;
 [Kx] = meshgrid(kx);
 
 %% ----------------------- Laguerre Gauss in z = 0 --------------------- %%
-LG  = LaguerreBeam(X,X',0,InitialWaist,Wavelength,nu,mu);
-
-% Plot of Field
+LG  = LaguerreBeam(X,Y,0,InitialWaist,Wavelength,nu,mu);
+% Optic Field to propagate 
+g   = LG.OpticalField;
+% Plot of Function
 figure(1)
-pcolor(x/(sqrt(2)*InitialWaist), x/(sqrt(2)*InitialWaist), abs(LG.OpticalField).^2)
+pcolor(x/(sqrt(2)*InitialWaist), x/(sqrt(2)*InitialWaist), abs(g))
 axis square
 shading flat
 colormap(mapgreen)
 xlabel('$x$','Interpreter','latex') 
 ylabel('$y$','Interpreter','latex') 
-
-% Optic Field to propagate 
-g   = LG.OpticalField;
 % Max Peak
 pxy = max(max(g));
 
 %% ----------------- Obstruction on Lagurre in z = 0 ------------------- %%
-lo      = LaguerreParameters.Waist(0,InitialWaist,LP.RayleighDistance,nu,mu)/4.3; % size of obstruction in terms of waist of Laguerre
-xt      = 0;                                                                      % traslation of obstruction in x-axis
-yt      = 0;                                                                      % traslation of onstruction in y-axis
-[~,rho] = cart2pol(X-xt,X'-yt);                                                   % Convert this in polar coordinates
-obo     = double(rho<=lo);                                                        % Create Obstruction   
-clear rho                                                                         % Clean Matrix of polar coordinates
+lo      = LaguerreInitialWaist/4.3; % size of obstruction in terms of waist of Laguerre
+xt      = 0;                        % traslation of obstruction in x-axis
+yt      = 0;                        % traslation of onstruction in y-axis
+[~,rho] = cart2pol(X-xt,X'-yt);     % Convert this in polar coordinates
+obo     = double(rho<=lo);          % Create Obstruction   
+clear rho                           % Clean Matrix of polar coordinates
 % Applying obstruction in optic field
 g       = g.*(1-obo);
 %Ploting Laguerre with obstruction
@@ -98,8 +95,9 @@ rayH2(pn) = OpticalRay;
 
 for jj = 1:pn
     % Cartersian coordinates of point in circunference of obstruction
-    xi = xt+lo*cos(jj*(2*pi)/(pn)); 
-    yi = yt+lo*sin(jj*(2*pi)/(pn));
+    xi              = xt+lo*cos(jj*(2*pi)/(pn)); 
+    yi              = yt+lo*sin(jj*(2*pi)/(pn));
+    
     
     % saving cartesian coordinates of point in circunference in each ray
     rayH1(jj).xCoordinate(1) = xi; 
@@ -138,7 +136,6 @@ hold off
 
 %%  ----------------------- Physical Propagation ------------------------ %
 % paraxial propagator 
-k    = LP.k;
 prop = exp(1i*dz*(Kx.^2+(Kx').^2)/(2*k));
 figure(5)
 imagesc(u,u,(angle(prop)))
