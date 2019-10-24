@@ -18,7 +18,7 @@ classdef LaguerreBeam <  GaussianBeam & LaguerreParameters
   methods
     
     function LaguerreAmplitude = get.LaguerreAmplitude(obj)
-      LaguerreAmplitude = (1./obj.Waist).*((sqrt(2)*(obj.RadialCoordinate))./obj.Waist).^abs(obj.l);%obj.l);
+      LaguerreAmplitude = (1./obj.Waist).*((sqrt(2)*(obj.RadialCoordinate))./obj.Waist).^abs(obj.p);%obj.l);
     end
     
     function Normalization = get.Normalization(obj)
