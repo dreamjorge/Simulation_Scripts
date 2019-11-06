@@ -1,16 +1,16 @@
 function [ray] = getHermiteSlopes(ray,x,y,z,...
                                   dx,dy,dz,...
                                   xi,yi,zi,...
-                                  InitialWaist,Wavelength,nu,mu,numberHankel)
+                                  InitialWaist,Wavelength,nu,mu,nrHankelx,nrHankely)
 
   %y = cte, z = cte
-  HLx = HankelLaguerre(x,yi,zi,InitialWaist,Wavelength,nu,mu,numberHankel);
+  HLx = HankelHermite(x,yi,zi,InitialWaist,Wavelength,nu,mu,nrHankelx,nrHankely);
   
   %x = cte, z = cte
-  HLy = HankelLaguerre(xi,y,zi,InitialWaist,Wavelength,nu,mu,numberHankel);
+  HLy = HankelHermite(xi,y,zi,InitialWaist,Wavelength,nu,mu,nrHankelx,nrHankely);
 
   %x = cte, y = cte
-  HLz = HankelLaguerre(xi,yi,z,InitialWaist,Wavelength,nu,mu,numberHankel);
+  HLz = HankelHermite(xi,yi,z,InitialWaist,Wavelength,nu,mu,nrHankelx,nrHankely);
 
   fx   = unwrap(angle(HLx.OpticalField));
   fy   = unwrap(angle(HLy.OpticalField));

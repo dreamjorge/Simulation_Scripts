@@ -74,13 +74,19 @@ ylabel('$y$','Interpreter','latex')
 % Max Peak
 pxy = max(max(g));
 
-%% ----------------- Obstruction on Lagurre in z = 0 ------------------- %%
+%% ----------------- Obstruction on Hermite in z = 0 ------------------- %%
 lo      = HermiteInitialWaist/8;    % size of obstruction in terms of waist of Laguerre
-xt      = 0;                        % traslation of obstruction in x-axis
-yt      = 0;                        % traslation of onstruction in y-axis
-[~,rho] = cart2pol(X-xt,X'-yt);     % Convert this in polar coordinates
-obo     = double(rho<=lo);          % Create Obstruction   
-clear rho                           % Clean Matrix of polar coordinates
+
+% Obstruction
+lx     = HermiteInitialWaist/3;
+ly     = lx;
+radius = (lx)*(sqrt(2));
+xt     = 0;
+yt     = 0;
+obx    = double(abs(x)<=lx/2);
+oby    = double(abs(x)<=ly/2);
+obo    = (oby')*obx;
+
 % Applying obstruction in optic field
 g       = g.*(1-obo);
 %Ploting Laguerre with obstruction
@@ -95,7 +101,79 @@ xlabel('$x$','Interpreter','latex','FontSize',18)
 ylabel('$y$','Interpreter','latex','FontSize',18)
 
 
+%%parametrization of obstruction for rays
 
+
+% points in obstruction
+no  = 5;
+np  = 2^no;
+th  = 2*pi/np;
+
+TotalNumberRays = np;
+rayH11(TotalNumberRays) = OpticalRay;
+rayH12(TotalNumberRays) = OpticalRay;
+rayH21(TotalNumberRays) = OpticalRay;
+rayH22(TotalNumberRays) = OpticalRay;
+
+%puntos sobre el rectangulo dada su parametrizacion, donde empezaran los
+%rayos
+for jj=1:TotalNumberRays
+  
+  xj = xt+(lx/2)*(abs(cos((jj)*th))*cos((jj)*th)+abs(sin((jj)*th))*sin((jj)*th));
+  yj = yt+(ly/2)*(abs(cos((jj)*th))*cos((jj)*th)-abs(sin((jj)*th))*sin((jj)*th));
+  
+  rayH11(jj).xCoordinate(1) = xj;
+  rayH11(jj).yCoordinate(1) = yj;
+  
+  rayH12(jj).xCoordinate(1) = xj;
+  rayH12(jj).yCoordinate(1) = yj;
+  
+  rayH21(jj).xCoordinate(1) = xj;
+  rayH21(jj).yCoordinate(1) = yj;
+  
+  rayH22(jj).xCoordinate(1) = xj;
+  rayH22(jj).yCoordinate(1) = yj;
+    
+  % Slopes in points  
+  [rayH11(jj)] = HankelHermite.getHerm
+  iteSlopes(rayH11(jj),x,y,z,...
+                                                 dx,dx,dz,...
+                                                 xj,yj,0,...
+                                                 InitialWaist,Wavelength,nu,mu,1,1);
+    
+  [rayH12(jj)] = HankelHermite.getHermiteSlopes(rayH12(jj),x,y,z,...
+                                                 dx,dx,dz,...
+                                                 xj,yj,0,...
+                                                 InitialWaist,Wavelength,nu,mu,1,2);
+                                               
+  [rayH21(jj)] = HankelHermite.getHermiteSlopes(rayH21(jj),x,y,z,...
+                                                 dx,dx,dz,...
+                                                 xj,yj,0,...
+                                                 InitialWaist,Wavelength,nu,mu,2,1); 
+                                               
+  [rayH22(jj)] = HankelHermite.getHermiteSlopes(rayH22(jj),x,y,z,...
+                                                 dx,dx,dz,...
+                                                 xj,yj,0,...
+                                                 InitialWaist,Wavelength,nu,mu,2,2);                                               
+        
+end
+
+
+figure(3)
+pcolor(x/(sqrt(2)*InitialWaist),x/(sqrt(2)*InitialWaist),abs(g).^2)
+axis square
+shading flat
+colormap(mapgreen)
+axis1=gca;
+
+hold on
+for jj=1:TotalNumberRays
+  plot(ray(jj).rxHH11(1)/(sqrt(2)*InitialWaist),ray(jj).ryHH11(1)/(sqrt(2)*InitialWaist),'.','color','r')
+end
+hold off
+set(axis1,'FontSize',13);
+xlabel('$x$','Interpreter','latex','FontSize',18)
+ylabel('$y$','Interpreter','latex','FontSize',18)
 %%  ----------------------- Physical Propagation ------------------------ %
 % paraxial propagator 
 prop = exp(1i*dz*(Kx.^2+(Kx').^2)/(2*k));
@@ -113,30 +191,80 @@ gy(:,1) = g(:,N/2+1);
 
 for ii = 2:length(z) % propagation with respect to z
     
-    % field before propagation i.e in z(ii-1)
-    pxyz         = g(1,1);
-    g(1,1)       = pxy;
-    fig          = figure(6);
+  % field before propagation i.e in z(ii-1)
+  pxyz         = g(1,1);
+  g(1,1)       = pxy;
+  fig          = figure(6);
 
-    fig.Position = [ 239 135 1354 733];
+  fig.Position = [ 239 135 1354 733];
 
-%     set(gca,'un','n','pos',[0,0,1,1])
-    imagesc(x/(sqrt(2)*InitialWaist),x/(sqrt(2)*InitialWaist),abs(g).^2)
-    colormap(mapgreen)
-    set(gca,'YDir','normal')
-    axis square
-    title(['z = ', num2str(z(ii))])
-    drawnow 
+% set(gca,'un','n','pos',[0,0,1,1])
+  imagesc(x/(sqrt(2)*InitialWaist),x/(sqrt(2)*InitialWaist),abs(g).^2)
+  colormap(mapgreen)
+  set(gca,'YDir','normal')
+  axis square
+  title(['z = ', num2str(z(ii))])
+  drawnow 
+  hold on
+  for jj=1:TotalNumberRays
   
-   pause(.25)
+    plot(rayH11(jj).xCoordinate(ii-1)/(sqrt(2)*InitialWaist),...
+         rayH11(jj).yCoordinate(ii-1)/(sqrt(2)*InitialWaist),'.','MarkerSize',20,'LineWidth',2,'color','r')
+         
+    plot(rayH12(jj).xCoordinate(ii-1)/(sqrt(2)*InitialWaist),...
+         rayH12(jj).yCoordinate(ii-1)/(sqrt(2)*InitialWaist),'.','MarkerSize',20,'LineWidth',2,'color','y')
+       
+    plot(rayH21(jj).xCoordinate(ii-1)/(sqrt(2)*InitialWaist),...
+         rayH21(jj).yCoordinate(ii-1)/(sqrt(2)*InitialWaist),'.','MarkerSize',20,'LineWidth',2,'color','b')
+       
+    plot(rayH22(jj).xCoordinate(ii-1)/(sqrt(2)*InitialWaist),...
+         rayH22(jj).yCoordinate(ii-1)/(sqrt(2)*InitialWaist),'.','MarkerSize',20,'LineWidth',2,'color','b')      
+    
+    rayH11.xCoordinate(ii) = rayH11(jj).xCoordinate(ii-1) + (1/rayH11(jj).zxSlope)*dz;
+    rayH11.yCoordinate(ii) = rayH11(jj).yCoordinate(ii-1) + (1/rayH11(jj).zySlope)*dz;
+  
+    rayH12.xCoordinate(ii) = rayH12(jj).xCoordinate(ii-1) + (1/rayH12(jj).zxSlope)*dz;
+    rayH12.yCoordinate(ii) = rayH12(jj).yCoordinate(ii-1) + (1/rayH12(jj).zySlope)*dz;
+  
+    rayH21.xCoordinate(ii) = rayH21(jj).xCoordinate(ii-1) + (1/rayH21(jj).zxSlope)*dz;
+    rayH21.yCoordinate(ii) = rayH21(jj).yCoordinate(ii-1) + (1/rayH21(jj).zySlope)*dz;
+  
+    rayH22.xCoordinate(ii) = rayH22(jj).xCoordinate(ii-1) + (1/rayH22(jj).zxSlope)*dz;
+    rayH22.yCoordinate(ii) = rayH22(jj).yCoordinate(ii-1) + (1/rayH22(jj).zySlope)*dz;
+    
+   % Slopes in points  
+
+    [rayH12(jj)] = HankelHermite.getHermiteSlopes(rayH12(jj),x,y,z,...
+                                                   dx,dx,dz,...
+                                                   rayH12.xCoordinate(ii),rayH12.yCoordinate(ii),z(ii),...
+                                                   InitialWaist,Wavelength,nu,mu,1,2);
+                                               
+   [rayH21(jj)] = HankelHermite.getHermiteSlopes(rayH21(jj),x,y,z,...
+                                                  dx,dx,dz,...
+                                                  rayH21.xCoordinate(ii),rayH21.yCoordinate(ii),z(ii),...
+                                                  InitialWaist,Wavelength,nu,mu,2,1); 
+                                               
+    [rayH22(jj)] = HankelHermite.getHermiteSlopes(rayH22(jj),x,y,z,...
+                                                   dx,dx,dz,...
+                                                   rayH22.xCoordinate(ii),rayH22.yCoordinate(ii),z(ii),...
+                                                   InitialWaist,Wavelength,nu,mu,2,2);                                               
+        
+  end
+
+  hold off
+  pause(.25)
 
 
-    %------------------------ End calculating rays -----------------------%   
-    %propagating field
-    % it's needed correction in phase of FFT
-    G = fftshift(fft2((g)));...*exp(-1j.*(u(1)).*(Kx)).*exp(-1j.*(u(1)).*(Kx'));
-    %obtain new propagated field
-    g = (ifft2(ifftshift(G.*prop)));...*exp(-1j.*(u(1)).*(X))*exp(-1j.*(u(1)).*(X'));
+  %------------------------ End calculating rays -----------------------%   
+  %propagating field
+  % it's needed correction in phase of FFT
+  G = fftshift(fft2((g)));...*exp(-1j.*(u(1)).*(Kx)).*exp(-1j.*(u(1)).*(Kx'));
+  %obtain new propagated field
+  g = (ifft2(ifftshift(G.*prop)));...*exp(-1j.*(u(1)).*(X))*exp(-1j.*(u(1)).*(X'));
+  
+  
+ 
+  
     figure(7)
     imagesc(angle(G))
     %G = G.*exp(1i*pi*50);
@@ -146,6 +274,10 @@ for ii = 2:length(z) % propagation with respect to z
     %saving transversal fields
     gx(:,ii)=g(N/2+1,:);
     gy(:,ii)=g(:,N/2+1);
+    
+    
+    
+    
 %     
 end
 
