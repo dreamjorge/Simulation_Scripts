@@ -33,15 +33,15 @@ classdef XHermiteBeam <  GaussianBeam
     end
     
     function Normalization = get.Normalization(obj)
-      Normalization =  sqrt(2*factorial(obj.p)/(pi*factorial(obj.p+abs(obj.l))));
+      Normalization =  1;...sqrt(2*factorial(obj.p)/(pi*factorial(obj.p+abs(obj.l))));
     end
 
-    function XHermite = XHermiteBeam(x,y,PropagationDistance, InitialWaist,Wavelength,n,m)
+    function XHermite = XHermiteBeam(x,y,PropagationDistance, InitialWaist,Wavelength,nu,mu)
       
       XHermite@GaussianBeam(x,y,PropagationDistance,InitialWaist,Wavelength); 
       
-      XHermite.n = n;
-      XHermite.m = m;
+      XHermite.n = nu;
+      XHermite.m = mu;
       [Hn,~]    = XHermite.hermiteSolutions(nu,(sqrt(2)/XHermite.Waist)*x);
       [Hm,~]    = XHermite.hermiteSolutions(mu,(sqrt(2)/XHermite.Waist)*y);
 
