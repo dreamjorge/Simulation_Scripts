@@ -75,13 +75,10 @@ ylabel('$y$','Interpreter','latex')
 pxy = max(max(g));
 
 %% ----------------- Obstruction on Hermite in z = 0 ------------------- %%
-
-HParameters = HermiteParameters(0,InitialWaist,Wavelength,nu,mu);
-
-lo      = HParameters.HermiteWaist/8;    % size of obstruction in terms of waist of hermite
+lo      = HermiteInitialWaist/8;    % size of obstruction in terms of waist of Laguerre
 
 % Obstruction
-lx     = HParameters.HermiteWaist/3;
+lx     = HermiteInitialWaist/3;
 ly     = lx;
 radius = (lx)*(sqrt(2));
 xt     = 0;
@@ -151,9 +148,9 @@ for jj=1:TotalNumberRays
   rp.y = yj;
   rp.z = z(jj); 
   
-  HankelType = [1,1];
+  HankelType = (1,1);
   
-  [rayH11(jj)] = HankelHermite.getHermiteSlopes(rayH11(jj),r,dr,rp,HParameters,HankelType);
+  [rayH11(jj)] = HankelHermite.getHermiteSlopes(rayH11(jj),r,dr,rp,HermiteParameters,HankelType);
 
     
   [rayH12(jj)] = HankelHermite.getHermiteSlopes(rayH12(jj),x,y,z,...

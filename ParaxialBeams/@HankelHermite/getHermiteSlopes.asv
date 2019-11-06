@@ -1,14 +1,11 @@
 function [ray] = getHermiteSlopes(ray,r,dr,ri,HermiteParameters,Hankel)
 
-nr_Hankelx = Hankel(1,1);
-
-nr_Hankely = Hankel(1,2);
-
+nr_Hankelx = Hankel(1,1)
 nargin
 
   %y = cte, z = cte
   HLx = HankelHermite(r.x,ri.y,ri.z,HermiteParameters.InitialWaist,HermiteParameters.Wavelength,...
-                      HermiteParameters.n,HermiteParameters.m,nr_Hankelx,nr_Hankely);
+                      HermiteParameters.nu,HermiteParameters.mu,nr_Hankelx,nr_Hankely);
   
   %x = cte, z = cte
   HLy = HankelHermite(xi,y,zi,InitialWaist,Wavelength,nu,mu,nr_Hankelx,nr_Hankely);
@@ -22,6 +19,6 @@ nargin
 
   k = 2*pi/InitialWaist;
   
-  [ray.zxSlope,ray.zySlope,ray.xySlope] = gradientxyz(fx,fy,fz,k,dr.dx,dy,dz,xi,yi,zi);
+  [ray.zxSlope,ray.zySlope,ray.xySlope] = gradientxyz(fx,fy,fz,k,dx,dy,dz,xi,yi,zi);
 
 end
