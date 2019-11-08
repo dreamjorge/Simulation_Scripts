@@ -42,8 +42,8 @@ classdef XHermiteBeam <  GaussianBeam
       
       XHermite.n = nu;
       XHermite.m = mu;
-      [Hn,~]    = XHermite.hermiteSolutions(nu,(sqrt(2)/XHermite.Waist)*x);
-      [Hm,~]    = XHermite.hermiteSolutions(mu,(sqrt(2)/XHermite.Waist)*y);
+      [Hn,~]    = XHermite.hermiteSolutions(nu,(sqrt(2)./XHermite.Waist).*x);
+      [Hm,~]    = XHermite.hermiteSolutions(mu,(sqrt(2)./XHermite.Waist).*y);
 
       
       %% Optical Field

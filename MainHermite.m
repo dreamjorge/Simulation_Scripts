@@ -32,21 +32,21 @@ RayleighDistance     = GP.RayleighDistance;
 Dz     = 2*RayleighDistance;        % z-window (propagation distance)
 Nz     = 2^8;                       % number of points in z-direction
 dz     = Dz/Nz;                     % Resolution in z
-z      = 0:dz:Dz;                   % z-vector z of propagation 
+z      = 0:dz:2*Dz;                   % z-vector z of propagation 
 
 % waist of Laguerre Gauss Beam until z-propagation
-maxIndex = max(nu,mu);
+maxIndex        = max(nu,mu);
 MaxHermiteWaist = HermiteBeam.waistHermite(z(end),InitialWaist,RayleighDistance,maxIndex);
 
 %Second we estimage sampling in x,y-direction in terms of waist of Guassian
 %Laguerre Beam
 
 % y,x-direction
-N      =  2^9;                   % Number of points in x,y axis
-n      = -N/2+.05:N/2-1+.05;      % vector with N-points with resolution 1
+N      =  2^8;                   % Number of points in x,y axis
+n      = -N/2+.05:N/2-1+.05;     % vector with N-points with resolution 1
 Dx     = 2*MaxHermiteWaist;      % Size of window 
-dx     = Dx/N;                    % Resolution
-x      = n*dx;                    % Vector
+dx     = Dx/N;                   % Resolution
+x      = n*dx;                   % Vector
 y      = x;
 [X,Y]  = meshgrid(x,y);
 
@@ -59,7 +59,19 @@ u      = n*du;                    % Vector
 kx     = 2*pi*u;
 [Kx]   = meshgrid(kx);
 
-%% ----------------------- Laguerre Gauss in z = 0 --------------------- %%
+% vector r
+r    = struct();
+r.x  = x;
+r.y  = y;
+r.z  = z;
+
+% differential of vector
+dr   = struct();
+dr.x = dx;
+dr.y = dx;
+dr.z = dz;
+  
+%% ----------------------- Hermite Gauss in z = 0 --------------------- %%
 HG  = HermiteBeam(X,Y,0,InitialWaist,Wavelength,nu,mu);
 % Optic Field to propagate 
 g   = HG.OpticalField;
@@ -76,14 +88,12 @@ pxy = max(max(g));
 
 %% ----------------- Obstruction on Hermite in z = 0 ------------------- %%
 
+%Estimating parameters of Hermite in z=0
 HParameters = HermiteParameters(0,InitialWaist,Wavelength,nu,mu);
-
-lo      = HParameters.HermiteWaist/8;    % size of obstruction in terms of waist of hermite
 
 % Obstruction
 lx     = HParameters.HermiteWaist/3;
 ly     = lx;
-radius = (lx)*(sqrt(2));
 xt     = 0;
 yt     = 0;
 obx    = double(abs(x)<=lx/2);
@@ -91,7 +101,7 @@ oby    = double(abs(x)<=ly/2);
 obo    = (oby')*obx;
 
 % Applying obstruction in optic field
-g       = g.*(1-obo);
+g      = g.*(1-obo);
 %Ploting Laguerre with obstruction
 figure(2)
 pcolor(x/(sqrt(2)*InitialWaist),x/(sqrt(2)*InitialWaist),abs(g).^2)
@@ -104,15 +114,13 @@ xlabel('$x$','Interpreter','latex','FontSize',18)
 ylabel('$y$','Interpreter','latex','FontSize',18)
 
 
-%%parametrization of obstruction for rays
-
-
-% points in obstruction
+% parametrization of obstruction for rays
+% np points in obstruction
 no  = 5;
 np  = 2^no;
 th  = 2*pi/np;
 
-TotalNumberRays = np;
+TotalNumberRays         = np;
 rayH11(TotalNumberRays) = OpticalRay;
 rayH12(TotalNumberRays) = OpticalRay;
 rayH21(TotalNumberRays) = OpticalRay;
@@ -120,7 +128,7 @@ rayH22(TotalNumberRays) = OpticalRay;
 
 %puntos sobre el rectangulo dada su parametrizacion, donde empezaran los
 %rayos
-for jj=1:TotalNumberRays
+for jj = 1:TotalNumberRays
   
   xj = xt+(lx/2)*(abs(cos((jj)*th))*cos((jj)*th)+abs(sin((jj)*th))*sin((jj)*th));
   yj = yt+(ly/2)*(abs(cos((jj)*th))*cos((jj)*th)-abs(sin((jj)*th))*sin((jj)*th));
@@ -137,39 +145,25 @@ for jj=1:TotalNumberRays
   rayH22(jj).xCoordinate(1) = xj;
   rayH22(jj).yCoordinate(1) = yj;
     
-  % Slopes in points  
-  r    = struct();
-  r.x  = x;
-  r.y  = y;
-  r.z  = z;
-  dr   = struct();
-  dr.x = dx;
-  dr.y = dx;
-  dr.z = dz;
+  % vector of propagation
   rp   = struct();
   rp.x = xj;
   rp.y = yj;
-  rp.z = z(jj); 
+  rp.z = z(1); 
   
-  HankelType = [1,1];
-  
+  % Estimate slopes of in rp
+  HankelType   = [1,1];
   [rayH11(jj)] = HankelHermite.getHermiteSlopes(rayH11(jj),r,dr,rp,HParameters,HankelType);
 
-    
-  [rayH12(jj)] = HankelHermite.getHermiteSlopes(rayH12(jj),x,y,z,...
-                                                 dx,dx,dz,...
-                                                 xj,yj,0,...
-                                                 InitialWaist,Wavelength,nu,mu,1,2);
-                                               
-  [rayH21(jj)] = HankelHermite.getHermiteSlopes(rayH21(jj),x,y,z,...
-                                                 dx,dx,dz,...
-                                                 xj,yj,0,...
-                                                 InitialWaist,Wavelength,nu,mu,2,1); 
-                                               
-  [rayH22(jj)] = HankelHermite.getHermiteSlopes(rayH22(jj),x,y,z,...
-                                                 dx,dx,dz,...
-                                                 xj,yj,0,...
-                                                 InitialWaist,Wavelength,nu,mu,2,2);                                               
+  HankelType   = [1,2];
+  [rayH12(jj)] = HankelHermite.getHermiteSlopes(rayH12(jj),r,dr,rp,HParameters,HankelType);
+
+  HankelType   = [2,1];
+  [rayH21(jj)] = HankelHermite.getHermiteSlopes(rayH21(jj),r,dr,rp,HParameters,HankelType);  
+  
+  HankelType   = [2,2];
+  [rayH22(jj)] = HankelHermite.getHermiteSlopes(rayH22(jj),r,dr,rp,HParameters,HankelType);  
+                               
         
 end
 
@@ -183,7 +177,7 @@ axis1=gca;
 
 hold on
 for jj=1:TotalNumberRays
-  plot(ray(jj).rxHH11(1)/(sqrt(2)*InitialWaist),ray(jj).ryHH11(1)/(sqrt(2)*InitialWaist),'.','color','r')
+  plot(rayH11(jj).xCoordinate(1)/(sqrt(2)*InitialWaist),rayH11(jj).yCoordinate(1)/(sqrt(2)*InitialWaist),'.','color','r')
 end
 hold off
 set(axis1,'FontSize',13);
@@ -221,54 +215,75 @@ for ii = 2:length(z) % propagation with respect to z
   title(['z = ', num2str(z(ii))])
   drawnow 
   hold on
-  for jj=1:TotalNumberRays
+  for jj = 1:TotalNumberRays
   
     plot(rayH11(jj).xCoordinate(ii-1)/(sqrt(2)*InitialWaist),...
-         rayH11(jj).yCoordinate(ii-1)/(sqrt(2)*InitialWaist),'.','MarkerSize',20,'LineWidth',2,'color','r')
-         
-    plot(rayH12(jj).xCoordinate(ii-1)/(sqrt(2)*InitialWaist),...
-         rayH12(jj).yCoordinate(ii-1)/(sqrt(2)*InitialWaist),'.','MarkerSize',20,'LineWidth',2,'color','y')
-       
-    plot(rayH21(jj).xCoordinate(ii-1)/(sqrt(2)*InitialWaist),...
-         rayH21(jj).yCoordinate(ii-1)/(sqrt(2)*InitialWaist),'.','MarkerSize',20,'LineWidth',2,'color','b')
-       
-    plot(rayH22(jj).xCoordinate(ii-1)/(sqrt(2)*InitialWaist),...
-         rayH22(jj).yCoordinate(ii-1)/(sqrt(2)*InitialWaist),'.','MarkerSize',20,'LineWidth',2,'color','b')      
-    
-    rayH11.xCoordinate(ii) = rayH11(jj).xCoordinate(ii-1) + (1/rayH11(jj).zxSlope)*dz;
-    rayH11.yCoordinate(ii) = rayH11(jj).yCoordinate(ii-1) + (1/rayH11(jj).zySlope)*dz;
-  
-    rayH12.xCoordinate(ii) = rayH12(jj).xCoordinate(ii-1) + (1/rayH12(jj).zxSlope)*dz;
-    rayH12.yCoordinate(ii) = rayH12(jj).yCoordinate(ii-1) + (1/rayH12(jj).zySlope)*dz;
-  
-    rayH21.xCoordinate(ii) = rayH21(jj).xCoordinate(ii-1) + (1/rayH21(jj).zxSlope)*dz;
-    rayH21.yCoordinate(ii) = rayH21(jj).yCoordinate(ii-1) + (1/rayH21(jj).zySlope)*dz;
-  
-    rayH22.xCoordinate(ii) = rayH22(jj).xCoordinate(ii-1) + (1/rayH22(jj).zxSlope)*dz;
-    rayH22.yCoordinate(ii) = rayH22(jj).yCoordinate(ii-1) + (1/rayH22(jj).zySlope)*dz;
-    
-   % Slopes in points  
+         rayH11(jj).yCoordinate(ii-1)/(sqrt(2)*InitialWaist),'.','MarkerSize',10,'LineWidth',2,'color','r')
 
-    [rayH12(jj)] = HankelHermite.getHermiteSlopes(rayH12(jj),x,y,z,...
-                                                   dx,dx,dz,...
-                                                   rayH12.xCoordinate(ii),rayH12.yCoordinate(ii),z(ii),...
-                                                   InitialWaist,Wavelength,nu,mu,1,2);
-                                               
-   [rayH21(jj)] = HankelHermite.getHermiteSlopes(rayH21(jj),x,y,z,...
-                                                  dx,dx,dz,...
-                                                  rayH21.xCoordinate(ii),rayH21.yCoordinate(ii),z(ii),...
-                                                  InitialWaist,Wavelength,nu,mu,2,1); 
-                                               
-    [rayH22(jj)] = HankelHermite.getHermiteSlopes(rayH22(jj),x,y,z,...
-                                                   dx,dx,dz,...
-                                                   rayH22.xCoordinate(ii),rayH22.yCoordinate(ii),z(ii),...
-                                                   InitialWaist,Wavelength,nu,mu,2,2);                                               
-        
+    plot(rayH12(jj).xCoordinate(ii-1)/(sqrt(2)*InitialWaist),...
+         rayH12(jj).yCoordinate(ii-1)/(sqrt(2)*InitialWaist),'.','MarkerSize',10,'LineWidth',2,'color','y')
+
+    plot(rayH21(jj).xCoordinate(ii-1)/(sqrt(2)*InitialWaist),...
+         rayH21(jj).yCoordinate(ii-1)/(sqrt(2)*InitialWaist),'.','MarkerSize',10,'LineWidth',2,'color','b')
+
+    plot(rayH22(jj).xCoordinate(ii-1)/(sqrt(2)*InitialWaist),...
+         rayH22(jj).yCoordinate(ii-1)/(sqrt(2)*InitialWaist),'.','MarkerSize',10,'LineWidth',2,'color','g')      
+
+    %% new point of propagation   
+    rayH11(jj).xCoordinate(ii) = rayH11(jj).xCoordinate(ii-1) + (1/rayH11(jj).zxSlope)*dz;
+    rayH11(jj).yCoordinate(ii) = rayH11(jj).yCoordinate(ii-1) + (1/rayH11(jj).zySlope)*dz;
+
+    rayH12(jj).xCoordinate(ii) = rayH12(jj).xCoordinate(ii-1) + (1/rayH12(jj).zxSlope)*dz;
+    rayH12(jj).yCoordinate(ii) = rayH12(jj).yCoordinate(ii-1) + (1/rayH12(jj).zySlope)*dz;
+
+    rayH21(jj).xCoordinate(ii) = rayH21(jj).xCoordinate(ii-1) + (1/rayH21(jj).zxSlope)*dz;
+    rayH21(jj).yCoordinate(ii) = rayH21(jj).yCoordinate(ii-1) + (1/rayH21(jj).zySlope)*dz;
+
+    rayH22(jj).xCoordinate(ii) = rayH22(jj).xCoordinate(ii-1) + (1/rayH22(jj).zxSlope)*dz;
+    rayH22(jj).yCoordinate(ii) = rayH22(jj).yCoordinate(ii-1) + (1/rayH22(jj).zySlope)*dz;
+    
+    %% new slopes in new point
+    
+    % ray for H11
+    rp.x = rayH11(jj).xCoordinate(ii);
+    rp.y = rayH11(jj).yCoordinate(ii);
+    rp.z = z(ii); 
+
+    % Estimate slopes of in rp
+    HankelType   = [1,1];
+    [rayH11(jj)] = HankelHermite.getHermiteSlopes(rayH11(jj),r,dr,rp,HParameters,HankelType);
+
+    % ray for H12
+    rp.x = rayH12(jj).xCoordinate(ii);
+    rp.y = rayH12(jj).yCoordinate(ii);
+    rp.z = z(ii); 
+    
+    % Estimate slopes of in rp
+    HankelType   = [1,2];
+    [rayH12(jj)] = HankelHermite.getHermiteSlopes(rayH12(jj),r,dr,rp,HParameters,HankelType);
+
+    % ray for H21
+    rp.x = rayH21(jj).xCoordinate(ii);
+    rp.y = rayH21(jj).yCoordinate(ii);
+    rp.z = z(ii);     
+    
+    % Estimate slopes of in rp
+    HankelType   = [2,1];
+    [rayH21(jj)] = HankelHermite.getHermiteSlopes(rayH21(jj),r,dr,rp,HParameters,HankelType);  
+
+    % ray for H22
+    rp.x = rayH22(jj).xCoordinate(ii);
+    rp.y = rayH22(jj).yCoordinate(ii);
+    rp.z = z(ii);    
+    
+    % Estimate slopes of in rp    
+    HankelType   = [2,2];
+    [rayH22(jj)] = HankelHermite.getHermiteSlopes(rayH22(jj),r,dr,rp,HParameters,HankelType);                                              
+
   end
 
   hold off
-  pause(.25)
-
+  pause(.01)
 
   %------------------------ End calculating rays -----------------------%   
   %propagating field
@@ -277,21 +292,16 @@ for ii = 2:length(z) % propagation with respect to z
   %obtain new propagated field
   g = (ifft2(ifftshift(G.*prop)));...*exp(-1j.*(u(1)).*(X))*exp(-1j.*(u(1)).*(X'));
   
-  
- 
-  
-    figure(7)
-    imagesc(angle(G))
-    %G = G.*exp(1i*pi*50);
-    figure(8)
-    imagesc(angle(G))
-    %obtain new propagated field
-    %saving transversal fields
-    gx(:,ii)=g(N/2+1,:);
-    gy(:,ii)=g(:,N/2+1);
-    
-    
-    
+  figure(7)
+  imagesc(angle(G))
+  %G = G.*exp(1i*pi*50);
+  figure(8)
+  imagesc(unwrap(angle(G)))
+  %obtain new propagated field
+  %saving transversal fields
+  gx(:,ii)=g(N/2+1,:);
+  gy(:,ii)=g(:,N/2+1);
+
     
 %     
 end
