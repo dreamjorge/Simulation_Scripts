@@ -8,14 +8,14 @@ classdef HankelLaguerre... < LaguerreBeam & XLaguerreBeam
 %   properties (Dependent)
 %     LaguerreWaist
 %   end
-%   
+% %   
   methods(Static)
     [ray] = getLaguerreSlopes(ray,x,y,z,...
                               dx,dy,dz,...
                               xi,yi,zi,...
                               InitialWaist,Wavelength,nu,mu,nh)
   end
-  
+%   
   methods
     
 %     function LaguerreWaist = get.LaguerreWaist(obj)

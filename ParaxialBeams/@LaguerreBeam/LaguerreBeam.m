@@ -1,5 +1,9 @@
 classdef LaguerreBeam <  GaussianBeam & LaguerreParameters
-  
+  % Laguerre Gaussian Beam is a scalar optical field with its parameters defined in
+  % properties.
+  % Example:
+  % LB = LaguerreBeam(X,Y,PropagationDistance,RayleighDistance,InitialWaist,l,p);
+  % where PropagationDistance,X,Y can be scalar, vector or matrix.  
 
   properties (Dependent)
     LaguerreAmplitude
@@ -18,7 +22,7 @@ classdef LaguerreBeam <  GaussianBeam & LaguerreParameters
   methods
     
     function LaguerreAmplitude = get.LaguerreAmplitude(obj)
-      LaguerreAmplitude = (1./obj.Waist).*((sqrt(2)*(obj.RadialCoordinate))./obj.Waist).^abs(obj.p);%obj.l);
+      LaguerreAmplitude = 1;...(1./obj.Waist).*((sqrt(2)*(obj.RadialCoordinate))./obj.Waist).^abs(obj.p);%obj.l);
     end
     
     function Normalization = get.Normalization(obj)
@@ -34,8 +38,8 @@ classdef LaguerreBeam <  GaussianBeam & LaguerreParameters
       [Laguerre.ThetaCoordinate,Laguerre.RadialCoordinate] = cart2pol(x,y);
       
       %% Optical Field
-      Laguerre.OpticalField = Laguerre.Normalization.*...
-                              Laguerre.LaguerreAmplitude.*... 
+      Laguerre.OpticalField = ...Laguerre.Normalization.*...
+                              ...Laguerre.LaguerreAmplitude.*... 
                               exp(1i*Laguerre.PhiPhase).*exp(-1i*abs(mu)*Laguerre.ThetaCoordinate).*...
                               LaguerreBeam.AssociatedLaguerrePolynomial(nu,abs(mu),(2*Laguerre.RadialCoordinate.^2)./Laguerre.Waist.^2).*...
                               Laguerre.OpticalField;

@@ -19,7 +19,6 @@ classdef XLaguerreBeam < GaussianBeam
   
   methods(Static)
     XLg     = XAssociatedLaguerrePolynomial(nu,mu,x);
-    waistL  = waistLaguerre(zDistance,InitialWaist,RayleighDistance,nu,mu);
   end
   
   methods
@@ -33,7 +32,7 @@ classdef XLaguerreBeam < GaussianBeam
     end
     
     function LaguerreAmplitude = get.LaguerreAmplitude(obj)
-      LaguerreAmplitude = (sqrt(2)*(obj.RadialCoordinate)./obj.Waist).^(obj.l);
+      LaguerreAmplitude = 1;...(sqrt(2)*(obj.RadialCoordinate)./obj.Waist).^(obj.l);
     end
 
     function Normalization = get.Normalization(obj)
@@ -41,11 +40,9 @@ classdef XLaguerreBeam < GaussianBeam
     end
 
     
-    function Laguerre = XLaguerreBeam(x,y,PropagationDistance, InitialWaist,Wavelength,nu,mu)
+    function XLaguerre = XLaguerreBeam(x,y,PropagationDistance, InitialWaist,Wavelength,nu,mu)
 
       if nargin == 7    
-        
-
         super_args{1} = x;
         super_args{2} = y;
         super_args{3} = PropagationDistance;
@@ -56,18 +53,18 @@ classdef XLaguerreBeam < GaussianBeam
       end
       
       %Laguerre@GaussianParameters(super_args{3:end});
-      Laguerre@GaussianBeam(super_args{:}); 
+      XLaguerre@GaussianBeam(super_args{:}); 
       
-      Laguerre.l = nu;
-      Laguerre.p = mu;
-      [Laguerre.ThetaCoordinate,Laguerre.RadialCoordinate] = cart2pol(x,y);
+      XLaguerre.l = nu;
+      XLaguerre.p = mu;
+      [XLaguerre.ThetaCoordinate,XLaguerre.RadialCoordinate] = cart2pol(x,y);
       
       %% Optical Field
-      Laguerre.OpticalField = Laguerre.Normalization.*...
-                              Laguerre.LaguerreAmplitude.*... 
-                              exp(1i*Laguerre.PhiPhase).*exp(-1i*abs(nu)*Laguerre.ThetaCoordinate).*...
-                              XLaguerreBeam.XAssociatedLaguerrePolynomial(nu,abs(mu),(2*Laguerre.RadialCoordinate.^2)./Laguerre.Waist.^2).*...
-                              Laguerre.OpticalField;
+      XLaguerre.OpticalField =... XLaguerre.Normalization.*...
+                              ...XLaguerre.LaguerreAmplitude.*... 
+                              exp(1i*XLaguerre.PhiPhase).*exp(-1i*abs(nu)*XLaguerre.ThetaCoordinate).*...
+                              XLaguerreBeam.XAssociatedLaguerrePolynomial(nu,abs(mu),(2*XLaguerre.RadialCoordinate.^2)./XLaguerre.Waist.^2).*...
+                              XLaguerre.OpticalField;
     end
   end
   
