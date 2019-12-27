@@ -85,7 +85,7 @@ clear rho                                                                       
 g       = g.*(1-obo);
 %Ploting Laguerre with obstruction
 figure(20)
-pcolor(x/(sqrt(2)*InitialWaist),x/(sqrt(2)*InitialWaist),abs(g).^2)
+pcolor(x,x,abs(g).^2)
 axis square
 shading flat
 colormap(mapgreen)
@@ -125,7 +125,7 @@ end
 
 % Initial Field with rays in this init conditions
 figure(3)
-pcolor(x/(sqrt(2)*InitialWaist),x/(sqrt(2)*InitialWaist),abs(g).^2)
+pcolor(x,x,abs(g).^2)
 axis square
 shading flat
 colormap(mapgreen)
@@ -135,7 +135,7 @@ xlabel('$x$','Interpreter','latex','FontSize',18)
 ylabel('$y$','Interpreter','latex','FontSize',18)
 hold on
 for jj=1:pn
-    plot(rayH1(jj).xCoordinate(1)/(sqrt(2)*InitialWaist),rayH1(jj).yCoordinate(1)/(sqrt(2)*InitialWaist)...
+    plot(rayH1(jj).xCoordinate(1),rayH1(jj).yCoordinate(1)...
         ,'.','MarkerSize',10,'LineWidth',2,'color','r')
 end
 hold off
