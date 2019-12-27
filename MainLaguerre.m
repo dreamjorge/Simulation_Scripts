@@ -5,37 +5,41 @@ addpath ParaxialBeams\Addons
 mapgreen = AdvancedColormap('kgg',256,[0 100 255]/255);  %color of beam
 
 %-------------------- indices of Laguerre Gaussian Beams -----------------%
-nu      = 4;
+nu      = 19;
 mu      = 0;
 
 % Calculating Laguerre Parameters in z = 0
 
 % Physical parameters [microns]
-LaguerreInitialWaist = 1000;
-InitialWaist         = LaguerreInitialWaist/sqrt(2*(2*nu+mu+1));
+InitialWaist         = 100;%179*2;
 Wavelength           = 0.6328;
 
 % normalized parameters
-% InitialWaist = 1;
-% Wavelength   = pi;
+% InitialWaist         = 1;
+% Wavelength           = pi;
+% Estimating parameter of laguerre in z=0
+LP                   = LaguerreParameters(0,InitialWaist,Wavelength,nu,mu);
 
-LP           = LaguerreParameters(0,InitialWaist,Wavelength,nu,mu);
+
+% Initial Waist of Laguerre Beam
+LaguerreInitialWaist = LP.LaguerreWaist;
+
 % %------------------------ sampling of vectors ----------------------------%
 %First we estimate sampling in z-direction with propagation distance 
 % z-direction
 Dz = LP.RayleighDistance;    % z-window (propagation distance)
-Nz = 2^5;                    % number of points in z-direction
+Nz = 2^8;                    % number of points in z-direction
 dz = Dz/Nz;                  % Resolution in z
 z  = 0:dz:Dz;                % z-vector z of propagation 
 
 %After sampling z vector, we estimage sampling in x,y-direction in terms of
 %waist of max waist Laguerre Gauss Beam until max z-propagation
 
-MaxLaguerreWaist = LaguerreParameters.Waist(z(end),InitialWaist,LP.RayleighDistance,nu,mu);
+MaxLaguerreWaist = LaguerreParameters.waistFunction(z(end),InitialWaist,LP.RayleighDistance,nu,mu);
 
 N   = 2^10;                  % Number of points in x,y axis
 n   = -N/2+.05:N/2-1+.05;    % vector with N-points with resolution 1
-Dx  = 2*MaxLaguerreWaist;    % Size of window 
+Dx  = 2.2*MaxLaguerreWaist;  % Size of window 
 dx  = Dx/N;                  % Resolution
 x   = n*dx;                  % Vector with dimentions
 y   = x;
@@ -57,12 +61,13 @@ LG  = LaguerreBeam(X,X',0,InitialWaist,Wavelength,nu,mu);
 
 % Plot of Field
 figure(1)
-pcolor(x/(sqrt(2)*InitialWaist), x/(sqrt(2)*InitialWaist), abs(LG.OpticalField).^2)
+pcolor(x, x, abs(LG.OpticalField).^2)
 axis square
 shading flat
 colormap(mapgreen)
-xlabel('$x$','Interpreter','latex') 
-ylabel('$y$','Interpreter','latex') 
+plotCircle(0,0,LP.LaguerreWaist);
+xlabel('$x \left[ microns \right]$','Interpreter','latex') 
+ylabel('$y \left[ microns \right]$','Interpreter','latex') 
 
 % Optic Field to propagate 
 g   = LG.OpticalField;
@@ -70,12 +75,12 @@ g   = LG.OpticalField;
 pxy = max(max(g));
 
 %% ----------------- Obstruction on Lagurre in z = 0 ------------------- %%
-lo      = LaguerreParameters.Waist(0,InitialWaist,LP.RayleighDistance,nu,mu)/4.3; % size of obstruction in terms of waist of Laguerre
-xt      = 0;                                                                      % traslation of obstruction in x-axis
-yt      = 0;                                                                      % traslation of onstruction in y-axis
-[~,rho] = cart2pol(X-xt,X'-yt);                                                   % Convert this in polar coordinates
-obo     = double(rho<=lo);                                                        % Create Obstruction   
-clear rho                                                                         % Clean Matrix of polar coordinates
+lo      = LaguerreParameters.waistFunction(0,InitialWaist,LP.RayleighDistance,nu,mu)/4.3; % size of obstruction in terms of waist of Laguerre
+xt      = 0;                                                                              % traslation of obstruction in x-axis
+yt      = 0;                                                                              % traslation of onstruction in y-axis
+[~,rho] = cart2pol(X-xt,X'-yt);                                                           % Convert this in polar coordinates
+obo     = double(rho<=lo);                                                                % Create Obstruction   
+clear rho                                                                                 % Clean Matrix of polar coordinates
 % Applying obstruction in optic field
 g       = g.*(1-obo);
 %Ploting Laguerre with obstruction
@@ -162,8 +167,7 @@ for ii = 2:length(z) % propagation with respect to z
     fig.Position = [ 239 135 1354 733];
 
     set(gca,'un','n','pos',[0,0,1,1])
-    imagesc(x/(sqrt(2)*InitialWaist),x/(sqrt(2)*InitialWaist),abs(g).^2)
-    axis off
+    imagesc(x,x,abs(g).^2)
     colormap(mapgreen)
     set(gca,'YDir','normal')
     axis square
@@ -171,10 +175,10 @@ for ii = 2:length(z) % propagation with respect to z
     hold on
     % propagated points of H1 and H2
     for jj=1:pn
-        plot(rayH1(jj).xCoordinate(ii-1)/(sqrt(2)*InitialWaist),...
-             rayH1(jj).yCoordinate(ii-1)/(sqrt(2)*InitialWaist),'.','MarkerSize',20,'LineWidth',2,'color','r')
-        plot(rayH2(jj).xCoordinate(ii-1)/(sqrt(2)*InitialWaist),...
-             rayH2(jj).yCoordinate(ii-1)/(sqrt(2)*InitialWaist),'.','MarkerSize',20,'LineWidth',2,'color','y')
+        plot(rayH1(jj).xCoordinate(ii-1),...
+             rayH1(jj).yCoordinate(ii-1),'.','MarkerSize',20,'LineWidth',2,'color','r')
+        plot(rayH2(jj).xCoordinate(ii-1),...
+             rayH2(jj).yCoordinate(ii-1),'.','MarkerSize',20,'LineWidth',2,'color','y')
     end
    hold off
    pause(1)
