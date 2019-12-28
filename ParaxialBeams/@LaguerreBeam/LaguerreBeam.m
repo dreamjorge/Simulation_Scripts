@@ -32,7 +32,7 @@ classdef LaguerreBeam <  GaussianBeam & LaguerreParameters
     function Laguerre = LaguerreBeam(x,y,PropagationDistance,InitialWaist,Wavelength,nu,mu)
       
       Laguerre@GaussianBeam(x,y,PropagationDistance,InitialWaist,Wavelength); 
-      Laguerre@LaguerreParameters(PropagationDistance,InitialWaist,Wavelength,nu,mu)
+      Laguerre@LaguerreParameters(PropagationDistance,InitialWaist,Wavelength,nu,mu);
 
    
       [Laguerre.ThetaCoordinate,Laguerre.RadialCoordinate] = cart2pol(x,y);
