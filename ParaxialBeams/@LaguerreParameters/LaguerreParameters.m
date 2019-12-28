@@ -39,7 +39,7 @@ classdef LaguerreParameters < GaussianParameters
   methods
     
     function PhiPhase = get.PhiPhase(obj) 
-      PhiPhase = (abs(obj.l)+2*obj.p).*obj.GouyPhase;
+      PhiPhase = obj.GouyPhase;...(abs(obj.l)+2*(obj.p)-1).*obj.GouyPhase;
     end
 
     function LaguerreWaist = get.LaguerreWaist(obj)

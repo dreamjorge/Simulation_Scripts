@@ -28,7 +28,7 @@ LaguerreInitialWaist = LP.LaguerreWaist;
 %First we estimate sampling in z-direction with propagation distance 
 % z-direction
 Dz = LP.RayleighDistance;    % z-window (propagation distance)
-Nz = 2^8;                    % number of points in z-direction
+Nz = 2^6;                    % number of points in z-direction
 dz = Dz/Nz;                  % Resolution in z
 z  = 0:dz:Dz;                % z-vector z of propagation 
 
@@ -230,6 +230,15 @@ for ii = 2:length(z) % propagation with respect to z
     %saving transversal fields
     gx(:,ii)=g(N/2+1,:);
     gy(:,ii)=g(:,N/2+1);
+    
+    figure(9)
+    H1=XLaguerreBeam(X,X',zi,InitialWaist,Wavelength,nu,mu);
+    imagesc(angle(H1.OpticalField))
+    
+    figure(10)
+    H2=HankelLaguerre(X,X',zi,InitialWaist,Wavelength,nu,mu,2);
+    imagesc(angle(H2.OpticalField))
+%     
 %     
 end
 
