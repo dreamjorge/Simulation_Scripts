@@ -29,7 +29,7 @@ classdef HankelLaguerre... < LaguerreBeam & XLaguerreBeam
       
       LB  = LaguerreBeam(rCoordinate,thetaCoordinate,PropagationDistance,InitialWaist,Wavelength,nu,mu);
       XLB = XLaguerreBeam(rCoordinate,thetaCoordinate,PropagationDistance,InitialWaist,Wavelength,nu,mu);
-      
+       
       if nh == 1
         Hankel.OpticalField = LB.OpticalField + 1i*XLB.OpticalField;
       elseif nh == 2

@@ -1,6 +1,6 @@
-function [rayObject] = getLaguerreSlopes(rayObject,x,y,z,...
-                                         dx,dy,dz,...
-                                         xi,yi,zi,...
+function [rayObject] = getLaguerreSlopes(rayObject,r,th,z,...
+                                         dr,dth,dz,...
+                                         ri,thi,zi,...
                                          InitialWaist,Wavelength,nu,mu,numberHankel)
                                        
 % This function estimates components (x,y,z) of a ray object and its slopes
@@ -15,24 +15,24 @@ function [rayObject] = getLaguerreSlopes(rayObject,x,y,z,...
 %                                           xi,yi,zi,...
 %                                           InitialWaist,Wavelength,nu,mu,numberHankel)
                                                  
-  %y = cte, z = cte
-  HLx = HankelLaguerre(x,yi,zi,InitialWaist,Wavelength,nu,mu,numberHankel);
+  %th = cte, z = cte
+  HLr = HankelLaguerre(r,thi,zi,InitialWaist,Wavelength,nu,mu,numberHankel);
   
   %x = cte, z = cte
-  HLy = HankelLaguerre(xi,y,zi,InitialWaist,Wavelength,nu,mu,numberHankel);
+  HLth = HankelLaguerre(ri,th,zi,InitialWaist,Wavelength,nu,mu,numberHankel);
 
   %x = cte, y = cte
-  HLz = HankelLaguerre(xi,yi,z,InitialWaist,Wavelength,nu,mu,numberHankel);
+  HLz = HankelLaguerre(ri,thi,z,InitialWaist,Wavelength,nu,mu,numberHankel);
 
-  fx  = unwrap(angle(HLx.OpticalField));
-  fy  = unwrap(angle(HLy.OpticalField));
-  fz  = unwrap(angle(HLz.OpticalField));
+  fr   = unwrap(angle(HLr.OpticalField));
+  fth  = unwrap(angle(HLth.OpticalField));
+  fz   = unwrap(angle(HLz.OpticalField));
 
   %Estimate k with wavelength
   k   = (2*pi)/Wavelength;
   
   %Calculating gradient for slopes of vector normal
-  [rayObject.zxSlope, rayObject.zySlope, rayObject.xySlope] = ...
-   gradientxyz(fx,fy,fz,k,dx,dy,dz,xi,yi,zi);
+  [rayObject.zrSlope, rayObject.zthSlope, rayObject.rthSlope] = ...
+   gradientCylindrical(fr,fth,fz,k,dr,dth,dz,ri,thi,zi);
 
 end

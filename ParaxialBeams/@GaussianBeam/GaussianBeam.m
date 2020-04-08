@@ -10,20 +10,20 @@ classdef GaussianBeam < GaussianParameters
   
   methods
     
-    function beam = GaussianBeam(x,y,PropagationDistance,InitialWaist,Wavelength)
+    function beam = GaussianBeam(r,PropagationDistance,InitialWaist,Wavelength)
 
       ...
-      if nargin == 5     
+      if nargin == 4     
          super_args{1} = PropagationDistance;
          super_args{2} = InitialWaist;
          super_args{3} = Wavelength;
-      else
+      else 
          error('You need introduce x, y, PropagationDistance, InitialWaist and Wavelength inputs')
       end 
        beam@GaussianParameters(super_args{:});
        
-       beam.OpticalField = beam.Amplitude.*exp(-(x.^2+y.^2)./(beam.Waist.^2))...
-                         .*exp(-1i*beam.k*(x.^2+y.^2)./(2*beam.Radius))...
+       beam.OpticalField = beam.Amplitude.*exp(-(r.^2)./(beam.Waist.^2))...
+                         .*exp(-1i*beam.k*(r.^2)./(2*beam.Radius))...
                          .*exp(1i*beam.GouyPhase)...
                          .*exp(1i*beam.k*PropagationDistance);
        
