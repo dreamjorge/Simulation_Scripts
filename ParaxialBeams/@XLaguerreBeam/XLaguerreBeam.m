@@ -5,8 +5,8 @@ classdef XLaguerreBeam < GaussianBeam & LaguerreParameters
   end
   
   properties (Hidden)
-    RadialCoordinate
-    ThetaCoordinate
+%     RadialCoordinate
+%     ThetaCoordinate
     Normalization
   end
   
@@ -26,25 +26,23 @@ classdef XLaguerreBeam < GaussianBeam & LaguerreParameters
     end
 
     
-    function XLaguerre = XLaguerreBeam(x,y,PropagationDistance, InitialWaist,Wavelength,nu,mu)
+    function XLaguerre = XLaguerreBeam(rCoordinate,thetaCoordinate,zCoordinate, InitialWaist,Wavelength,nu,mu)
       
       
-      XLaguerre@GaussianBeam(x,y,PropagationDistance, InitialWaist,Wavelength); 
-      XLaguerre@LaguerreParameters(PropagationDistance,InitialWaist,Wavelength,nu,mu);
+      XLaguerre@GaussianBeam(rCoordinate,zCoordinate,InitialWaist,Wavelength); 
+      XLaguerre@LaguerreParameters(zCoordinate,InitialWaist,Wavelength,nu,mu);
 
-      [XLaguerre.ThetaCoordinate,XLaguerre.RadialCoordinate] = cart2pol(x,y);
-      
+%       [XLaguerre.ThetaCoordinate,XLaguerre.RadialCoordinate] = cart2pol(x,y);
+%       
       %% Optical Field
       XLaguerre.OpticalField =... XLaguerre.Normalization.*...
                               ...XLaguerre.XLaguerreAmplitude.*... 
-                              exp(1i*XLaguerre.PhiPhase).*exp(-1i*abs(mu)*XLaguerre.ThetaCoordinate).*...
-                              XLaguerreBeam.XAssociatedLaguerrePolynomial(nu,abs(mu),(2*XLaguerre.RadialCoordinate.^2)./XLaguerre.Waist.^2).*...
+                              exp(1i*XLaguerre.PhiPhase).*exp(-1i*abs(mu)*thetaCoordinate).*...
+                              XLaguerreBeam.XAssociatedLaguerrePolynomial(nu,abs(mu),(2*rCoordinate.^2)./XLaguerre.Waist.^2).*...
                               XLaguerre.OpticalField;
     end
   end
   
-  
-  
-  
+
   
 end

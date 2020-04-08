@@ -10,8 +10,8 @@ classdef LaguerreBeam <  GaussianBeam & LaguerreParameters
   end
   
   properties (Hidden)
-    RadialCoordinate
-    ThetaCoordinate
+%     RadialCoordinate
+%     ThetaCoordinate
     Normalization
   end
   
@@ -29,19 +29,18 @@ classdef LaguerreBeam <  GaussianBeam & LaguerreParameters
       Normalization =  sqrt(2*factorial(obj.p)/(pi*factorial(obj.p+abs(obj.l))));
     end
 
-    function Laguerre = LaguerreBeam(x,y,PropagationDistance,InitialWaist,Wavelength,nu,mu)
+    function Laguerre = LaguerreBeam(rCoordintate,thetaCoordintate,zCoordinate,InitialWaist,Wavelength,nu,mu)
       
-      Laguerre@GaussianBeam(x,y,PropagationDistance,InitialWaist,Wavelength); 
-      Laguerre@LaguerreParameters(PropagationDistance,InitialWaist,Wavelength,nu,mu);
+      Laguerre@GaussianBeam(rCoordintate,zCoordinate,InitialWaist,Wavelength); 
+      Laguerre@LaguerreParameters(zCoordinate,InitialWaist,Wavelength,nu,mu);
 
-   
-      [Laguerre.ThetaCoordinate,Laguerre.RadialCoordinate] = cart2pol(x,y);
+      %[Laguerre.ThetaCoordinate,Laguerre.RadialCoordinate] = cart2pol(x,y);
       
       %% Optical Field
       Laguerre.OpticalField = ...Laguerre.Normalization.*...
                               ...Laguerre.LaguerreAmplitude.*... 
-                              exp(1i*Laguerre.PhiPhase).*exp(-1i*abs(mu)*Laguerre.ThetaCoordinate).*...
-                              LaguerreBeam.AssociatedLaguerrePolynomial(nu,abs(mu),(2*Laguerre.RadialCoordinate.^2)./Laguerre.Waist.^2).*...
+                              exp(1i*Laguerre.PhiPhase).*exp(-1i*abs(mu)*thetaCoordintate).*...
+                              LaguerreBeam.AssociatedLaguerrePolynomial(nu,abs(mu),(2*rCoordintate.^2)./Laguerre.Waist.^2).*...
                               Laguerre.OpticalField;
     end
   end
