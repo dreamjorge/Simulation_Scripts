@@ -50,6 +50,9 @@ y   = x;                     % same for y
 [thetaCoordinate,rCoordinate] = cart2pol(x,x');
 [ThetaCoordinate,RCoordinate] = cart2pol(X,X');
 
+%diferential vector in cylindrical coordinates
+difr = [dx,dx,dz];
+
 % Last we estimate vectors of frequency for Fourier Transforms associated
 % with x,y
 
@@ -115,12 +118,13 @@ rObst       = zeros(1,pn);
 rAcum       = zeros(1,pn);
 rTempPrev   = zeros(1,pn);
 rTempActual = zeros(1,pn);
-
+rayTemp     = OpticalRay;
 
 for jj = 1:pn
     % Cartersian coordinates of point in circunference of obstruction
     xi = xt+lo*cos(jj*(2*pi)/(pn)); 
     yi = yt+lo*sin(jj*(2*pi)/(pn));
+    zi = 0;
     %estimate radii of point (x,y) to origin
     [thi,ri] = cart2pol(xi,yi);
   
@@ -130,22 +134,28 @@ for jj = 1:pn
     % saving cartesian coordinates of point in circunference in each ray
     rayH1(jj).xCoordinate(1)     = xi; 
     rayH1(jj).yCoordinate(1)     = yi;
+    rayH1(jj).zCoordinate(1)     = zi;
     rayH2(jj).xCoordinate(1)     = xi; 
     rayH2(jj).yCoordinate(1)     = yi;
+    rayH2(jj).zCoordinate(1)     = zi;
     rayH1(jj).thetaCoordinate(1) = ri;
-    rayH1(jj).rCoordinate(1)      = thi;
+    rayH1(jj).rCoordinate(1)     = thi;
     rayH2(jj).thetaCoordinate(1) = ri;
-    rayH2(jj).rCoordinate(1)      = thi;    
+    rayH2(jj).rCoordinate(1)     = thi;    
+    
+    rayTemp.xCoordinate          = xi;
+    rayTemp.yCoordinate          = yi;
+    rayTemp.zCoordinate          = zi;
+    rayTemp.rCoordinate          = ri;
+    rayTemp.thetaCoordinate      = thi;
     
     HankelType  = 1;
-    [rayH1(jj)] = HankelLaguerre.getLaguerreSlopes(rayH1(jj),rCoordinate,thetaCoordinate,z,...
-                                                   dr,dth,dz,...
-                                                   ri,thi,0,...
+    [rayH1(jj)] = HankelLaguerre.getLaguerreSlopes(rayTemp,rCoordinate,thetaCoordinate,z,...
+                                                   difr,...
                                                    InitialWaist,Wavelength,nu,mu,HankelType);
     HankelType  = 2;
-    [rayH2(jj)] = HankelLaguerre.getLaguerreSlopes(rayH1(jj),rCoordinate,thetaCoordinate,z,...
-                                                   dr,dth,dz,...
-                                                   ri,thi,0,...
+    [rayH2(jj)] = HankelLaguerre.getLaguerreSlopes(rayTemp,rCoordinate,thetaCoordinate,z,...
+                                                   difr,...
                                                    InitialWaist,Wavelength,nu,mu,HankelType);
 end
 
@@ -185,10 +195,7 @@ gy(:,1) = g(:,N/2+1);
 
 for ii = 2:length(z) % propagation with respect to z
   
-    %propagation distance 
-    zi          = z(ii);
     % field before propagation i.e in z(ii-1)
-    
     pxyz         = g(1,1);
     g(1,1)       = pxy;
     fig          = figure(6);
@@ -215,53 +222,47 @@ for ii = 2:length(z) % propagation with respect to z
     %------------------------ Calculating Rays ---------------------------%   
     % Given z we find z+dz and new position x+dx and y+dy with help of
      % slopes
-
+     
+    %propagation distance 
+    zi          = z(ii);
     for jj = 1:pn
         % step of ray in z-direction, equation or ray r(z) = mrz*dz+r(z-1)
         % dependece of last point, new vector
  
-        rayH1(jj).thetaCoordinate(ii) = rayH1(jj).thetaCoordinate(ii-1) + (1./rayH1(jj).zthSlope)*dz;
-        rayH1(jj).rCoordinate(ii)     = rayH1(jj).rCoordinate(ii-1)     + (1./rayH1(jj).zrSlope)*dz;
+        rayH1(jj).xCoordinate(ii) = rayH1(jj).xCoordinate(ii-1) + (1./rayH1(jj).zxSlope)*dz;
+        rayH1(jj).yCoordinate(ii) = rayH1(jj).yCoordinate(ii-1) + (1./rayH1(jj).zySlope)*dz;
 
-        rayH2(jj).thetaCoordinate(ii) = rayH2(jj).thetaCoordinate(ii-1) + (1./rayH1(jj).zthSlope)*dz;
-        rayH2(jj).rCoordinate(ii)     = rayH2(jj).rCoordinate(ii-1)     + (1./rayH1(jj).zrSlope)*dz;        
+        rayH2(jj).xCoordinate(ii) = rayH2(jj).xCoordinate(ii-1) + (1./rayH1(jj).zxSlope)*dz;
+        rayH2(jj).yCoordinate(ii) = rayH2(jj).yCoordinate(ii-1) + (1./rayH1(jj).zySlope)*dz;        
         
-%         rayH1(jj).xCoordinate(ii) = rayH1(jj).xCoordinate(ii-1) + (1./rayH1(jj).zxSlope)*dz;
-%         rayH1(jj).yCoordinate(ii) = rayH1(jj).yCoordinate(ii-1) + (1./rayH1(jj).zySlope)*dz;
-%       
-%         rayH2(jj).xCoordinate(ii) = rayH2(jj).xCoordinate(ii-1) + (1./rayH2(jj).zxSlope)*dz;
-%         rayH2(jj).yCoordinate(ii) = rayH2(jj).yCoordinate(ii-1) + (1./rayH2(jj).zySlope)*dz;
-  
-        % ------------------ Calculating Slopes ------------------------- %
-        % point for H1 in cartesin coordinates
-%         xi          = rayH1(jj).xCoordinate(ii);
-%         yi          = rayH1(jj).yCoordinate(ii);
-
-%         [thi,ri]    = car2pol(xi,yi);
-%         
-         ri      = rayH1(jj).rCoordinate(ii);
-         thi     = rayH1(jj).thetaCoordinate(ii);
-        [rayH1(jj).xCoordinate(ii),rayH1(jj).yCoordinate(ii)] = pol2cart(thi,ri);
+        xi = rayH1(jj).xCoordinate(ii);
+        yi = rayH1(jj).yCoordinate(ii);
+        
+        [thi,ri] = cart2pol(xi,yi);
+        rayTemp.rCoordinate     = ri;
+        rayTemp.thetaCoordinate = thi;        
+        raytemp.zCoordinate     = zi;
         
         HankelType  = 1;
+        [rayH1(jj)] = HankelLaguerre.getLaguerreSlopes(rayTemp,...
+                                                       rCoordinate,thetaCoordinate,z,...
+                                                       difr,...
+                                                       InitialWaist,Wavelength,nu,mu,HankelType); 
+                                                     
+        rayH1(jj).zxSlope = rayTemp.zxSlope;
+        rayH1(jj).zySlope = rayTemp.zySlope; 
         
-        [rayH1(jj)] = HankelLaguerre.getLaguerreSlopes(rayH1(jj),rCoordinate,thetaCoordinate,z,...
-                                                       dr,dth,dz,...
-                                                       ri,thi,zi,...
-                                                       InitialWaist,Wavelength,nu,mu,HankelType);
-
-        % point of H2
         
-%         xi          = rayH2(jj).xCoordinate(ii);
-%         yi          = rayH2(jj).yCoordinate(ii);
-%         zi          = z(ii); 
-%         [thi,ri]    = car2pol(xi,yi);
-
-        ri      = rayH2(jj).rCoordinate(ii);
-        thi     = rayH2(jj).thetaCoordinate(ii);
-        [rayH2(jj).xCoordinate(ii),rayH2(jj).yCoordinate(ii)] = pol2cart(thi,ri);
+        xi = rayH1(jj).xCoordinate(ii);
+        yi = rayH1(jj).yCoordinate(ii);
+        
+        [thi,ri] = cart2pol(xi,yi);
+        rayTemp.rCoordinate     = ri;
+        rayTemp.thetaCoordinate = thi;        
+        raytemp.zCoordinate     = zi;
         
 
+        
         %----------condition for cross around origin
         rTempActual(jj) = ri;
         drTemp          = abs( rTempPrev(jj) - rTempActual(jj) );
@@ -270,16 +271,16 @@ for ii = 2:length(z) % propagation with respect to z
         if ( rAcum(jj)<rObst(jj) )
           
           HankelType  = 2;
-          [rayH2(jj)] = HankelLaguerre.getLaguerreSlopes(rayH2(jj),rCoordinate,thetaCoordinate,z,...
-                                                         dr,dth,dz,...
-                                                         ri,thi,zi,...
+          [rayH2(jj)] = HankelLaguerre.getLaguerreSlopes(rayH2(jj),...
+                                                         rCoordinate,thetaCoordinate,z,...
+                                                         difr,...
                                                          InitialWaist,Wavelength,nu,mu,HankelType);
-        else
+        else % change to H1
            
           HankelType  = 1;
-          [rayH2(jj)] = HankelLaguerre.getLaguerreSlopes(rayH2(jj),rCoordinate,thetaCoordinate,z,...
-                                                         dr,dth,dz,...
-                                                         ri,thi,zi,...
+          [rayH2(jj)] = HankelLaguerre.getLaguerreSlopes(rayH2(jj),...
+                                                         rCoordinate,thetaCoordinate,z,...
+                                                         difr,...
                                                          InitialWaist,Wavelength,nu,mu,HankelType);                                    
         end
         

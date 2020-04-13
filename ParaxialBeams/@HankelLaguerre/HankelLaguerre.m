@@ -10,9 +10,9 @@ classdef HankelLaguerre... < LaguerreBeam & XLaguerreBeam
 %   end
 % %   
   methods(Static)
-    [ray] = getLaguerreSlopes(ray,x,y,z,...
-                              dx,dy,dz,...
-                              xi,yi,zi,...
+    [ray] = getLaguerreSlopes(ray,...
+                              x,y,z,...
+                              dr,...
                               InitialWaist,Wavelength,nu,mu,nh)
   end
 %   
@@ -29,7 +29,7 @@ classdef HankelLaguerre... < LaguerreBeam & XLaguerreBeam
       
       LB  = LaguerreBeam(rCoordinate,thetaCoordinate,PropagationDistance,InitialWaist,Wavelength,nu,mu);
       XLB = XLaguerreBeam(rCoordinate,thetaCoordinate,PropagationDistance,InitialWaist,Wavelength,nu,mu);
-      
+       
       if nh == 1
         Hankel.OpticalField = LB.OpticalField + 1i*XLB.OpticalField;
       elseif nh == 2
