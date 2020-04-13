@@ -1,7 +1,7 @@
 function [Slopes] = getLaguerreSlopes(rayObject,...
                                       r,th,z,...
                                       dr,...
-                                      LaguerreParameters,numberHankel)
+                                      LaguerreParameters,nu,mu,numberHankel)
                                        
 % This function estimates components (x,y,z) of a ray object and its slopes
 % for next iteration.
@@ -26,15 +26,15 @@ function [Slopes] = getLaguerreSlopes(rayObject,...
   
   %vriable
   
-  HLx     = HankelLaguerre(sqrt(x.^2 + yi.^2),atan2(yi,x) ,zi,LaguerreParameters.InitialWaist,LaguerreParameters.Wavelength,LaguerreParameters.l,LaguerreParameters.p,numberHankel);
-  HLy     = HankelLaguerre(sqrt(xi.^2+ y.^2) ,atan2(y,xi) ,zi,LaguerreParameters.InitialWaist,LaguerreParameters.Wavelength,LaguerreParameters.l,LaguerreParameters.p,numberHankel);
-  HLz     = HankelLaguerre(sqrt(xi.^2+ yi.^2),atan2(yi,xi),z ,LaguerreParameters.InitialWaist,LaguerreParameters.Wavelength,LaguerreParameters.l,LaguerreParameters.p,numberHankel);
+  HLx     = HankelLaguerre(sqrt(x.^2 + yi.^2),atan2(yi,x) ,zi,InitialWaist,Wavelength,nu,mu,numberHankel);
+  HLy     = HankelLaguerre(sqrt(xi.^2+ y.^2) ,atan2(y,xi) ,zi,InitialWaist,Wavelength,nu,mu,numberHankel);
+  HLz     = HankelLaguerre(sqrt(xi.^2+ yi.^2),atan2(yi,xi),z ,InitialWaist,Wavelength,nu,mu,numberHankel);
   
   fx      = unwrap(angle(HLx.OpticalField));
   fy      = unwrap(angle(HLy.OpticalField));
   fz      = unwrap(angle(HLz.OpticalField));
 
-  k   = (2*pi)/LaguerreParameters.Wavelength;
+  k   = (2*pi)/Wavelength;
   
   [Slopes] = gradientxyz(fx,fy,fz,k,dr,rayObject);
   
