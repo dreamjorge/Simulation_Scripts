@@ -1,4 +1,5 @@
 %% add path for classes and functions
+
 addpath ParaxialBeams
 addpath ParaxialBeams\Addons
 mapgreen = AdvancedColormap('kgg',256,[0 100 255]/255);  %color of beam
@@ -43,13 +44,14 @@ hold off
 
 MaxWaist = GaussianParameters.waistFunction(z(end),InitialWaist,GaussianBeamParameters.RayleighDistance);
 
-N   = 2^10;                  % Number of points in x,y axis
-n   = -N/2+.05:N/2-1+.05;    % vector with N-points with resolution 1
-Dx  = (1.2)*2*MaxWaist;     % Size of window 
-dx  = Dx/N;                  % Resolution
-x   = n*dx;                  % Vector with dimentions
-y   = x;
-[X] = meshgrid(x,y);
+N     = 2^10;                  % Number of points in x,y axis
+n     = -N/2+.05:N/2-1+.05;    % vector with N-points with resolution 1
+Dx    = (1.2)*2*MaxWaist;     % Size of window 
+dx    = Dx/N;                  % Resolution
+x     = n*dx;                  % Vector with dimentions
+y     = x;
+[X]   = meshgrid(x,y);
+[~,R] = cart2pol(X,X');
 
 %Last we estimate vectors of frequency for Fourier Transforms associated
 %with x,y
@@ -61,10 +63,11 @@ u    = n*du;                 % Vector with dimentions
 %kx,ky vectors
 kx   = 2*pi*u;
 [Kx] = meshgrid(kx);
-
-
 %% ------------------------ Gaussian Beam in z = 0 ---------------------- %%
-GB  = GaussianBeam(X,X',0,InitialWaist,Wavelength);
+
+
+GaussianBeamParameters = GaussianParameters(0,InitialWaist,Wavelength);
+GB  = GaussianBeam(R,GaussianBeamParameters);
 
 % Plot of Field
 figure(2)

@@ -1,8 +1,8 @@
-classdef HankelLaguerre 
+classdef HankelLaguerre < ...LaguerreBeam ...& XLaguerreBeam
   
   properties   
     HankelType    % hankel type (1,2)
-    OpticalField  % Optical field
+    %%OpticalField  % Optical field
   end
     
   methods(Static)

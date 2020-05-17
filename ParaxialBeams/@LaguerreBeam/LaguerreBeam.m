@@ -1,4 +1,4 @@
-classdef LaguerreBeam <  GaussianBeam & LaguerreParameters
+classdef LaguerreBeam < GaussianBeam & LaguerreParameters
   % Laguerre Gaussian Beam is a scalar optical field with its parameters defined in
   % properties.
   % Example:
@@ -29,18 +29,26 @@ classdef LaguerreBeam <  GaussianBeam & LaguerreParameters
       Normalization =  sqrt(2*factorial(obj.p)/(pi*factorial(obj.p+abs(obj.l))));
     end
 
-    function Laguerre = LaguerreBeam(rCoordintate,thetaCoordintate,zCoordinate,InitialWaist,Wavelength,nu,mu)
+    function Laguerre = LaguerreBeam(rCoordinate,thetaCoordinate,LaguerreParameters)
       
-      Laguerre@GaussianBeam(rCoordintate,zCoordinate,InitialWaist,Wavelength); 
-      Laguerre@LaguerreParameters(zCoordinate,InitialWaist,Wavelength,nu,mu);
+      Laguerre@LaguerreParameters(LaguerreParameters.zCoordinate...
+                                 ,LaguerreParameters.InitialWaist...
+                                 ,LaguerreParameters.Wavelength...
+                                 ,LaguerreParameters.l...
+                                 ,LaguerreParameters.p);
+      
+      Laguerre@GaussianBeam(rCoordinate,LaguerreParameters); 
 
-      %[Laguerre.ThetaCoordinate,Laguerre.RadialCoordinate] = cart2pol(x,y);
-      
       %% Optical Field
+      PhiPhase =  LaguerreParameters.PhiPhase;
+      l       =  LaguerreParameters.p;
+      p       =  LaguerreParameters.l;
+      waist    =  LaguerreParameters.Waist;
+      
       Laguerre.OpticalField = ...Laguerre.Normalization.*...
                               ...Laguerre.LaguerreAmplitude.*... 
-                              exp(1i*Laguerre.PhiPhase).*exp(-1i*abs(mu)*thetaCoordintate).*...
-                              LaguerreBeam.AssociatedLaguerrePolynomial(nu,abs(mu),(2*rCoordintate.^2)./Laguerre.Waist.^2).*...
+                              exp(1i*PhiPhase).*exp(-1i*abs(p)*thetaCoordinate).*...
+                              LaguerreBeam.AssociatedLaguerrePolynomial(l,abs(p),(2*rCoordinate.^2)./(waist.^2)).*...
                               Laguerre.OpticalField;
     end
   end
