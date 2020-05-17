@@ -10,22 +10,31 @@ classdef GaussianBeam < GaussianParameters
   
   methods
     
-    function beam = GaussianBeam(r,PropagationDistance,InitialWaist,Wavelength)
+     function cpObj = copyElement(obj)
+         % Copy super_prop
+         cpObj = copyElement@GaussianParameters(obj);
+         % Copy sub_prop1 in subclass
 
+      end
+    
+    function beam = GaussianBeam(r,gaussianParameters)
+
+      %copying gaussian parameters to beam class
+      beam@GaussianParameters(gaussianParameters.zCoordinate...
+                             ,gaussianParameters.InitialWaist...
+                             ,gaussianParameters.Wavelength);
       ...
-      if nargin == 4     
-         super_args{1} = PropagationDistance;
-         super_args{2} = InitialWaist;
-         super_args{3} = Wavelength;
+      if nargin == 2     
+
       else 
-         error('You need introduce x, y, PropagationDistance, InitialWaist and Wavelength inputs')
+         error('You need introduce r (value,vector or matrix), and gaussianParameters obect as inputs')
       end 
-       beam@GaussianParameters(super_args{:});
        
+       % Gaussian beam
        beam.OpticalField = beam.Amplitude.*exp(-(r.^2)./(beam.Waist.^2))...
                          .*exp(-1i*beam.k*(r.^2)./(2*beam.Radius))...
                          .*exp(1i*beam.GouyPhase)...
-                         .*exp(1i*beam.k*PropagationDistance);
+                         .*exp(1i*beam.k*beam.zCoordinate);
        
     end
     

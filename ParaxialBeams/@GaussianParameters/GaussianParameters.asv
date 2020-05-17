@@ -19,17 +19,17 @@ classdef GaussianParameters <  handle
   properties
     zCoordinate    % z-coordinate (or distance of propagation)
     InitialWaist   % initial wasit of Gaussian Beam
-    Wavelength     % wavelength of Gaussian Beam
+    Wavelength     % wavelength of 
   end
   
   properties (Dependent)
-    RayleighDistance % RayleighDistance.
-    k                % k-number.
-    Waist            % Waist of Gaussian Beam at zCoordinate.
-    Radius           % Radius of Gaussian Beam at zCoordinate.
-    GouyPhase        % GouyPhace of Gaussian Beam at zCoordinate.
-    Amplitude        % Amplitude of Gaussian Beam at zCoordinate.
-    DivergenceAngle  % Angle of Divergence of Gaussian Beam
+    RayleighDistance
+    k
+    Waist
+    Radius
+    GouyPhase
+    Amplitude
+    DivergenceAngle
   end
 
   
