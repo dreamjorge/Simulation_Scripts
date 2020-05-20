@@ -1,4 +1,4 @@
-classdef GaussianParameters <  handle
+classdef GaussianParameters <  handle & matlab.mixin.Copyable
 % This class gives Gaussian parameters of Gaussian Beam
 % recives zCoordinate,InitialWaist,Wavelength as input and
 % gives a object with next properties:
@@ -17,41 +17,51 @@ classdef GaussianParameters <  handle
 % Example: Parameters = GaussianParameters(zCoordinate,InitialWaist,Wavelength)
 
   properties
-    zCoordinate    % z-coordinate (or distance of propagation)
-    InitialWaist   % initial wasit of Gaussian Beam
-    Wavelength     % wavelength of 
+    zCoordinate      % z-coordinate (or distance of propagation)
+    InitialWaist     % initial wasit of Gaussian Beam
+    Wavelength       % wavelength of Gaussian Beam
   end
   
   properties (Dependent)
-    RayleighDistance
-    k
-    Waist
-    Radius
-    GouyPhase
-    Amplitude
-    DivergenceAngle
+    RayleighDistance % RayleighDistance.
+    k                % k-number.
+    Waist            % Waist of Gaussian Beam at zCoordinate.
+    Radius           % Radius of Gaussian Beam at zCoordinate.
+    GouyPhase        % GouyPhace of Gaussian Beam at zCoordinate.
+    Amplitude        % Amplitude of Gaussian Beam at zCoordinate.
+    DivergenceAngle  % Angle of Divergence of Gaussian Beam
   end
 
   
   methods(Static)
 %     
-        Waist  = waistFunction(zCoordinate,...
-                               InitialWaist,...
-                               RayleighDistance);
-                                    
-        Phase  = phaseFunction(zCoordinate,...
-                               RayleighDistance);
-                                         
-        Radius = radiusFunction(zCoordinate,...
-                                RayleighDistance);
+    Waist  = waistFunction(zCoordinate,...
+                           InitialWaist,...
+                           RayleighDistance);
+
+    Phase  = phaseFunction(zCoordinate,...
+                           RayleighDistance);
+
+    Radius = radiusFunction(zCoordinate,...
+                            RayleighDistance);
 
   end
-  
-  
-  methods
+  methods 
     
-  %% Constructor
-     function Parameters = GaussianParameters(zCoordinate,InitialWaist,Wavelength)
+    function output = copyObject(obj, output)
+      %%
+       C = metaclass(obj);
+       P = C.Properties;
+       for k = 1:length(P)
+         if ~P{k}.Dependent
+           output.(P{k}.Name) = obj.(P{k}.Name);
+         end
+       end
+     end
+
+
+    function Parameters = GaussianParameters(zCoordinate,InitialWaist,Wavelength)
+     % Constructor of Gaussian Beam   
       if nargin == 3 
         Parameters.zCoordinate         = zCoordinate;
         Parameters.InitialWaist        = InitialWaist;
@@ -60,17 +70,14 @@ classdef GaussianParameters <  handle
          error('You need introduce zCoordinate, InitialWaist and Wavelength inputs')
       end
     end
-
-    
-
     %% Error for dependent properties
     
-    function obj = set.RayleighDistance(obj,~)
+    function [] = set.RayleighDistance(obj,~)
       fprintf('%s%d\n','RayleighDistance is: ',obj.RayleighDistance)
       error('You cannot set RayleighDistance property'); 
     end 
    
-    function obj = set.k(obj,~)
+    function [] = set.k(obj,~)
       fprintf('%s%d\n','k is: ',obj.k)
       error('You cannot set k property'); 
     end 

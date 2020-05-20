@@ -6,6 +6,10 @@ classdef LaguerreBeam <  matlab.mixin.Copyable & handle & LaguerreParameters & G
   % LB = LaguerreBeam(rCoordinate,thetaCoordinate,LaguerreParameters);
   % where PropagationDistance,rCoordinate,rCoordinate can be scalar, vector or matrix.  
 
+  properties
+
+  end
+ 
   properties (Dependent)
     %% Properties dependient of Laguerre Gauss Beam
     LaguerreAmplitude     % Laguerre Gauss factor for Amplitude
@@ -13,7 +17,7 @@ classdef LaguerreBeam <  matlab.mixin.Copyable & handle & LaguerreParameters & G
   end
   
   properties
-    %% Properties independent of Laguerre Gauss Beam
+    %% IndepenProperties of Laguerre Gauss Beam
     thetaCoordinate       % Azimutal coordinate in Cylindrical Coordinates
     Normalization         % Normalization Factor 
   end
@@ -25,6 +29,7 @@ classdef LaguerreBeam <  matlab.mixin.Copyable & handle & LaguerreParameters & G
   
   methods
     
+
     function LaguerreAmplitude = get.LaguerreAmplitude(obj)
       %% Factor of Amplitude for Laguerre Gauss Beam
       LaguerreAmplitude = 1;...(1./obj.Waist).*((sqrt(2)*(obj.RadialCoordinate))./obj.Waist).^abs(obj.p);%obj.l);
@@ -70,7 +75,6 @@ classdef LaguerreBeam <  matlab.mixin.Copyable & handle & LaguerreParameters & G
     end
     
     function [] =set.OpticalFieldLaguerre(~,~)
-      %% Block OpticalFieldLaguerre as input in Lagurre Gauss Beam
        error('You cannot set OpticalField property'); 
     end
   end

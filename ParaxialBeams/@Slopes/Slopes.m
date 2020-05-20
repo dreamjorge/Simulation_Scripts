@@ -6,6 +6,10 @@ classdef Slopes
     zy
     xy
     
+    zr
+    zth
+    rth
+    
   end
   
   

@@ -53,9 +53,9 @@ function [Slopes] = getLaguerreSlopes(rayObject,...
   
   HLz     = HankelLaguerre(ri                ,thi         ,LPz ,numberHankel);
   
-  fx      = unwrap(angle(HLx.OpticalField));
-  fy      = unwrap(angle(HLy.OpticalField));
-  fz      = unwrap(angle(HLz.OpticalField));
+  fx      = unwrap(angle(HLx.OpticalFieldLaguerre));
+  fy      = unwrap(angle(HLy.OpticalFieldLaguerre));
+  fz      = unwrap(angle(HLz.OpticalFieldLaguerre));
 
  
   [Slopes] = gradientxyz(fx,fy,fz,k,dr,rayObject);
