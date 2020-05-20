@@ -1,4 +1,4 @@
-classdef LaguerreParameters < GaussianParameters
+classdef LaguerreParameters < GaussianParameters & handle & matlab.mixin.Copyable
 % LaguerreParameters class gives Laguerre parameters of Laguerre Gaussian Beam
 % recives zCoordinate,InitialWaist,Wavelength,l,p as input and
 % gives a object with next properties:
@@ -18,6 +18,7 @@ classdef LaguerreParameters < GaussianParameters
 % -Amplitude
 % -DivergenceAngle
 % 
+
 % Example: Parameters = LaguerreParameters(zCoordinate...
 %                                         ,InitialWaist...
 %                                         ,Wavelength)
@@ -33,23 +34,22 @@ classdef LaguerreParameters < GaussianParameters
   end
   
   methods(Static)   
-    waistL = waistFunction(zCoordinate,InitialWaist,RayleighDistance,nu,mu); % Function for estimate wast of Laguerre Gauss Beam
+    waistL = waistLFunction(zCoordinate,InitialWaist,RayleighDistance,nu,mu); % Function for estimate wast of Laguerre Gauss Beam
   end
   
   
   methods
     
-    function PhiPhase = get.PhiPhase(obj) 
+    function PhiPhase      = get.PhiPhase(obj) 
       % Function for estimate phase of Laguerre Gaussian Beam
       PhiPhase = (abs(obj.l)+2*(obj.p)-1).*obj.GouyPhase; 
     end
 
     function LaguerreWaist = get.LaguerreWaist(obj)
       % Function for estimate phase of Laguerre Gaussian Beam
-      LaguerreWaist = LaguerreParameters.waistFunction(obj.zCoordinate,obj.InitialWaist,obj.RayleighDistance,obj.l,obj.p);
+      LaguerreWaist = LaguerreParameters.waistLFunction(obj.zCoordinate,obj.InitialWaist,obj.RayleighDistance,obj.l,obj.p);
     end
 
-    
     function Parameters = LaguerreParameters(zCoordinate,InitialWaist,Wavelength,l,p)
     % Constructor of Laguerre Parameters Object 
      %Call Gaussian Parameters

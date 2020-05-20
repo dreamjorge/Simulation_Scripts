@@ -1,4 +1,4 @@
-classdef GaussianParameters <  handle
+classdef GaussianParameters <  handle & matlab.mixin.Copyable
 % This class gives Gaussian parameters of Gaussian Beam
 % recives zCoordinate,InitialWaist,Wavelength as input and
 % gives a object with next properties:
@@ -17,10 +17,15 @@ classdef GaussianParameters <  handle
 % Example: Parameters = GaussianParameters(zCoordinate,InitialWaist,Wavelength)
 
   properties
-    zCoordinate    % z-coordinate (or distance of propagation)
-    InitialWaist   % initial wasit of Gaussian Beam
-    Wavelength     % wavelength of Gaussian Beam
+    zCoordinate      % z-coordinate (or distance of propagation)
+    InitialWaist     % initial wasit of Gaussian Beam
+    Wavelength       % wavelength of Gaussian Beam
   end
+  
+  properties(Access = private)
+    OpticalField
+  end
+  
   
   properties (Dependent)
     RayleighDistance % RayleighDistance.
@@ -35,23 +40,34 @@ classdef GaussianParameters <  handle
   
   methods(Static)
 %     
-        Waist  = waistFunction(zCoordinate,...
-                               InitialWaist,...
-                               RayleighDistance);
-                                    
-        Phase  = phaseFunction(zCoordinate,...
-                               RayleighDistance);
-                                         
-        Radius = radiusFunction(zCoordinate,...
-                                RayleighDistance);
+    Waist  = waistFunction(zCoordinate,...
+                           InitialWaist,...
+                           RayleighDistance);
+
+    Phase  = phaseFunction(zCoordinate,...
+                           RayleighDistance);
+
+    Radius = radiusFunction(zCoordinate,...
+                            RayleighDistance);
 
   end
-  
-  
-  methods
+  methods 
     
-  %% Constructor
-     function Parameters = GaussianParameters(zCoordinate,InitialWaist,Wavelength)
+    function output = copyObject(obj, output)
+      %%
+       C = metaclass(obj);
+       P = C.Properties;
+       for kk = 1:length(P)
+         if ~P{kk}.Dependent
+           output.(P{kk}.Name) = obj.(P{kk}.Name);
+         end
+
+       end
+     end
+
+
+    function Parameters = GaussianParameters(zCoordinate,InitialWaist,Wavelength)
+     % Constructor of Gaussian Beam   
       if nargin == 3 
         Parameters.zCoordinate         = zCoordinate;
         Parameters.InitialWaist        = InitialWaist;
@@ -60,37 +76,34 @@ classdef GaussianParameters <  handle
          error('You need introduce zCoordinate, InitialWaist and Wavelength inputs')
       end
     end
-
-    
-
     %% Error for dependent properties
     
-    function obj = set.RayleighDistance(obj,~)
+    function [] = set.RayleighDistance(obj,~)
       fprintf('%s%d\n','RayleighDistance is: ',obj.RayleighDistance)
       error('You cannot set RayleighDistance property'); 
     end 
    
-    function obj = set.k(obj,~)
+    function [] = set.k(obj,~)
       fprintf('%s%d\n','k is: ',obj.k)
       error('You cannot set k property'); 
     end 
     
-    function obj = set.Waist(obj,~)
+    function [] = set.Waist(obj,~)
       fprintf('%s%d\n','waist is: ',obj.Waist)
       error('You cannot set Waist property'); 
     end 
         
-    function obj = set.Radius(obj,~)
+    function [] = set.Radius(obj,~)
       fprintf('%s%d\n','radius is: ',obj.Radius)
       error('You cannot set Waist property'); 
     end 
        
-    function obj = set.GouyPhase(obj,~)
+    function [] = set.GouyPhase(obj,~)
       fprintf('%s%d\n','phase is: ',obj.PhiPhase)
       error('You cannot set PhiPhase property'); 
     end 
     
-    function obj = set.Amplitude(obj,~)
+    function [] = set.Amplitude(obj,~)
       fprintf('%s%d\n','amplitude is: ',obj.Amplitude)
       error('You cannot set Amplitude property'); 
 

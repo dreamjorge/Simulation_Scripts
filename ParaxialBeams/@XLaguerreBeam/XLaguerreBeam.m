@@ -1,7 +1,12 @@
 classdef XLaguerreBeam < GaussianBeam & LaguerreParameters
-
+  
+  properties
+    thetaCoordinate
+  end
+  
   properties (Dependent)
     XLaguerreAmplitude
+    OpticalFieldLaguerre
   end
   
   properties (Hidden)
@@ -34,20 +39,30 @@ classdef XLaguerreBeam < GaussianBeam & LaguerreParameters
       
       XLaguerre@GaussianBeam(rCoordinate,LaguerreParameters); 
 
-      PhiPhase =  LaguerreParameters.PhiPhase;
-      l        =  LaguerreParameters.p;
-      p        =  LaguerreParameters.l;
-      waist    =  LaguerreParameters.Waist;
+      XLaguerre.thetaCoordinate = thetaCoordinate;
 
 %       [XLaguerre.ThetaCoordinate,XLaguerre.RadialCoordinate] = cart2pol(x,y);
 %       
       %% Optical Field
-      XLaguerre.OpticalField =... XLaguerre.Normalization.*...
-                              ...XLaguerre.XLaguerreAmplitude.*... 
-                              exp(1i*PhiPhase).*exp(-1i*abs(p)*thetaCoordinate).*...
-                              XLaguerreBeam.XAssociatedLaguerrePolynomial(l,abs(p),(2*rCoordinate.^2)./waist.^2).*...
-                              XLaguerre.OpticalField;
-    end
+
+     end
+    
+     
+     function [opticalField]=get.OpticalFieldLaguerre(obj)
+      PhiPhase     = obj.PhiPhase;
+      l            = obj.l;
+      p            = obj.p;
+      waist        = obj.Waist;
+      theta        = obj.thetaCoordinate;
+      r            = obj.rCoordinate;
+      xArgument    = (2*(r.^2))./(waist.^2);
+       
+     opticalField =... XLaguerre.Normalization.*...
+                   ...XLaguerre.XLaguerreAmplitude.*... 
+                    exp(1i*PhiPhase).*exp(-1i*abs(p)*theta).*...
+                    XLaguerreBeam.XAssociatedLaguerrePolynomial(l,abs(p),xArgument).*...
+                    obj.OpticalField;
+     end
   end
   
 

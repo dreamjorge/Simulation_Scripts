@@ -11,10 +11,7 @@ classdef OpticalRay
     zxSlope
     zySlope
     xySlope
-    
-    zrSlope
-    zthSlope
-    rthSlope
+
   end
   
   

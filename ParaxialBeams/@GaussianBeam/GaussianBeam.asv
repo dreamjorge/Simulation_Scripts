@@ -20,7 +20,7 @@ classdef GaussianBeam < matlab.mixin.Copyable & GaussianParameters
   % where r can be scalar, vector or matrix; and gaussianParameters defined in 
   % @GaussianParameters
   %%
-  properties (Dependent)
+  properties (Dependent,Access=private)
     OpticalField; % Optical Field of Gaussian Beam
   end
   
@@ -45,14 +45,7 @@ classdef GaussianBeam < matlab.mixin.Copyable & GaussianParameters
        end
     end
 
-    function opticalField = get.OpticalField(obj)
-    %% Funtion for get Optical Field of Gaussian Beams
-      opticalField = obj.Amplitude...
-                  .* exp(-   ((obj.rCoordinate).^2)./((obj.Waist).^2))...
-                  .* exp(-1i*((obj.k)*((obj.rCoordinate).^2)./(2*(obj.Radius))))...
-                  .* exp( 1i*((obj.GouyPhase)))...
-                  .* exp( 1i*((obj.k)*(obj.zCoordinate)));
-    end   
+     
     
     function beam = GaussianBeam(rCoordinate,gaussianParameters)
     %% Constructor of Gaussian Beam
@@ -71,11 +64,16 @@ classdef GaussianBeam < matlab.mixin.Copyable & GaussianParameters
                                  ,gaussianParameters.InitialWaist...
                                  ,gaussianParameters.Wavelength);
           %Copying Radial coordinate of Input
-          beam.rCoordinate = rCoordinate;  
-          
-          if  isa(gaussianParameters,'LaguerreParameters')
-%              beam.OpticalFieldLaguerre = beam.OpticalField;
-          end
+          beam.rCoordinate = rCoordinate;
+          beam.OpticalField = OpticalField;
+%           beam=copyObject(gaussianParameters,beam); 
+%         beam.OP  
+%         if isa(input,'myclass')
+%                     obj=copyObject(input,obj); 
+%        else
+%                    obj.a=input;
+%         end
+
     end
    
     function [] = set.OpticalField(~,~)

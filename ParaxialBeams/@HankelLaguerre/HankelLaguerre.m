@@ -2,7 +2,7 @@ classdef HankelLaguerre
   
   properties   
     HankelType    % hankel type (1,2)
-    OpticalField  % Optical field
+    OpticalFieldLaguerre
   end
     
   methods(Static)
@@ -26,9 +26,9 @@ classdef HankelLaguerre
        
       %Taking different sign according type of Hankel
       if nh == 1
-        Hankel.OpticalField = LB.OpticalField + 1i*XLB.OpticalField;
+        Hankel.OpticalFieldLaguerre = LB.OpticalFieldLaguerre + 1i*XLB.OpticalFieldLaguerre;
       elseif nh == 2
-        Hankel.OpticalField = LB.OpticalField - 1i*XLB.OpticalField;
+        Hankel.OpticalFieldLaguerre = LB.OpticalFieldLaguerre - 1i*XLB.OpticalFieldLaguerre;
       end
       
     end

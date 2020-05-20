@@ -1,14 +1,17 @@
 
-%% add path for classes and functions
+%%          Script of Laguerre Beam (properties and propagation)
+% adding path for classes and functions
 addpath ParaxialBeams
 addpath ParaxialBeams\Addons
-mapgreen = AdvancedColormap('kgg',256,[0 100 255]/255);  %color of beam
+% Selecting green color for beam
+mapgreen = AdvancedColormap('kgg',256,[0 100 255]/255);
 
-%--------------- initial parameters of Laguerre Gaussian Beams -----------%
-l = 19;
+%%          Initial parameters of Laguerre Gaussian Beams
+
+l = 17;
 p = 0;
 % Physical parameters [microns]
-InitialWaist        = 100;%179*2;
+InitialWaist        = 10;%179*2;
 Wavelength          = 0.6328;
 % normalized parameters
 % InitialWaist = 1;
@@ -21,8 +24,8 @@ LPinZ0 = LaguerreParameters(PropagationDistance...
                            ,Wavelength...
                            ,l...
                            ,p);
-
-%-------------------------- sampling of vectors --------------------------%
+                     
+%%                        Sampling of vectors 
 % Estimate sampling in z-direction with propagation distance 
 % z-direction
 Dz = LPinZ0.RayleighDistance; % z-window (propagation distance)
@@ -30,14 +33,31 @@ Nz = 2^5;                     % number of points in z-direction
 dz = Dz/Nz;                   % Resolution in z
 z  = 0:dz:Dz;                 % z-vector z of propagation 
 
-% Sample z vector, we estimate sampling in x,y-direction in terms of
-% waist of max waist Laguerre Gauss Beam until max z-propagation
+% Calculating Laguerre parameters in z distance vector
+% LPinZ = LaguerreParameters(z...
+%                           ,InitialWaist...
+%                           ,Wavelength...
+%                           ,l...
+%                           ,p);
+                        
+% Calculating Laguerre parameters in z distance vector copying object in z = 0
+LPinZ  = copy(LPinZ0);
+LPinZ.zCoordinate = z;                         
+                        
+fig1          = figure(1);
+fig1.Position = [314 300 1097 479];
+plotLaguerreParameters(LPinZ);
 
-MaxLaguerreWaist = LaguerreParameters.waistFunction(z(end)...
-                                                   ,InitialWaist...
-                                                   ,LPinZ0.RayleighDistance...
-                                                   ,l...
-                                                   ,p);
+% Estimate sampling in x,y-direction in terms of waist of max  
+% Laguerre Gauss Beam waist until max z-propagation
+
+% MaxLaguerreWaist = LaguerreParameters.waistFunction(z(end)...
+%                                                    ,InitialWaist...
+%                                                    ,LPinZ0.RayleighDistance...
+%                                                    ,l...
+%                                                    ,p);
+ % waist in max z, from LaguereParametersz0                                               
+MaxLaguerreWaist = LPinZ.LaguerreWaist(end);
 
 N   = 2^9;                  % Number of points in x,y axis
 n   = -N/2+.05:N/2-1+.05;   % vector with N-points with resolution 1
@@ -57,39 +77,33 @@ difr = [dx,dx,dz];
 
 % Estimate vectors of frequency for Fourier Transforms associated
 % with x,y
-Du   = 1/dx;                 % Size of window 
-du   = 1/Dx;                 % Resolution
-u    = n*du;                 % freq vector with dimentions
-[U]  = meshgrid(u);          % freq Matrix
+Du   = 1/dx;         % Size of window 
+du   = 1/Dx;         % Resolution
+u    = n*du;         % freq vector with dimentions
+[U]  = meshgrid(u);  % freq Matrix
 %kx,ky vectors
-kx   = 2*pi*u;               % angular freq vector
-[Kx] = meshgrid(kx);         % angular freq matrix
+kx   = 2*pi*u;       % angular freq vector
+[Kx] = meshgrid(kx); % angular freq matrix
 
 %% ----------------------- Laguerre Gauss in z = 0 --------------------- %%
 
-%with laguerre parameters calculated we estimate Lageurre Gauss Beam
+% With laguerre parameters calculated, it estimates Laguerre Gauss Beam
 LG = LaguerreBeam(RCoordinate,ThetaCoordinate,LPinZ0);
 
 % Plot of Field
-figure(1)
-pcolor(x, x, abs(LG.OpticalField).^2)
-axis square
-shading flat
-colormap(mapgreen)
+figure(2)
+plotOpticalField(x,x,(LG.OpticalFieldLaguerre).^2,mapgreen,'microns');
 plotCircle(0,0,LPinZ0.LaguerreWaist);
-xlabel('$x \left[ microns \right]$','Interpreter','latex') 
-ylabel('$y \left[ microns \right]$','Interpreter','latex') 
 
 % Optic Field to propagate 
-g   = LG.OpticalField;
+g   = LG.OpticalFieldLaguerre;
 % Max Peak
 pxy = max(max(g));
 
 %% ----------------- Obstruction on Lagurre in z = 0 ------------------- %%
 % Initial Waist of Laguerre Beam
-LaguerreInitialWaist = LPinZ0.LaguerreWaist;
 
-lo      = (LaguerreInitialWaist)/4.3;  % size of obstruction in terms of waist of Laguerre
+lo      = (LPinZ0.LaguerreWaist)/4.3;  % size of obstruction in terms of waist of Laguerre
 xt      = 0;                           % traslation of obstruction in x-axis
 yt      = 0;                           % traslation of onstruction in y-axis
 [~,rho] = cart2pol(X-xt,X'-yt);        % Convert this in polar coordinates
@@ -99,20 +113,15 @@ clear rho
 % Applying obstruction in optic field
 g       = g.*(1-obo);
 %Ploting Laguerre with obstruction
-figure(2)
-pcolor(x,x,abs(g).^2)
-axis square
-shading flat
-colormap(mapgreen)
-axis1=gca;
-set(axis1,'FontSize',13);
-xlabel('$x$','Interpreter','latex','FontSize',18)
-ylabel('$y$','Interpreter','latex','FontSize',18)
+figure(3)
+plotOpticalField(x,x,abs(g).^2,mapgreen,'microns');
+plotCircle(0,0,LPinZ0.LaguerreWaist);
+plotCircle(0,0,lo);
 
 
 %% ----------------------- Ray tracing (rx,z=0)  ----------------------- %%
 
-pn           =  8;          % Number of rays
+pn           = 8;          % Number of rays
 rayH1(pn)    = OpticalRay;
 rayH2(pn)    = OpticalRay;
 SlopesH1(pn) = Slopes;
@@ -170,14 +179,8 @@ end
 
 % Initial Field with rays in this init conditions
 figure(3)
-pcolor(x,x,abs(g).^2)
-axis square
-shading flat
-colormap(mapgreen)
-axis1=gca;
-set(axis1,'FontSize',13);
-xlabel('$x$','Interpreter','latex','FontSize',18)
-ylabel('$y$','Interpreter','latex','FontSize',18)
+plotOpticalField(x,x,abs(g).^2,mapgreen,'microns');
+
 hold on
 for point_index=1:pn
     plot(rayH1(point_index).xCoordinate(1)...
@@ -213,10 +216,7 @@ for z_index = 2:length(z) % propagation with respect to z
 
     fig.Position = [-1349 147 813 733];
     set(gca,'un','n','pos',[0,0,1,1])
-    imagesc(x,x,abs(g).^2)
-    colormap(mapgreen)
-    set(gca,'YDir','normal')
-    axis square
+    plotOpticalField(x,x,abs(g).^2,mapgreen,'microns');
     drawnow 
     hold on
     
@@ -237,25 +237,18 @@ for z_index = 2:length(z) % propagation with respect to z
     %propagation distance 
     zi          = z(z_index);
     %calculating Laguerre Parameters in zi
-    LPinZ       = LaguerreParameters(zi,InitialWaist,Wavelength,l,p);
+    LPinZi      = LaguerreParameters(zi,InitialWaist,Wavelength,l,p);
     
     for point_index = 1:pn
         % step of ray in z-direction, equation or ray r(z) = mrz*dz+r(z-1)
         % dependece of last point, new vector
-        tempvalue1 = rayH1(point_index).xCoordinate(z_index-1);
-        slope1     = 1/SlopesH1(point_index).zx;
+
+        slope1     = 1./SlopesH1(point_index).zx;
         rayH1(point_index).xCoordinate(z_index) = rayH1(point_index).xCoordinate(z_index-1) + (1./SlopesH1(point_index).zx)*dz;
-        tempvalue1 = rayH1(point_index).xCoordinate(z_index);
-        
-        
         rayH1(point_index).yCoordinate(z_index) = rayH1(point_index).yCoordinate(z_index-1) + (1./SlopesH1(point_index).zy)*dz;
-        
-        
-        tempvalue2 = rayH2(point_index).xCoordinate(z_index-1);
-        slope2     = 1/SlopesH2(point_index).zx;
-        rayH2(point_index).xCoordinate(z_index) = rayH2(point_index).xCoordinate(z_index-1) + (1./SlopesH2(point_index).zx)*dz;
-        tempvalue2 = rayH2(point_index).xCoordinate(z_index);
-        
+
+        slope2     = 1./SlopesH2(point_index).zx;
+        rayH2(point_index).xCoordinate(z_index) = rayH2(point_index).xCoordinate(z_index-1) + (1./SlopesH2(point_index).zx)*dz;         
         rayH2(point_index).yCoordinate(z_index) = rayH2(point_index).yCoordinate(z_index-1) + (1./SlopesH2(point_index).zy)*dz;        
         
         %point of H1 for iteration 
@@ -272,7 +265,7 @@ for z_index = 2:length(z) % propagation with respect to z
         [SlopesH1(point_index)] = getLaguerreSlopes(rayTemp,...
                                                     rCoordinate,thetaCoordinate,z,...
                                                     difr,...
-                                                    LPinZ,HankelType); 
+                                                    LPinZi,HankelType); 
         %point of H2 for iteration
         xi = rayH2(point_index).xCoordinate(z_index);
         yi = rayH2(point_index).yCoordinate(z_index);
@@ -293,14 +286,14 @@ for z_index = 2:length(z) % propagation with respect to z
           [SlopesH2(point_index)] = getLaguerreSlopes(rayTemp,...
                                                       rCoordinate,thetaCoordinate,z,...
                                                       difr,...
-                                                      LPinZ,HankelType);
+                                                      LPinZi,HankelType);
         else % change to H1
            
           HankelType  = 1;
           [SlopesH2(point_index)] = getLaguerreSlopes(rayTemp,...
                                                       rCoordinate,thetaCoordinate,z,...
                                                       difr,...
-                                                      LPinZ,HankelType);                                    
+                                                      LPinZi,HankelType);                                    
         end
         
         rTempPrev(point_index) = rTempActual(point_index);
@@ -326,12 +319,12 @@ for z_index = 2:length(z) % propagation with respect to z
     
     figure(9)
     H1 = XLaguerreBeam(RCoordinate,ThetaCoordinate,LPinZ);
-    imagesc(angle(H1.OpticalField))
+    imagesc(angle(H1.OpticalFieldLaguerre))
     title('Angle of Exact H1 Optical Field')
     
     figure(10)
     H2 = HankelLaguerre(RCoordinate,ThetaCoordinate,LPinZ,2);
-    imagesc(angle(H2.OpticalField))
+    imagesc(angle(H2.OpticalFieldLaguerre))
     title('Angle of Exact H2 Optical Field')
 %     
 %     
