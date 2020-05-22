@@ -1,9 +1,0 @@
-function [rayObjectOuput]= copyElementsOnRay(rayObjectInput)
-
-rayObjectOuput.xCoordinate       = rayObjectInput.xCoordinate;
-rayObjectOuput.yCoordinate       =
-rayObjectOuput.zCoordinate  
-rayObjectOuput.rCoordinate
-rayObjectOuput.thetaCoordinate
-
-end

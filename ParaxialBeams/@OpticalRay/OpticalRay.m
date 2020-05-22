@@ -1,10 +1,12 @@
 classdef OpticalRay
   
   properties
+    % cartesians coordinates
     xCoordinate
     yCoordinate
     zCoordinate
     
+    % cylindrical coordinates
     rCoordinate
     thetaCoordinate
     

@@ -121,74 +121,31 @@ plotCircle(0,0,lo);
 
 %% ----------------------- Ray tracing (rx,z=0)  ----------------------- %%
 
-rayTotal           = 8;          % Number of rays
+TotalRays = 30;          % Number of rays
 
+rayH1(Nz) = OpticalRay;
+rayH2(Nz) = OpticalRay;
 
-rayH1(Nz)    = OpticalRay;
-rayH2(Nz)    = OpticalRay;
-SlopesH1(Nz) = Slopes;
-SlopesH2(Nz) = Slopes;
-% temp th for estimate cross in origin 
-thTempPrev   = zeros(1,Nz);
-thTemp       = zeros(1,Nz);
-rObst        = zeros(1,Nz);
-rAcum        = zeros(1,Nz);
-rTempPrev    = zeros(1,Nz);
-rTempActual  = zeros(1,Nz);
-rayTemp      = OpticalRay;
-
-for point_index = 1:rayTotal
+for point_index = 1 : TotalRays
     % Cartersian coordinates of point in circunference of obstruction
-    xi = xt+lo*cos(point_index*(2*pi)/(rayTotal)); 
-    yi = yt+lo*sin(point_index*(2*pi)/(rayTotal));
+    xi = xt+lo*cos(point_index*(2*pi)/(TotalRays)); 
+    yi = yt+lo*sin(point_index*(2*pi)/(TotalRays));
     zi = 0;
-    %estimate radii of point (x,y) to origin
-    [thi,ri] = cart2pol(xi,yi);
-    rObst(point_index) = ri;
-    %for iterative process in propagation 
-    rTempPrev(point_index) = rObst(point_index);
+    % assign coordinate to Optical Rays in z = 0, i.e index_z = 1  
+    [rayH1(1)] = assignCoordinates2Ray(xi,yi,zi,rayH1(1),point_index);
+    [rayH2(1)] = assignCoordinates2Ray(xi,yi,zi,rayH2(1),point_index);
     
-    % saving cartesian coordinates of point in circunference in each ray
-    rayH1(1).xCoordinate(point_index)     = xi; 
-    rayH1(1).yCoordinate(point_index)     = yi;
-    rayH1(1).zCoordinate(point_index)     = zi;
-    rayH2(1).xCoordinate(point_index)     = xi; 
-    rayH2(1).yCoordinate(point_index)     = yi;
-    rayH2(1).zCoordinate(point_index)     = zi;
-    rayH1(1).thetaCoordinate(point_index) = ri;
-    rayH1(1).rCoordinate(point_index)     = thi;
-    rayH2(1).thetaCoordinate(point_index) = ri;
-    rayH2(1).rCoordinate(point_index)     = thi;    
-    
-    rayTemp.xCoordinate     = xi;
-    rayTemp.yCoordinate     = yi;
-    rayTemp.zCoordinate     = zi;
-    
-    rayTemp.rCoordinate     = ri;
-    rayTemp.thetaCoordinate = thi;
-    
-    HankelType  = 1;
-    [SlopesH1(point_index)] = getLaguerreSlopes(rayTemp,...
-                                                rCoordinate,thetaCoordinate,z,...
-                                                difr,...
-                                                LPinZ0,HankelType);
-    HankelType  = 2;
-    [SlopesH2(point_index)] = getLaguerreSlopes(rayTemp,...
-                                                rCoordinate,thetaCoordinate,z,...
-                                                difr,...
-                                                LPinZ0,HankelType);
 end
 
 % Initial Field with rays in this init conditions
-figure(3)
+figure(3) 
 plotOpticalField(x,x,abs(g).^2,mapgreen,'microns');
 plotRays(rayH1(1),'r')
 
 
-%%  ----------------------- Physical Propagation ------------------------ %
+%%                         Physical Propagation
 % paraxial propagator 
-k       = LPinZ0.k;
-prop    = paraxialPropagator(Kx,Kx',k,dz);
+prop    = paraxialPropagator(Kx,Kx',LPinZ0.k,dz);
 
 figure(5)
 imagesc(u,u,(angle(prop)))
@@ -202,131 +159,60 @@ gx(:,1) = g(N/2+1,:);
 gy(:,1) = g(:,N/2+1);
 
 
-for z_index = 2:length(z) % propagation with respect to z
-  
-    % field before propagation i.e in z(ii-1)
-    pxyz         = g(1,1);
-    g(1,1)       = pxy;
-    fig          = figure(6);
+for z_index = 1:length(z)-1 % propagation with respect to z
+%% loop of each component in z
 
-    fig.Position = [-1349 147 813 733];
-    set(gca,'un','n','pos',[0,0,1,1])
-    plotOpticalField(x,x,abs(g).^2,mapgreen,'microns');
-    drawnow 
-    hold on
+  % propagation of Optical Field 
+  g = propagateOpticalField(g,prop);
+  %saving transversal fields
+  gx(:,z_index+1) = g(N/2+1,:);
+  gy(:,z_index+1) = g(:,N/2+1);  
     
-    % Plot propagated points of H1 and H2 in iteration before
-    plotRays(rayH1(z_index-1),'r')
-    plotRays(rayH2(z_index-1),'r')
-    
-    pause(0.5)
+  %%                    Calculating Rays
 
-    %------------------------ Calculating Rays ---------------------------%   
-    % Given z we find z+dz and new position x+dx and y+dy with help of
-     % slopes
-     
-    %propagation distance 
-    zi          = z(z_index);
-    %calculating Laguerre Parameters in zi
-    LPinZi      = LaguerreParameters(zi,InitialWaist,Wavelength,l,p);
-    
-    rayH1Temp =rayH1(z_index);
-    rayH2Temp =rayH2(z_index);
-    
-    for point_index = 1:rayTotal
-        % step of ray in z-direction, equation or ray r(z) = mrz*dz+r(z-1)
-        % dependece of last point, new vector
+  % propagation distance 
+  zi          = z(z_index);
+  % calculating Laguerre Parameters in zi
+  LPinZi      = LaguerreParameters(zi,InitialWaist,Wavelength,l,p);   
 
-        slope1     = 1./SlopesH1(point_index).zx;
-        rayH1Temp.xCoordinate(point_index) = rayH1(z_index-1).xCoordinate(point_index) + (1./SlopesH1(point_index).zx)*dz;
-        rayH1Temp.yCoordinate(point_index) = rayH1(z_index-1).yCoordinate(point_index) + (1./SlopesH1(point_index).zy)*dz;
+  % propagate all rays of H1
+  HankelType  = 1;
+  [rayH1(z_index+1)] = getPropagateRay(rayH1(z_index),...
+                                       TotalRays,...
+                                       x,y,...
+                                       difr,...
+                                       LPinZi,...
+                                       LPinZ,...
+                                       HankelType); 
+ 
 
-        slope2     = 1./SlopesH2(point_index).zx;
-        rayH2Temp.xCoordinate(point_index) = rayH2(z_index-1).xCoordinate(point_index) + (1./SlopesH2(point_index).zx)*dz;         
-        rayH2Temp.yCoordinate(point_index) = rayH2(z_index-1).yCoordinate(point_index) + (1./SlopesH2(point_index).zy)*dz;        
-        
-        %point of H1 for iteration 
-        xi       = rayH1Temp.xCoordinate(point_index);
-        yi       = rayH1Temp.yCoordinate(point_index);
-        [thi,ri] = cart2pol(xi,yi);
-        %Obtain polar coordinates
-        rayH1Temp.rCoordinate(point_index)    = ri;
-        rayH1Temp.thetaCoordinate(point_index) = thi;
-        
-        rayH1(z_index) = copyRay(rayH1Temp.rCoordinate);
-        
-        
-        rayTemp.rCoordinate     = ri;
-        rayTemp.thetaCoordinate = thi;        
-        rayTemp.zCoordinate     = zi;
-        
-        HankelType  = 1;
-        
-        [SlopesH1(point_index)] = getLaguerreSlopes(rayTemp,...
-                                                    rCoordinate,thetaCoordinate,z,...
-                                                    difr,...
-                                                    LPinZi,HankelType); 
-        %point of H2 for iteration
-        xi = rayH2(point_index).xCoordinate(z_index);
-        yi = rayH2(point_index).yCoordinate(z_index);
-        
-        [thi,ri]                = cart2pol(xi,yi);
-        rayTemp.rCoordinate     = ri;
-        rayTemp.thetaCoordinate = thi;        
-        rayTemp.zCoordinate     = zi;
-                
-        %----------condition for cross around origin
-        rTempActual(point_index) = ri;
-        drTemp                   = abs( rTempPrev(point_index) - rTempActual(point_index) );
-        rAcum(point_index)       = (rAcum(point_index) + drTemp);
-        
-        if ( rAcum(point_index)<rObst(point_index) )
-          
-          HankelType  = 2;
-          [SlopesH2(point_index)] = getLaguerreSlopes(rayTemp,...
-                                                      rCoordinate,thetaCoordinate,z,...
-                                                      difr,...
-                                                      LPinZi,HankelType);
-        else % change to H1
-           
-          HankelType  = 1;
-          [SlopesH2(point_index)] = getLaguerreSlopes(rayTemp,...
-                                                      rCoordinate,thetaCoordinate,z,...
-                                                      difr,...
-                                                      LPinZi,HankelType);                                    
-        end
-        
-        rTempPrev(point_index) = rTempActual(point_index);
-                                                     
-    end
-    %------------------------ End calculating rays -----------------------%   
-    %propagating field
-    % it's needed correction in phase of FFT
-    G = fftshift(fft2(ifftshift(g)));...*exp(-1j.*(u(1)).*(Kx)).*exp(-1j.*(u(1)).*(Kx'));
-    %obtain new propagated field
-    g = fftshift(ifft2(ifftshift(G.*prop)));...*exp(-1j.*(u(1)).*(X))*exp(-1j.*(u(1)).*(X'));
-    figure(7)
-    imagesc(angle(G))
-    title('Angle of Optical Field')
-    %G = G.*exp(1i*pi*50);
-    figure(8)
-    imagesc(angle(g))
-    title('Angle of Optical Field FT')
-    %obtain new propagated field
-    %saving transversal fields
-    gx(:,z_index) = g(N/2+1,:);
-    gy(:,z_index) = g(:,N/2+1);
-    
-    figure(9)
-    H1 = XLaguerreBeam(RCoordinate,ThetaCoordinate,LPinZ);
-    imagesc(angle(H1.OpticalFieldLaguerre))
-    title('Angle of Exact H1 Optical Field')
-    
-    figure(10)
-    H2 = HankelLaguerre(RCoordinate,ThetaCoordinate,LPinZ,2);
-    imagesc(angle(H2.OpticalFieldLaguerre))
-    title('Angle of Exact H2 Optical Field')
-%     
-%     
+  % temporal rays in zi for loop above all rays
+  rayH2Temp   = rayH2(z_index);
+  % propagate all rays of H2
+  HankelType  = 2;
+  [rayH2(z_index+1)] = getPropagateRay(rayH2(z_index),...
+                                       TotalRays,...
+                                       x,y,...
+                                       difr,...
+                                       LPinZi,...
+                                       LPinZ,...
+                                       HankelType);
+                         
+
+  %                             End calculating rays 
+  %%
+
+  fig = figure(6);
+  fig.Position = [-1349 147 813 733];
+  plotOpticalField(x,x,abs(g).^2,mapgreen,'microns');
+  drawnow 
+  hold on
+
+  % Plot propagated points of H1 and H2 in iteration before
+  plotRays(rayH1(z_index+1),'r')
+  plotRays(rayH2Temp,'y')
+
+  pause(0.5)
+
 end
 
