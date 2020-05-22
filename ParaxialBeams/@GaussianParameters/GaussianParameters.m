@@ -13,21 +13,24 @@ classdef GaussianParameters <  handle & matlab.mixin.Copyable
 % -GouyPhase
 % -Amplitude
 % -DivergenceAngle
-% 
+
 % Example: Parameters = GaussianParameters(zCoordinate,InitialWaist,Wavelength)
 
   properties
+    %% Independent properties 
     zCoordinate      % z-coordinate (or distance of propagation)
     InitialWaist     % initial wasit of Gaussian Beam
     Wavelength       % wavelength of Gaussian Beam
   end
   
   properties(Access = private)
+     %% Don't set Optical Field
     OpticalField
   end
   
   
   properties (Dependent)
+    %% Properties dependent of Gaussian Beam
     RayleighDistance % RayleighDistance.
     k                % k-number.
     Waist            % Waist of Gaussian Beam at zCoordinate.
@@ -39,7 +42,7 @@ classdef GaussianParameters <  handle & matlab.mixin.Copyable
 
   
   methods(Static)
-%     
+    %% functions ofr obtain parameters of Gaussian Beam     
     Waist  = waistFunction(zCoordinate,...
                            InitialWaist,...
                            RayleighDistance);
@@ -54,7 +57,7 @@ classdef GaussianParameters <  handle & matlab.mixin.Copyable
   methods 
     
     function output = copyObject(obj, output)
-      %%
+      %% copying object
        C = metaclass(obj);
        P = C.Properties;
        for kk = 1:length(P)
@@ -67,7 +70,7 @@ classdef GaussianParameters <  handle & matlab.mixin.Copyable
 
 
     function Parameters = GaussianParameters(zCoordinate,InitialWaist,Wavelength)
-     % Constructor of Gaussian Beam   
+     %% Constructor of Gaussian Beam   
       if nargin == 3 
         Parameters.zCoordinate         = zCoordinate;
         Parameters.InitialWaist        = InitialWaist;
