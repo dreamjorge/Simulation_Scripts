@@ -1,5 +1,4 @@
 function [Rays] = getPropagateCartesianRays(Rays,...
-                                            TotalRays,...
                                             x,y,...
                                             difr,...
                                             HParametersZi,...
@@ -10,16 +9,17 @@ function [Rays] = getPropagateCartesianRays(Rays,...
 %equation or ray r(z) = mrz*dz+r(z-1) using previous value
 %debugMode = 'Off';                                                         
   % each component of diferential dr 
-  tempdr   = num2cell(difr);
-  [~,~,dz] = deal(tempdr{:});
-  k        = HParametersZi.k;
+  tempdr    = num2cell(difr);
+  [~,~,dz]  = deal(tempdr{:});
+  k         = HParametersZi.k;
+  TotalRays = numel(Rays.xCoordinate);
   
-  for point_index = 1 : TotalRays
+  for ray_index = 1 : TotalRays
 
     temporalRay = OpticalRay(); 
 
     % copy data a temporal ray 
-    temporalRay = copyArrayRay2Ray(Rays,temporalRay,point_index);
+    temporalRay = copyArrayRay2Ray(Rays,temporalRay,ray_index);
     
     % new coordinates of ray
     temporalRay.xCoordinate = temporalRay.xCoordinate + (1./temporalRay.zxSlope)*dz;
@@ -39,10 +39,10 @@ function [Rays] = getPropagateCartesianRays(Rays,...
     fz   = unwrap(angle(HHz.OpticalField));
 
     % Calculating gradient
-    [temporalRay] = gradientCartesian(fx,fy,fz,k,difr,temporalRay);
+    [temporalRay] = getCartesianGradient(fx,fy,fz,k,difr,temporalRay);
     
     % copying new coordinates of ray to object that includes all rays
-    Rays = copyRay2ArrayRay(temporalRay,Rays,point_index);                                
+    Rays = copyRay2ArrayRay(temporalRay,Rays,ray_index);                                
   end
 
 end

@@ -6,8 +6,8 @@ addpath ParaxialBeams\Addons
 mapgreen = AdvancedColormap('kgg',256,[0 100 255]/255);  %color of beam
 
 %% indices of Hermite Gaussian Beams 
-nu      = 12;
-mu      = 11;
+nu = 12;
+mu = 11;
 
 %% Physical parameters [microns]
 InitialWaist          = 100;
@@ -22,19 +22,19 @@ HermiteInitialWaistX  = HPz0.HermiteWaistX;
 HermiteInitialWaistY  = HPz0.HermiteWaistY;
 HermiteInitialWaist   = HPz0.HermiteWaist;
 
-%% normalized parameters
+%% Normalized parameters
 % 
 % Wavelength           = pi;
 % InitialWaist         = 1;
 % HermiteInitialWaist  = InitialWaist*sqrt(nu+mu+1);
-% GP                   = GaussianParameters(0,InitialWaist,Wavelength);
-% k                    = GP.k;
-% RayleighDistance     = GP.RayleighDistance;
+% HPz0                 = HermiteParameters(0,InitialWaist,Wavelength,nu,mu);
+% k                    = HPz0.k;
+% RayleighDistance     = HPz0.RayleighDistance;
 
 %% sampling of vectors 
-%First we estimate samplig in z-direction with propagation distance 
+%First, we estimate samplig in z-direction with propagation distance 
 % z-direction
-Dz    = RayleighDistance/2;     % z-window (propagation distance)
+Dz    = RayleighDistance/2;   % z-window (propagation distance)
 Nz    = 2^6;                  % number of points in z-direction
 dz    = Dz/Nz;                % Resolution in z
 nz    = 0:Nz-1;               % vector with N-points with resolution 1
@@ -43,11 +43,11 @@ z     = nz*dz;                % z-vector z of propagation
 % waist of Hermite Gauss Beam until z-propagation
 MaxHermiteWaist = HermiteParameters.getWaist(z(end),InitialWaist,RayleighDistance,nu,mu);
 
-%Second we estimage sampling in x,y-direction in terms of waist of Guassian
+%Second, we estimage sampling in x,y-direction in terms of waist of Guassian
 %Laguerre Beam
 
 % y,x-direction
-Nx    =  2^8;                % Number of points in x,y axis
+Nx    =  2^7;                % Number of points in x,y axis
 n     = -Nx/2:Nx/2-1;         % vector with N-points with resolution 1
 Dx    = MaxHermiteWaist;      % Size of window 
 dx    = Dx/Nx;                % Resolution
@@ -55,7 +55,7 @@ x     = n*dx;                 % Vector
 y     = x;
 [X,Y] = meshgrid(x,y);
 
-%Last we estimate vectors of frequency for Fourier Transforms
+%Last, we estimate vectors of frequency for Fourier Transforms
 Du    = 1/dx;                 % Size of window 
 du    = 1/Dx;                 % Resolution
 u     = n*du;                 % Vector
@@ -99,39 +99,38 @@ figure(2)
 plotOpticalField(x,x,abs(g).^2,mapgreen,'microns');
 
 %% Parametrization of obstruction for rays
-% np points in obstruction
-no  = 5;
-np  = 2^no;
-th  = 2*pi/np;
+% Total points/rays in obstruction
+no        = 5;
+TotalRays = 2^no;
+th        = 2*pi/TotalRays;
 
-TotalRays  = np;
-
+% Optical Ray of size Nz, i.e size of direction of z-coordinate
 rayH11(Nz) = OpticalRay();
 rayH12(Nz) = OpticalRay();
 rayH21(Nz) = OpticalRay();
 rayH22(Nz) = OpticalRay();
 
-%puntos sobre el rectangulo dada su parametrizacion, donde empezaran los
-%rayos
-for point_index = 1:TotalRays
+% it given parametrization of obstruction, we give initial conditions of
+% rays
+for ray_index = 1:TotalRays
   
-  xj         = xt + (lx/2)*(abs(cos((point_index)*th))*cos((point_index)*th)...
-             + abs(sin((point_index)*th))*sin((point_index)*th));
-  yj         = yt + (ly/2)*(abs(cos((point_index)*th))*cos((point_index)*th)...
-             - abs(sin((point_index)*th))*sin((point_index)*th));
+  xj         = xt + (lx/2)*(abs(cos((ray_index)*th))*cos((ray_index)*th)...
+             + abs(sin((ray_index)*th))*sin((ray_index)*th));
+  yj         = yt + (ly/2)*(abs(cos((ray_index)*th))*cos((ray_index)*th)...
+             - abs(sin((ray_index)*th))*sin((ray_index)*th));
   zj         = 0;
 
+  %assign coordinates to each Hankel ray
   hankeltype = 11;
-  rayH11(1)  = assignCoordinates2CartesianRay(xj,yj,zj,rayH11(1),point_index,hankeltype);
+  rayH11(1)  = assignCoordinates2CartesianRay(xj,yj,zj,rayH11(1),ray_index,hankeltype);
   hankeltype = 12;
-  rayH12(1)  = assignCoordinates2CartesianRay(xj,yj,zj,rayH12(1),point_index,hankeltype);
+  rayH12(1)  = assignCoordinates2CartesianRay(xj,yj,zj,rayH12(1),ray_index,hankeltype);
   hankeltype = 21;
-  rayH21(1)  = assignCoordinates2CartesianRay(xj,yj,zj,rayH21(1),point_index,hankeltype);
+  rayH21(1)  = assignCoordinates2CartesianRay(xj,yj,zj,rayH21(1),ray_index,hankeltype);
   hankeltype = 22;
-  rayH22(1)  = assignCoordinates2CartesianRay(xj,yj,zj,rayH22(1),point_index,hankeltype);
+  rayH22(1)  = assignCoordinates2CartesianRay(xj,yj,zj,rayH22(1),ray_index,hankeltype);
   
 end
-
 
 figure(3)
 plotOpticalField(x,x,abs(g).^2,mapgreen,'microns');
@@ -151,18 +150,16 @@ W       = zeros(Nx,Nz,Nx);
 %% propagation with respect to z
 for z_index = 1:length(z)
 % propagation with respect to z  
-  %saving transversal fields
+  % saving transversal fields
   gx(:,z_index)   = g(Nx/2+1,:);
   gy(:,z_index)   = g(:,Nx/2+1);
   % saving field for slices
   W (:,z_index,:) = g;
-  %propagating field
-  % it's needed correction in phase of FFT
-  G = fftshift(fft2((g)));...*exp(-1j.*(u(1)).*(Kx)).*exp(-1j.*(u(1)).*(Kx'));
-  %obtain new propagated field
-  g = (ifft2(ifftshift(G.*prop)));...*exp(-1j.*(u(1)).*(X))*exp(-1j.*(u(1)).*(X'));
+  % propagating field
+  G = fftshift(fft2((g)));
+  % obtain new propagated field
+  g = (ifft2(ifftshift(G.*prop)));
 %%  Calculating propagation of Rays
-
   % propagation distance 
   zi   = z(z_index);
   % calculating Laguerre Parameters in zi
@@ -172,7 +169,6 @@ for z_index = 1:length(z)
   HankelType = 11;
   [rayH11(z_index+1)] = ...
   HankelHermite.getPropagateCartesianRays(rayH11(z_index),...
-                                          TotalRays,...
                                           x,y,...
                                           dr,...
                                           HPzi,...
@@ -182,7 +178,6 @@ for z_index = 1:length(z)
   HankelType = 12;                                      
   [rayH12(z_index+1)] = ...
   HankelHermite.getPropagateCartesianRays(rayH12(z_index),...
-                                          TotalRays,...
                                           x,y,...
                                           dr,...
                                           HPzi,...
@@ -192,7 +187,6 @@ for z_index = 1:length(z)
   HankelType = 21;                                      
   [rayH21(z_index+1)] = ...
   HankelHermite.getPropagateCartesianRays(rayH21(z_index),...
-                                          TotalRays,...
                                           x,y,...
                                           dr,...
                                           HPzi,...
@@ -202,7 +196,6 @@ for z_index = 1:length(z)
   HankelType = 22;                                       
   [rayH22(z_index+1)] = ...
   HankelHermite.getPropagateCartesianRays(rayH22(z_index),...
-                                          TotalRays,...
                                           x,y,...
                                           dr,...
                                           HPzi,...
@@ -218,11 +211,10 @@ for z_index = 1:length(z)
   plotRays(rayH11(z_index+1),'r')
   plotRays(rayH21(z_index+1),'y')
   plotRays(rayH12(z_index+1),'m')                                         
-  plotRays(rayH22(z_index+1),'b')
+  plotRays(rayH22(z_index+1),'c')
   pause(0.01)
 end
-
-
+%% Slices 
 xslice = [0,x(Nx/2)]; 
 yslice = [x(Nx/2)]; 
 zslice = 1;
@@ -243,4 +235,4 @@ axis off
 
 hold on
 
-plotRaysPropagated(rayH11,rayH22,Nz);
+plotPropagatedRays(rayH11,rayH22);

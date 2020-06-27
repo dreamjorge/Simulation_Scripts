@@ -19,14 +19,7 @@ classdef XHermiteBeam < matlab.mixin.Copyable & handle & HermiteParameters & Gau
   end
   
   methods 
-%     function PhiPhase = get.PhiPhase(obj)
-%       PhiPhase = (obj.n+obj.m).*obj.GouyPhase;
-%     end
-% 
-%     function XHermiteWaist = get.XHermiteWaist(obj)
-%       XHermiteWaist = XHermiteBeam.waistXHermite(obj.PropagationDistance,obj.InitialWaist,obj.RayleighDistance,obj.l,obj.p);
-%     end
-%     
+
     function XHermiteAmplitude = get.XHermiteAmplitude(obj)
       XHermiteAmplitude = 1;
     end
@@ -36,7 +29,7 @@ classdef XHermiteBeam < matlab.mixin.Copyable & handle & HermiteParameters & Gau
     end
 
     function OpticalFieldHermite  = get.OpticalFieldXHermite(obj)
-      
+    %% Obatining Optical Field of Hermite  
       [~,NHn] = HermiteBeam.hermiteSolutions(obj.n,(sqrt(2)./obj.Waist).*obj.x);
 
       [~,NHm] = HermiteBeam.hermiteSolutions(obj.m,(sqrt(2)./obj.Waist).*obj.y); 
@@ -58,11 +51,13 @@ classdef XHermiteBeam < matlab.mixin.Copyable & handle & HermiteParameters & Gau
                                 , hermiteParameters.n...
                                 , hermiteParameters.m);
       
-      
+      % Gaussian Beam reqs radial coordinate
       [~,r]=cart2pol(x,y);
       
+      % Generate Gaussian Beam for Hermite Beam
       XHermite@GaussianBeam(r,hermiteParameters);
       
+      % Copying coordinates to object for generate Optical Field of Hermite
       XHermite.x = x;
       XHermite.y = y;
     
