@@ -57,11 +57,11 @@ classdef GaussianBeam < matlab.mixin.Copyable & GaussianParameters
     function beam = GaussianBeam(rCoordinate,gaussianParameters)
     %% Constructor of Gaussian Beam
       if nargin == 2     
-        if  isa(gaussianParameters,'GaussianParameters')
-          % Do nothing, constructor can be done
-        else
-          error('second input is not a GaussianParameters object')
-        end
+%         if  isa(gaussianParameters,'GaussianParameters')
+%           % Do nothing, constructor can be done
+%         else
+%           error('second input is not a GaussianParameters object')
+%         end
 
       else 
         error('You need introduce r (value,vector or matrix), and gaussianParameters obect as inputs')

@@ -5,15 +5,12 @@ classdef OpticalRay
     xCoordinate
     yCoordinate
     zCoordinate
-    
-    % cylindrical coordinates
-    rCoordinate
-    thetaCoordinate
-    
+      
     zxSlope
     zySlope
     xySlope
-
+    
+    hankelType
   end
   
   

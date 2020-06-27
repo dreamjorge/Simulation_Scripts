@@ -22,7 +22,7 @@ function [rayObject]=gradientCartesian(fx,fy,fz,k,difr,rayObject)
   % get slopes 
   rayObject.zxSlope = gz(floor(z/dz+1))    /gx(N/2+1+floor(x/dx));
   rayObject.zySlope = gz(floor(z/dz+1))    /gy(N/2+1+floor(y/dy));
-  rayObject.zySlope = gx(N/2+1+floor(x/dx))/gy(N/2+1+floor(y/dy));
+  rayObject.xySlope = gx(N/2+1+floor(x/dx))/gy(N/2+1+floor(y/dy));
   
 
 end

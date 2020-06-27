@@ -1,13 +1,16 @@
-classdef HermiteBeam <  GaussianBeam
+classdef HermiteBeam < matlab.mixin.Copyable & handle & HermiteParameters & GaussianBeam
   
   properties
-    n
-    m
+    OpticalFieldHermite
+    x
+    y
   end
   
   properties (Dependent)
-    HermiteWaist
-    PhiPhase
+%     HermiteWaist
+%     HermiteWaistX
+%     HermiteWaistY
+%     PhiPhase
     HermiteAmplitude
   end
   
@@ -21,38 +24,53 @@ classdef HermiteBeam <  GaussianBeam
   end
   
   methods 
-    function PhiPhase = get.PhiPhase(obj)
-      PhiPhase = (obj.n+obj.m).*obj.GouyPhase;
-    end
+%     function PhiPhase         = get.PhiPhase(obj)
+%       PhiPhase = (obj.n+obj.m).*obj.GouyPhase;
+%     end
 
-    function HermiteWaist = get.HermiteWaist(obj)
-      HermiteWaist = HermiteBeam.waistHermite(obj.PropagationDistance,obj.InitialWaist,obj.RayleighDistance,obj.n,obj.m);
-    end
+ %   function HermiteWaist     = get.HermiteWaist(obj)
+  %    HermiteWaist = HermiteBeam.waistHermite(obj.PropagationDistance,obj.InitialWaist,obj.RayleighDistance,obj.n,obj.m);
+  %  end
     
     function HermiteAmplitude = get.HermiteAmplitude(obj)
       HermiteAmplitude = 1;
     end
     
-    function Normalization = get.Normalization(obj)
+    function Normalization        = get.Normalization(obj)
       Normalization =  1;
     end
 
-    function Hermite = HermiteBeam(x,y,PropagationDistance, InitialWaist,Wavelength,n,m)
-      
-      Hermite@GaussianBeam(x,y,PropagationDistance,InitialWaist,Wavelength); 
-      
-      Hermite.n = n;
-      Hermite.m = m;
-      [Hn,~]    = Hermite.hermiteSolutions(n,(sqrt(2)./Hermite.Waist).*x);
-      [Hm,~]    = Hermite.hermiteSolutions(m,(sqrt(2)./Hermite.Waist).*y);
+    function OpticalFieldHermite  = get.OpticalFieldHermite(obj)
 
+      [Hn,~] = HermiteBeam.hermiteSolutions(obj.n,(sqrt(2)./obj.Waist).*obj.x);
       
-      %% Optical Field
-      Hermite.OpticalField = Hermite.Normalization.*...
-                             Hermite.HermiteAmplitude.*... 
-                             exp(1i*Hermite.PhiPhase).*...
-                             Hn.*Hm.*...
-                             Hermite.OpticalField;
+      [Hm,~] = HermiteBeam.hermiteSolutions(obj.m,(sqrt(2)./obj.Waist).*obj.y);
+
+      OpticalFieldHermite = obj.Normalization.*...
+                            obj.HermiteAmplitude.*...
+                            exp(1i*obj.PhiPhase).*...
+                            Hn.*Hm.*...
+                            obj.OpticalField;
+    end
+      
+    function Hermite          = HermiteBeam(x,y,hermiteParameters)
+    %% Constructor of Hermite
+      
+      % Copying HermtiteParameters to Hermite Beam Object
+      Hermite@HermiteParameters( hermiteParameters.zCoordinate...
+                               , hermiteParameters.InitialWaist...
+                               , hermiteParameters.Wavelength...
+                               , hermiteParameters.n...
+                               , hermiteParameters.m);
+      
+      
+      [~,r]=cart2pol(x,y);
+      
+      Hermite@GaussianBeam(r,hermiteParameters);
+      
+      Hermite.x = x;
+      Hermite.y = y;
+    
     end
   end
   
