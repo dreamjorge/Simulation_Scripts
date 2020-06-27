@@ -2,6 +2,11 @@ function [Xnmr]= XAssociatedLaguerrePolynomial(n,m,x)
 %This function calculates second solution of associated laguerre equation
 %for n,m integers.
 nrterms = 48;
+  if x == 0
+    
+    Xnmr = Inf
+    
+  else
 
     % first term
     a1 = x.^(n+1)/(gamma(n+2)*gamma(m+1+n+1));
@@ -36,5 +41,6 @@ nrterms = 48;
 
     % Second Solution
     Xnmr = (-1)^(n+1)/((n+(m+1)/2)^(m/2))*gamma(n+m+1)/pi*(-a1+((-1)^n)*(a2+a3));
-
+    
+  end
 end

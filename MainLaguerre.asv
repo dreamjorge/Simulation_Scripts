@@ -5,13 +5,11 @@ addpath ParaxialBeams
 addpath ParaxialBeams\Addons
 % Selecting green color for beam
 mapgreen = AdvancedColormap('kgg',256,[0 100 255]/255);
-% use gpu? 
-runGPU = 'no';
+
 %%          Initial parameters of Laguerre Gaussian Beams
 
-l = 15;
+l = 17;
 p = 0;
-
 % Physical parameters [microns]
 InitialWaist        = 10;%179*2;
 Wavelength          = 0.6328;
@@ -31,7 +29,7 @@ LPinZ0 = LaguerreParameters(PropagationDistance...
 % Estimate sampling in z-direction with propagation distance 
 % z-direction
 Dz = LPinZ0.RayleighDistance; % z-window (propagation distance)
-Nz = 2^9;                     % number of points in z-direction
+Nz = 2^5;                     % number of points in z-direction
 dz = Dz/Nz;                   % Resolution in z
 z  = 0:dz:Dz;                 % z-vector z of propagation 
 
@@ -61,7 +59,7 @@ plotLaguerreParameters(LPinZ);
  % waist in max z, from LaguereParametersz0                                               
 MaxLaguerreWaist = LPinZ.LaguerreWaist(end);
 
-N   = 2^10;                  % Number of points in x,y axis
+N   = 2^9;                  % Number of points in x,y axis
 n   = -N/2+.05:N/2-1+.05;   % vector with N-points with resolution 1
 Dx  = 2.2*MaxLaguerreWaist; % Size of window 
 dx  = Dx/N;                 % Resolution
@@ -69,25 +67,14 @@ x   = n*dx;                 % Vector with dimentions
 y   = x;                    % same for y
 [X] = meshgrid(x,y);        % Matrix for x,y
 
-
 % Transformation of coordinates
 [dth,dr]                      = cart2pol(dx,dx');
-[thetaCoordinate,rCoordinate] = cart2pol(x,x);
+[thetaCoordinate,rCoordinate] = cart2pol(x,x');
 [ThetaCoordinate,RCoordinate] = cart2pol(X,X');
 
-r  = 0:N-1;
-Dr = sqrt(2)*Dx;
-dr = Dr/N;
-r  = r*dr;
-
-th   = -N/2:N/2-1;
-Dth  = atan2(Dx,Dx);
-dth  = Dth/N;
-th   = th*dth;
-
 % Diferential vector in cartesian coordinates
-%difr = [dx,dx,dz];
-difr = [dr,dth,dz];
+difr = [dx,dx,dz];
+
 % Estimate vectors of frequency for Fourier Transforms associated
 % with x,y
 Du   = 1/dx;         % Size of window 
@@ -98,19 +85,6 @@ u    = n*du;         % freq vector with dimentions
 kx   = 2*pi*u;       % angular freq vector
 [Kx] = meshgrid(kx); % angular freq matrix
 
-
-if strcmp(runGPU,'yes')
-%Parallel Computing Toolbox
-  x               = gpuArray(x);
-  X               = gpuArray(X);
-  u               = gpuArray(u);
-  U               = gpuArray(U);
-  kx              = gpuArray(kx);
-  rCoordinate     = gpuArray(rCoordinate);
-  thetaCoordinate = gpuArray(thetaCoordinate);
-  RCoordinate     = gpuArray(RCoordinate);
-  ThetaCoordinate = gpuArray(ThetaCoordinate);
-end
 %% ----------------------- Laguerre Gauss in z = 0 --------------------- %%
 
 % With laguerre parameters calculated, it estimates Laguerre Gauss Beam
@@ -118,7 +92,7 @@ LG = LaguerreBeam(RCoordinate,ThetaCoordinate,LPinZ0);
 
 % Plot of Field
 figure(2)
-plotOpticalField(x,x,abs(LG.OpticalFieldLaguerre).^2,mapgreen,'microns');
+plotOpticalField(x,x,(LG.OpticalFieldLaguerre).^2,mapgreen,'microns');
 plotCircle(0,0,LPinZ0.LaguerreWaist);
 
 % Optic Field to propagate 
@@ -130,8 +104,8 @@ pxy = max(max(g));
 % Initial Waist of Laguerre Beam
 
 lo      = (LPinZ0.LaguerreWaist)/4.3;  % size of obstruction in terms of waist of Laguerre
-xt      = LPinZ0.LaguerreWaist/5.8;                           % traslation of obstruction in x-axis
-yt      = LPinZ0.LaguerreWaist/5.8;                           % traslation of onstruction in y-axis
+xt      = 0;                           % traslation of obstruction in x-axis
+yt      = 0;                           % traslation of onstruction in y-axis
 [~,rho] = cart2pol(X-xt,X'-yt);        % Convert this in polar coordinates
 obo     = double(rho<=lo);             % Create Obstruction   
 clear rho      
@@ -142,24 +116,24 @@ g       = g.*(1-obo);
 figure(3)
 plotOpticalField(x,x,abs(g).^2,mapgreen,'microns');
 plotCircle(0,0,LPinZ0.LaguerreWaist);
-plotCircle(xt,yt,lo);
+plotCircle(0,0,lo);
 
 
 %% ----------------------- Ray tracing (rx,z=0)  ----------------------- %%
 
-TotalRays = 4;          % Number of rays
+TotalRays = 30;          % Number of rays
 
-rayH1(Nz) = CylindricalRay();
-rayH2(Nz) = CylindricalRay();
+rayH1(Nz) = OpticalRay;
+rayH2(Nz) = OpticalRay;
 
 for point_index = 1 : TotalRays
     % Cartersian coordinates of point in circunference of obstruction
-    xi = xt + lo*cos(point_index*(2*pi)/(TotalRays))+.001; 
-    yi = yt + lo*sin(point_index*(2*pi)/(TotalRays))+.001;
+    xi = xt+lo*cos(point_index*(2*pi)/(TotalRays)); 
+    yi = yt+lo*sin(point_index*(2*pi)/(TotalRays));
     zi = 0;
     % assign coordinate to Optical Rays in z = 0, i.e index_z = 1  
-    [rayH1(1)] = assignCoordinates2CylindricalRay(xi,yi,zi,rayH1(1),point_index);
-    [rayH2(1)] = assignCoordinates2CylindricalRay(xi,yi,zi,rayH2(1),point_index);
+    [rayH1(1)] = assignCoordinates2Ray(xi,yi,zi,rayH1(1),point_index);
+    [rayH2(1)] = assignCoordinates2Ray(xi,yi,zi,rayH2(1),point_index);
     
 end
 
@@ -180,12 +154,6 @@ title('Propagator')
 % Matrix for save transversal fields
 gx      = zeros(N,length(z)); 
 gy      = zeros(N,length(z));
-
-if strcmp(runGPU,'yes')
-  gx      = gpuArray(gx); 
-  gy      = gpuArray(gy); 
-end
-
 % Save field in z = 0 
 gx(:,1) = g(N/2+1,:);
 gy(:,1) = g(:,N/2+1);
@@ -203,30 +171,32 @@ for z_index = 1:length(z)-1 % propagation with respect to z
   %%                    Calculating Rays
 
   % propagation distance 
-  zi     = z(z_index);
+  zi          = z(z_index);
   % calculating Laguerre Parameters in zi
-  LPinZi = LaguerreParameters(zi,InitialWaist,Wavelength,l,p);   
+  LPinZi      = LaguerreParameters(zi,InitialWaist,Wavelength,l,p);   
 
   % propagate all rays of H1
-  HankelType = 1;
-  [rayH1(z_index+1)] = getPropagateCylindricalRays(rayH1(z_index),...
-                                                   TotalRays,...
-                                                   r,th,...
-                                                   difr,...
-                                                   LPinZi,...
-                                                   LPinZ,...
-                                                   HankelType); 
+  HankelType  = 1;
+  [rayH1(z_index+1)] = getPropagateRay(rayH1(z_index),...
+                                       TotalRays,...
+                                       x,y,...
+                                       difr,...
+                                       LPinZi,...
+                                       LPinZ,...
+                                       HankelType); 
  
 
+  % temporal rays in zi for loop above all rays
+  rayH2Temp   = rayH2(z_index);
   % propagate all rays of H2
   HankelType  = 2;
-  [rayH2(z_index+1)] = getPropagateCylindricalRays(rayH2(z_index),...
-                                                   TotalRays,...
-                                                   r,th,...
-                                                   difr,...
-                                                   LPinZi,...
-                                                   LPinZ,...
-                                                   HankelType);
+  [rayH2(z_index+1)] = getPropagateRay(rayH2(z_index),...
+                                       TotalRays,...
+                                       x,y,...
+                                       difr,...
+                                       LPinZi,...
+                                       LPinZ,...
+                                       HankelType);
                          
 
   %                             End calculating rays 
@@ -235,38 +205,14 @@ for z_index = 1:length(z)-1 % propagation with respect to z
   fig = figure(6);
   fig.Position = [-1349 147 813 733];
   plotOpticalField(x,x,abs(g).^2,mapgreen,'microns');
-  title(['z = ', num2str(z_index), ' of ', num2str(Nz)])
   drawnow 
   hold on
 
   % Plot propagated points of H1 and H2 in iteration before
   plotRays(rayH1(z_index+1),'r')
-  plotRays(rayH2(z_index+1),'y')
+  plotRays(rayH2Temp,'y')
 
-  pause(0.1)
+  pause(0.5)
 
 end
-%%
-figure(7)
-plotRaysPropagated(rayH1,rayH2,Nz);
-%%
-figure(8)
-imagesc(z,x,abs(gx))
-hold on
-for z_index = 1:length(z)-1
-  scatter(rayH2(z_index).zCoordinate,rayH2(z_index).xCoordinate,10,'filled','MarkerFaceColor',[1 0 0])
-  scatter(rayH1(z_index).zCoordinate,rayH1(z_index).xCoordinate,10,'filled','MarkerFaceColor',[0 1 0])
-end
-hold off
 
-figure(9)
-
-for z_index = 1:length(z)-1
-  
-  radial1(z_index) = rayH2(z_index).rCoordinate(1);
-  radial2(z_index) = rayH2(z_index).rCoordinate(2);
-end
-hold on
-plot(radial1)
-plot(radial2)
-hold off
