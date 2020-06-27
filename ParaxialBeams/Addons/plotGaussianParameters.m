@@ -1,0 +1,26 @@
+function [] = plotGaussianParameters(GBParameters)
+%% Function plots parameters of Gaussian Beam (Waist,DivergenceAngle)
+% Input:
+%  -GB Parameters as GaussianBeamParameters
+
+  p1 = plot( GBParameters.zCoordinate...
+           , GBParameters.Waist...
+           ,'Color','red' );
+  hold on
+  p2 = plot( GBParameters.zCoordinate...
+           ,-GBParameters.Waist...
+           ,'Color','red' );  
+  p3 = plot( GBParameters.zCoordinate...
+           , GBParameters.zCoordinate*tan(GBParameters.DivergenceAngle)...
+           ,'Color','blue');
+  p4 = plot( GBParameters.zCoordinate...
+           ,-GBParameters.zCoordinate*tan(GBParameters.DivergenceAngle)...
+           ,'Color','blue');
+  xlabel('Distance of Propagation [microns]')
+  ylabel('[microns]')
+  title('Parameters of Gaussian Beam')
+  p1legend = 'Waist of Gaussian Beam';
+  p3legend = ['Angle of Divergence = ',num2str(rad2deg(GBParameters.DivergenceAngle)),'°'];
+  legend([p1,p3],{p1legend,p3legend})
+
+end
