@@ -1,14 +1,9 @@
 function [] = plotRays(rayObject,color)
 
-rayTotal = numel(rayObject.xCoordinate);
-
 hold on
-for point_index=1:rayTotal
-    plot(rayObject.xCoordinate(point_index)...
-        ,rayObject.yCoordinate(point_index)...
-        ,'.','MarkerSize',10,'LineWidth',2,'color',color)
-      pause(0.1)
-end
+
+scatter(rayObject.xCoordinate,rayObject.yCoordinate,10,color,'filled','o')
+pause(0.05)
 hold off
 
 end
