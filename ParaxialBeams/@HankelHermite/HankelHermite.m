@@ -7,7 +7,6 @@ classdef HankelHermite
   
   methods(Static)
     Rays = getPropagateCartesianRays(Rays,...
-                                     TotalRays,...
                                      x,y,...
                                      difr,...
                                      HParametersZi,...
@@ -21,7 +20,6 @@ classdef HankelHermite
 
       Hankel.HankelType = hankelType;
       WaistGauss        = hermiteParameters.Waist;
-      PhiPhase          = hermiteParameters.PhiPhase;
 
       [Hx,NHx] = ...
       HermiteBeam.hermiteSolutions(hermiteParameters.n...
@@ -30,25 +28,22 @@ classdef HankelHermite
       [Hy,NHy] = ...
       HermiteBeam.hermiteSolutions(hermiteParameters.m...
                                   ,(sqrt(2)./WaistGauss).*y);
-      GaussX   = GaussianBeam(x,hermiteParameters).OpticalField;
-      GaussY   = GaussianBeam(y,hermiteParameters).OpticalField;
+                            
       
-      Hx       = Hx .*GaussX.*exp(1i*PhiPhase);
-      Hy       = Hy .*GaussY.*exp(1i*PhiPhase);
-      NHx      = NHx.*GaussX.*exp(1i*PhiPhase);
-      NHy      = NHy.*GaussY.*exp(1i*PhiPhase);
+      GaussB   = GaussianBeam(sqrt(x.^2+y.^2),hermiteParameters).OpticalField;
+
 
       if     (hankelType == 11)
-        Hankel.OpticalField = (Hx+1i*NHx).*(Hy+1i*NHy);
+        Hankel.OpticalField = (Hx+1i*NHx).*(Hy+1i*NHy).*GaussB;
        
       elseif (hankelType == 12)
-        Hankel.OpticalField = (Hx+1i*NHx).*(Hy-1i*NHy);
+        Hankel.OpticalField = (Hx+1i*NHx).*(Hy-1i*NHy).*GaussB;
 
       elseif (hankelType == 21)
-        Hankel.OpticalField = (Hx-1i*NHx).*(Hy+1i*NHy);
+        Hankel.OpticalField = (Hx-1i*NHx).*(Hy+1i*NHy).*GaussB;
 
       elseif (hankelType == 22)
-        Hankel.OpticalField = (Hx-1i*NHx).*(Hy-1i*NHy);
+        Hankel.OpticalField = (Hx-1i*NHx).*(Hy-1i*NHy).*GaussB;
 
       end
 
