@@ -20,7 +20,7 @@ function [Rays] = getPropagateRay(Rays,...
 
       % new coordinates of ray
       temporalRay.xCoordinate = temporalRay.xCoordinate + (1./temporalRay.zxSlope)*dz;
-      temporalRay.yCoordinate = temporalRay.yCoordinate + (1./temporalRay.zySlope)*dz;
+      temporalRay.yCoordinate = temporalRay.yCoordinate + (1./temporalRay.zxSlope)*dz;
       % obtain new (r,th) coordinates 
       [Rays.thetaCoordinate,Rays.rCoordinate] = cart2pol(Rays.xCoordinate,Rays.yCoordinate);
 
