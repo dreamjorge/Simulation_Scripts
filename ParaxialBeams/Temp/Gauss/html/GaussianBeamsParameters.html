@@ -1,0 +1,666 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>This script generates plots of Normalized Gaussian Beams Parameters</title><meta name="generator" content="MATLAB 8.6"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2019-06-06"><meta name="DC.source" content="GaussianBeamsParameters.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>This script generates plots of Normalized Gaussian Beams Parameters</h1><!--introduction--><p>For this we have used different ways of normalization.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Initial parameters</a></li><li><a href="#2">Normalized Radius of Curvature of Guassian Beams</a></li><li><a href="#3">Normalized Waist, Elegant Waist and Sigma of Gaussian Beams</a></li><li><a href="#4">Slopes Normalized Waist, Elegant Waist and Sigma of Gaussian Beams</a></li><li><a href="#6">Changing Condition initial to Elegant Waist = 1</a></li><li><a href="#7">Functions Defined in Script</a></li></ul></div><h2>Initial parameters<a name="1"></a></h2><pre class="codeinput"><span class="comment">% Diffent definitions of "waist" of Gaussian Beams</span>
+wo      = 1;             <span class="comment">% Initial normalized standard waist of Gaussian Beam.</span>
+sigmao  = 2*wo;          <span class="comment">% Initial normalized deviation of Gaussian Beam.</span>
+weo     = wo/sqrt(2);    <span class="comment">% Initial normalized elegant waist of Gaussian Beam.</span>
+<span class="comment">% Normalized distance of Rayleigh</span>
+so      = wo^2;
+
+<span class="comment">% Quantities for generate vector in s direction</span>
+Ns      = 2^9;            <span class="comment">% Number of points of vector</span>
+ns      = -Ns/2:Ns/2-1;   <span class="comment">% Index vector with 1 of resolution</span>
+timesso = 12;             <span class="comment">% Number of times so</span>
+Ds      = timesso*so;     <span class="comment">% Size of vector's window</span>
+ds      = Ds/Ns;          <span class="comment">% Resolution of vector</span>
+s       = ns.*ds;         <span class="comment">% Vector</span>
+</pre><h2>Normalized Radius of Curvature of Guassian Beams<a name="2"></a></h2><pre class="codeinput">set(groot,<span class="string">'defaultAxesTickLabelInterpreter'</span>,<span class="string">'latex'</span>);                       <span class="comment">% Using latex in labels.</span>
+<span class="comment">%Plot Normalized Radius of Curvature and Normalized Elegant Radius of Curvature</span>
+figure(1)
+plot(s,radiusGaussianBeam(s,wo),<span class="string">'LineWidth'</span>,1.5)                            <span class="comment">% Normalized Radius of Curvature.</span>
+hold <span class="string">on</span>
+plot(s,elegantRadiusGaussianBeam(s,wo),<span class="string">'LineWidth'</span>,1.5)                     <span class="comment">% Normalized Elegant Radius of Curvature.</span>
+hold <span class="string">off</span>
+xlabel(<span class="string">'$s$'</span>,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>)
+ylabel(<span class="string">'$R(s)$'</span>,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>)
+title(<span class="string">'Radius of Curvature of Normalized Gaussian Beam'</span>)
+
+<span class="comment">%generate x-ticks in terms of so</span>
+nrticksx     = timesso+1;                                                   <span class="comment">% Number of ticks symetric of 0.</span>
+xticksv      = zeros(1,nrticksx);                                           <span class="comment">% Vector for values in ticks.</span>
+xticklabelsv = cell(1,nrticksx);                                            <span class="comment">% Cell for strings of labels in ticks.</span>
+<span class="comment">%cycle for how many times of so</span>
+<span class="keyword">for</span> ii = 1:nrticksx
+    xticksv(ii)      = (ii-floor(nrticksx/2)-1)*so;                         <span class="comment">% How many times of so.</span>
+    <span class="keyword">if</span> ( xticksv(ii) == 0)                                                  <span class="comment">% If x is zero only put 0 in xlabel.</span>
+         xticklabelsv{ii} = 0;
+    <span class="keyword">else</span>                                                                    <span class="comment">% Else It takes value of times so.</span>
+         xticklabelsv{ii} = [num2str(xticksv(ii)),<span class="string">'$s_0$'</span>];
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+set(gca,<span class="string">'xtick'</span>,xticksv);                                                   <span class="comment">% Set values of ticks.</span>
+set(gca,<span class="string">'xticklabel'</span>,xticklabelsv)                                          <span class="comment">% Set labels in ticks.</span>
+xlim([-1.05*Ds/2 1.05*Ds/2])                                                <span class="comment">% Limit axes</span>
+
+<span class="comment">%generate y-ticks in terms of so</span>
+nrticksy     = timesso+1;                                                   <span class="comment">% Number of ticks symetric of 0.</span>
+yticksv      = zeros(1,nrticksx);                                           <span class="comment">% Vector for values in ticks.</span>
+yticklabelsv = cell(1,nrticksx);                                            <span class="comment">% Cell for strings of labels in ticks.</span>
+<span class="comment">%cycle for how many times of so is evaluated in Radius functions</span>
+<span class="keyword">for</span> jj =1:nrticksy
+    yticksv(jj) = radiusGaussianBeam((jj-floor(nrticksx/2)-1)*so,wo);       <span class="comment">% How many times of so evalued in Radius.</span>
+    <span class="keyword">if</span> (isnan(yticksv(jj)) == 1)                                            <span class="comment">% If y is nan only put 0 in ylabel</span>
+        yticksv(jj)      = 0;
+        yticklabelsv{jj} = 0;
+    <span class="keyword">else</span>
+        yticklabelsv{jj} = [num2str(rats(yticksv(jj))),<span class="string">' $s_0$'</span>];           <span class="comment">% Else It takes value of times so in Radius.</span>
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+set(gca,<span class="string">'ytick'</span>,yticksv);                                                   <span class="comment">% Set values of ticks.</span>
+set(gca,<span class="string">'yticklabel'</span>,yticklabelsv)                                          <span class="comment">% Set labels in ticks.</span>
+ylim([1.05*radiusGaussianBeam(-(timesso/2)*so,wo) <span class="keyword">...</span><span class="comment">                       % Limit axes</span>
+     ,1.05*radiusGaussianBeam( (timesso/2)*so,wo)])
+
+grid
+leg = legend({<span class="string">'$R(s)$'</span>,<span class="string">'$R_e(s)$'</span>},<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>);                  <span class="comment">% Legends</span>
+leg.Position = [0.6326    0.4531    0.1514    0.0978];                      <span class="comment">% Change position of legends</span>
+
+daspect([1 1 1])                                                            <span class="comment">% relation aspect 1:1 in axes</span>
+</pre><img vspace="5" hspace="5" src="GaussianBeamsParameters_01.png" style="width:560px;height:438px;" alt=""> <h2>Normalized Waist, Elegant Waist and Sigma of Gaussian Beams<a name="3"></a></h2><pre class="codeinput"><span class="comment">%Plot different waist of Gaussian Beams</span>
+figure(2)
+plot(s,waistGaussianBeam(s,wo),<span class="string">'b'</span>,<span class="string">'LineWidth'</span>,1.5)
+hold <span class="string">on</span>
+plot(s,sigmaGaussianBeam(s,wo),<span class="string">'r'</span>,<span class="string">'LineWidth'</span>,1.5)
+plot(s,elegantWaistGaussianBeam(s,wo),<span class="string">'g'</span>,<span class="string">'LineWidth'</span>,1.5)
+plot(s,-waistGaussianBeam(s,wo),<span class="string">'b'</span>,<span class="string">'LineWidth'</span>,1.5)
+plot(s,-sigmaGaussianBeam(s,wo),<span class="string">'r'</span>,<span class="string">'LineWidth'</span>,1.5)
+plot(s,-elegantWaistGaussianBeam(s,wo),<span class="string">'g'</span>,<span class="string">'LineWidth'</span>,1.5)
+hold <span class="string">off</span>
+xlabel(<span class="string">'$s$'</span>,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>)
+<span class="comment">%%ylabel('$w(s)$','Interpreter','latex')</span>
+xticksv =[-4*so,-3*so,-2*so,-3*so/2,-so,-so/2,0,so/2,so,3*so/2,2*so,3*so,4*so];
+xticklabelsv={<span class="string">'$-4s_0$'</span>,<span class="string">'$-3s_0$'</span>,<span class="string">'$-2s_0$'</span>,<span class="string">'$-\frac{3s_0}{2}$'</span>,<span class="string">'$-s_0$'</span>,<span class="string">'$-\frac{s_0}{2}$'</span>,<span class="string">'$0$'</span>,<span class="string">'$\frac{s_0}{2}$'</span>,<span class="string">'$s_0$'</span>,<span class="string">'$\frac{3s_0}{2}$'</span>,<span class="string">'$2s_0$'</span>,<span class="string">'$3s_0$'</span>,<span class="string">'$4s_0$'</span>};
+set(gca,<span class="string">'xtick'</span>,xticksv);
+set(gca,<span class="string">'xticklabel'</span>,xticklabelsv)
+yticksv =[-waistGaussianBeam(2*so,wo),-waistGaussianBeam(3*so/2,wo),-waistGaussianBeam(so,wo), -waistGaussianBeam(so/2,wo),-  waistGaussianBeam(0,wo),-wo/2,0,<span class="keyword">...</span>
+          wo/2,    waistGaussianBeam(0,wo),   waistGaussianBeam(so/2,wo), waistGaussianBeam(so,wo),waistGaussianBeam(3*so/2,wo),waistGaussianBeam(2*so,wo)];
+yticklabelsv={<span class="string">'$-\sqrt{5}w_0$'</span>,<span class="string">'$-\frac{\sqrt{13}}{2}w_0$'</span>,<span class="string">'$-\sqrt{2}w_0$'</span>,<span class="string">'$-\frac{\sqrt{5}}{2}w_0\quad$'</span>,<span class="string">'$-w_0$'</span>,<span class="string">'$-\frac{w_0}{2}$'</span>,<span class="string">'$0$'</span><span class="keyword">...</span>
+               <span class="string">'$\frac{w_0}{2}$'</span>,<span class="string">'$w_0$'</span>,<span class="string">'$\frac{\sqrt{5}}{2}w_0\quad$'</span>,<span class="string">'$\sqrt{2}w_0$'</span>,<span class="string">'$\frac{\sqrt{13}}{2}w_0$'</span>,<span class="string">'$\sqrt{5}w_0$'</span>};
+set(gca,<span class="string">'ytick'</span>,yticksv);
+set(gca,<span class="string">'yticklabel'</span>,yticklabelsv)
+title(<span class="string">'Waist, Standard Devation and Elegant Term of Normalized Gaussian Beam'</span>)
+xlim([-1.02*4*so 1.02*4*so])
+ylim([-1.02*sigmaGaussianBeam(7*so,wo) 1.02*sigmaGaussianBeam(7*so,wo)])
+daspect([1 1 1])
+grid
+ax=gca;
+ax.GridLineStyle = <span class="string">'--'</span>;
+ax.GridAlpha = 0.5;
+legend(<span class="string">'w(s) Waist of Gaussian Beam'</span>,<span class="string">'\sigma(s) Standard Deviation of Gaussian Beam'</span>,<span class="string">'w_e(s) Elegant Term of Gaussian Beam'</span>)
+</pre><img vspace="5" hspace="5" src="GaussianBeamsParameters_02.png" style="width:560px;height:420px;" alt=""> <h2>Slopes Normalized Waist, Elegant Waist and Sigma of Gaussian Beams<a name="4"></a></h2><pre class="codeinput">Ns = 2^9;                     <span class="comment">% number of points</span>
+ns = -Ns/2:Ns/2-1;            <span class="comment">% index vector with 1 of resolution</span>
+
+<span class="comment">%%vector s</span>
+Ds = 20*so;                   <span class="comment">% size of window of vector</span>
+ds = Ds/Ns;                   <span class="comment">% resolution of vector</span>
+s  = ns.*ds;                  <span class="comment">% vector</span>
+
+Colors = {<span class="string">'b'</span>,<span class="string">'r'</span>,<span class="string">'g'</span>};
+
+numberofplots = 2;
+legendplot = {};
+K =1:1:numberofplots;
+figure(3)
+plots = {};
+<span class="keyword">for</span> jj = K
+    plot(s,s*(1/(jj*wo)),[<span class="string">'--'</span>,Colors{jj}],<span class="string">'LineWidth'</span>,1)
+    hold <span class="string">on</span>
+    plot(s,-s*(1/(jj*wo)),[<span class="string">'--'</span>,Colors{jj}],<span class="string">'LineWidth'</span>,1)
+    plots{jj}=plot(s, waistGaussianBeam(s,jj*wo),Colors{jj},<span class="string">'LineWidth'</span>,1.5);
+    plot(s,-waistGaussianBeam(s,jj*wo),Colors{jj},<span class="string">'LineWidth'</span>,1.5)
+    legendplot{jj} = [<span class="string">'beam with $w_0='</span>,num2str(jj),<span class="string">'w_0$'</span>];
+<span class="keyword">end</span>
+hold <span class="string">off</span>
+legend([plots{:}],legendplot,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>)
+xlabel(<span class="string">'$s$'</span>,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>)
+ylabel(<span class="string">'$w(s)$'</span>,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>)
+title(<span class="string">'Asynths of waist'</span>)
+
+<span class="comment">%ticks</span>
+nrticksx     = 19;
+xticksv      = zeros(1,nrticksx);
+xticklabelsv = {};
+<span class="keyword">for</span> ii = 1:nrticksx
+    xticksv(ii)  = (ii-floor(nrticksx/2)-1)*so;
+    xticklabelsv{ii} = [<span class="string">'$'</span>,num2str(ii-floor(nrticksx/2)-1),<span class="string">'s_0$'</span>];
+<span class="keyword">end</span>
+set(gca,<span class="string">'xtick'</span>,xticksv);
+set(gca,<span class="string">'xticklabel'</span>,xticklabelsv)
+
+nrticksy     = 11;
+yticksv      = zeros(1,nrticksy);
+yticklabelsv = {};
+<span class="keyword">for</span> ii = 1:nrticksy
+    yticksv(ii)      = waistGaussianBeam(0,(ii-floor(nrticksy/2)-1)*wo);
+    yticklabelsv{ii} = [<span class="string">'$'</span>,num2str(ii-floor(nrticksy/2)-1),<span class="string">'w_0$'</span>];
+
+<span class="keyword">end</span>
+yticksv(isnan(yticksv))=0;
+set(gca,<span class="string">'ytick'</span>,yticksv);
+set(gca,<span class="string">'yticklabel'</span>,yticklabelsv)
+
+grid
+
+
+
+ylim([-1.02*waistGaussianBeam(5*so,wo) 1.02*waistGaussianBeam(5*so,wo)])
+xlim([-10*so 10*so])
+daspect([1 1 1])
+</pre><img vspace="5" hspace="5" src="GaussianBeamsParameters_03.png" style="width:560px;height:420px;" alt=""> <pre class="codeinput"><span class="comment">%</span>
+<span class="comment">% plot(s,waistGaussianBeam(s,wo),'b','LineWidth',1.5)</span>
+<span class="comment">% hold on</span>
+<span class="comment">% plot(s,waistGaussianBeam(s,2*wo),'g','LineWidth',1.5)</span>
+<span class="comment">% plot(s,waistGaussianBeam(s,3*wo),'r','LineWidth',1.5)</span>
+<span class="comment">%</span>
+<span class="comment">% plot(s,waistGaussianBeam(s,-wo),'b','LineWidth',1.5)</span>
+<span class="comment">% plot(s,waistGaussianBeam(s,-2*wo),'g','LineWidth',1.5)</span>
+<span class="comment">% plot(s,waistGaussianBeam(s,-3*wo),'r','LineWidth',1.5)</span>
+<span class="comment">% plot(s,waistGaussianBeam(s,wo),'b','LineWidth',1.5)</span>
+<span class="comment">% plot(s,s*(1/wo),'--b','LineWidth',1.5)</span>
+<span class="comment">% plot(s,-s*(1/wo),'--b','LineWidth',1.5)</span>
+<span class="comment">% plot(s,s*(1/(2*wo)),'--g','LineWidth',1.5)</span>
+<span class="comment">% plot(s,-s*(1/(2*wo)),'--g','LineWidth',1.5)</span>
+<span class="comment">% plot(s,s*(1/(3*wo)),'--r','LineWidth',1.5)</span>
+<span class="comment">% plot(s,-s*(1/(3*wo)),'--r','LineWidth',1.5)</span>
+<span class="comment">% hold off</span>
+<span class="comment">%xlim([-1.02*2*so 1.02*2*so])</span>
+legend(<span class="string">'beam with \sigma_0 = \sigma_0'</span>,<span class="string">'beam with \sigma_0 = 2\sigma_0'</span>, <span class="string">'beam with \sigma_0 = 3\sigma_0'</span>)
+xlabel(<span class="string">'$s$'</span>,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>)
+ylabel(<span class="string">'$w(s)$'</span>,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>)
+
+nrticksx     = 30;
+xticksv      = zeros(1,15);
+xticklabelsv = {};
+
+<span class="keyword">for</span> ii = 1:nrticksx
+    xticksv(ii)  = (ii-floor(nrticksx/2)-1)*so;
+    xticklabelsv{ii} = [<span class="string">'$'</span>,num2str(ii-floor(nrticksx/2)-1),<span class="string">'s_0$'</span>];
+<span class="keyword">end</span>
+set(gca,<span class="string">'xtick'</span>,xticksv);
+set(gca,<span class="string">'xticklabel'</span>,xticklabelsv)
+
+
+
+
+
+xticksv =[-7*so,-6*so,-5*so,-4*so,-3*so,-2*so,-so,0,so,2*so,3*so,4*so,5*so,6*so,7*so];
+xticklabelsv={<span class="string">'$-7s_0$'</span>,<span class="string">'$-6s_0$'</span>,<span class="string">'$-5s_0$'</span>,<span class="string">'$-4s_0$'</span>,<span class="string">'$-3s_0$'</span>,<span class="string">'$-2s_0$'</span>,<span class="string">'$-s_0$'</span>,<span class="string">'$0$'</span>,<span class="string">'$s_0$'</span>,<span class="string">'$2s_0$'</span>,<span class="string">'$3s_0$'</span>,<span class="string">'$4s_0$'</span>,<span class="string">'$5s_0$'</span>,<span class="string">'$6s_0$'</span>,<span class="string">'$7s_0$'</span>};
+set(gca,<span class="string">'xtick'</span>,xticksv);
+set(gca,<span class="string">'xticklabel'</span>,xticklabelsv)
+
+
+
+yticksv =[-waistGaussianBeam(0,5*wo),-waistGaussianBeam(0,4*wo),-waistGaussianBeam(0,3*wo),-waistGaussianBeam(0,2*wo),-waistGaussianBeam(0,wo),0,<span class="keyword">...</span>
+             waistGaussianBeam(0,wo),waistGaussianBeam(0,2*wo),waistGaussianBeam(0,3*wo),waistGaussianBeam(0,4*wo),waistGaussianBeam(0,5*wo)];
+yticklabelsv={<span class="string">'$-5w_0$'</span>,<span class="string">'$-4w_0$'</span>,<span class="string">'$-3w_0$'</span>,<span class="string">'$-2w_0$'</span>,<span class="string">'$-w_0$'</span>,<span class="string">'$0$'</span>,<span class="keyword">...</span>
+              <span class="string">'$w_0$'</span>,<span class="string">'$2w_0$'</span>,<span class="string">'$3w_0$'</span>,<span class="string">'$4w_0$'</span>,<span class="string">'$5w_0$'</span>};
+
+set(gca,<span class="string">'ytick'</span>,yticksv);
+set(gca,<span class="string">'yticklabel'</span>,yticklabelsv)
+grid
+ax=gca;
+ax.GridLineStyle = <span class="string">'--'</span>;
+ax.GridAlpha = 0.5;
+xlim([-20*so 20*so])
+title(<span class="string">'Normalized Gaussian Beams with different \sigma_{0} '</span>)
+daspect([1 1 1])
+ylim([-1.02*waistGaussianBeam(5*so,wo) 1.02*waistGaussianBeam(5*so,wo)])
+</pre><img vspace="5" hspace="5" src="GaussianBeamsParameters_04.png" style="width:560px;height:420px;" alt=""> <h2>Changing Condition initial to Elegant Waist = 1<a name="6"></a></h2><pre class="codeinput"><span class="comment">%initial parameters</span>
+
+omegao = 1;
+sigmao = omegao/sqrt(2);
+wo     = sqrt(2)*omegao;
+
+<span class="comment">% wo = 1;</span>
+<span class="comment">% sigmao = 2*wo;</span>
+ so = wo^2;
+
+
+<span class="comment">%</span>
+Ns = 2^9;                     <span class="comment">% number of points</span>
+ns = -Ns/2:Ns/2-1;            <span class="comment">% index vector with 1 of resolution</span>
+
+
+<span class="comment">%number of so</span>
+
+timesso = 12;
+
+<span class="comment">%%vector s</span>
+Ds = timesso*so;                    <span class="comment">% size of window of vector</span>
+ds = Ds/Ns;                   <span class="comment">% resolution of vector</span>
+s  = ns.*ds;                  <span class="comment">% vector</span>
+
+
+
+figure(2)
+
+plot(s,waistGaussianBeam(s,wo),<span class="string">'b'</span>,<span class="string">'LineWidth'</span>,1.5)
+hold <span class="string">on</span>
+plot(s,sigmaGaussianBeam(s,wo),<span class="string">'r'</span>,<span class="string">'LineWidth'</span>,1.5)
+plot(s,omegaGaussianBeam(s,wo),<span class="string">'g'</span>,<span class="string">'LineWidth'</span>,1.5)
+plot(s,-waistGaussianBeam(s,wo),<span class="string">'b'</span>,<span class="string">'LineWidth'</span>,1.5)
+plot(s,-sigmaGaussianBeam(s,wo),<span class="string">'r'</span>,<span class="string">'LineWidth'</span>,1.5)
+plot(s,-omegaGaussianBeam(s,wo),<span class="string">'g'</span>,<span class="string">'LineWidth'</span>,1.5)
+hold <span class="string">off</span>
+xlabel(<span class="string">'$s$'</span>,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>)
+<span class="comment">%%ylabel('$w(s)$','.abel',xticklabelsv)</span>
+
+xticksv =[-4*so,-3*so,-2*so,-3*so/2,-so,-so/2,0,so/2,so,3*so/2,2*so,3*so,4*so];
+xticklabelsv={<span class="string">'$-4s_0$'</span>,<span class="string">'$-3s_0$'</span>,<span class="string">'$-2s_0$'</span>,<span class="string">'$-\frac{3s_0}{2}$'</span>,<span class="string">'$-s_0$'</span>,<span class="string">'$-\frac{s_0}{2}$'</span>,<span class="string">'$0$'</span>,<span class="string">'$\frac{s_0}{2}$'</span>,<span class="string">'$s_0$'</span>,<span class="string">'$\frac{3s_0}{2}$'</span>,<span class="string">'$2s_0$'</span>,<span class="string">'$3s_0$'</span>,<span class="string">'$4s_0$'</span>};
+set(gca,<span class="string">'xtick'</span>,xticksv);
+set(gca,<span class="string">'xticklabel'</span>,xticklabelsv)
+yticksv =[-wo,-omegao,-sigmao,0,sigmao,omegao,wo];
+yticklabelsv={<span class="string">'$-\sqrt{2}w_{es0}$'</span>,<span class="string">'$-w_{es0}$'</span>,<span class="string">'$-w_{es0}/\sqrt{2}$'</span>,<span class="string">'$0$'</span><span class="keyword">...</span>
+               <span class="string">'$w_{es0}/\sqrt{2}$'</span>,<span class="string">'$w_{se0}$'</span>,<span class="string">'$\sqrt{2}w_{es0}$'</span>};
+<span class="comment">%yticklabelsv = {'a','b','c','d','e','f','g'};</span>
+set(gca,<span class="string">'ytick'</span>,yticksv);
+set(gca,<span class="string">'yticklabel'</span>,yticklabelsv)
+title(<span class="string">'Waist, Standard Devation and Elegant Term of Normalized Gaussian Beam'</span>)
+xlim([-1.02*4*so 1.02*4*so])
+ylim([-1.02*omegaGaussianBeam(4*so,wo) 1.02*omegaGaussianBeam(4*so,wo)])
+daspect([1 1 1])
+grid
+ax=gca;
+ax.GridLineStyle = <span class="string">'--'</span>;
+ax.GridAlpha = 0.5;
+legend(<span class="string">'w(s) Waist of Gaussian Beam'</span>,<span class="string">'\sigma(s) Standard Deviation of Gaussian Beam'</span>,<span class="string">'w_{e}(s) Elegant Term of Gaussian Beam'</span>)
+</pre><img vspace="5" hspace="5" src="GaussianBeamsParameters_05.png" style="width:560px;height:420px;" alt=""> <h2>Functions Defined in Script<a name="7"></a></h2><pre class="language-matlab">
+<span class="keyword">function</span> Rs = radiusGaussianBeam(s,wo)
+
+
+so = wo.^2;
+
+Rs = (s).*(1+(so./s).^2);
+
+<span class="keyword">end</span>
+
+</pre><pre class="language-matlab">
+<span class="keyword">function</span> Rs = elegantRadiusGaussianBeam(s,wo)
+
+
+so = wo.^2;
+
+Rs = (s/2).*(1+(so./s).^2);
+
+<span class="keyword">end</span>
+
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2015b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% This script generates plots of Normalized Gaussian Beams Parameters
+% For this we have used different ways of normalization.
+%% Initial parameters
+
+% Diffent definitions of "waist" of Gaussian Beams
+wo      = 1;             % Initial normalized standard waist of Gaussian Beam.
+sigmao  = 2*wo;          % Initial normalized deviation of Gaussian Beam.
+weo     = wo/sqrt(2);    % Initial normalized elegant waist of Gaussian Beam.
+% Normalized distance of Rayleigh
+so      = wo^2;
+
+% Quantities for generate vector in s direction
+Ns      = 2^9;            % Number of points of vector
+ns      = -Ns/2:Ns/2-1;   % Index vector with 1 of resolution
+timesso = 12;             % Number of times so 
+Ds      = timesso*so;     % Size of vector's window
+ds      = Ds/Ns;          % Resolution of vector
+s       = ns.*ds;         % Vector
+
+%% Normalized Radius of Curvature of Guassian Beams
+
+set(groot,'defaultAxesTickLabelInterpreter','latex');                       % Using latex in labels.
+%Plot Normalized Radius of Curvature and Normalized Elegant Radius of Curvature
+figure(1)
+plot(s,radiusGaussianBeam(s,wo),'LineWidth',1.5)                            % Normalized Radius of Curvature.
+hold on
+plot(s,elegantRadiusGaussianBeam(s,wo),'LineWidth',1.5)                     % Normalized Elegant Radius of Curvature.
+hold off
+xlabel('$s$','Interpreter','latex')
+ylabel('$R(s)$','Interpreter','latex')
+title('Radius of Curvature of Normalized Gaussian Beam')
+
+%generate x-ticks in terms of so
+nrticksx     = timesso+1;                                                   % Number of ticks symetric of 0.
+xticksv      = zeros(1,nrticksx);                                           % Vector for values in ticks.
+xticklabelsv = cell(1,nrticksx);                                            % Cell for strings of labels in ticks.
+%cycle for how many times of so
+for ii = 1:nrticksx
+    xticksv(ii)      = (ii-floor(nrticksx/2)-1)*so;                         % How many times of so.
+    if ( xticksv(ii) == 0)                                                  % If x is zero only put 0 in xlabel.
+         xticklabelsv{ii} = 0;                                              
+    else                                                                    % Else It takes value of times so.
+         xticklabelsv{ii} = [num2str(xticksv(ii)),'$s_0$'];                    
+    end
+end
+set(gca,'xtick',xticksv);                                                   % Set values of ticks. 
+set(gca,'xticklabel',xticklabelsv)                                          % Set labels in ticks. 
+xlim([-1.05*Ds/2 1.05*Ds/2])                                                % Limit axes
+
+%generate y-ticks in terms of so
+nrticksy     = timesso+1;                                                   % Number of ticks symetric of 0.   
+yticksv      = zeros(1,nrticksx);                                           % Vector for values in ticks.
+yticklabelsv = cell(1,nrticksx);                                            % Cell for strings of labels in ticks.
+%cycle for how many times of so is evaluated in Radius functions
+for jj =1:nrticksy
+    yticksv(jj) = radiusGaussianBeam((jj-floor(nrticksx/2)-1)*so,wo);       % How many times of so evalued in Radius.
+    if (isnan(yticksv(jj)) == 1)                                            % If y is nan only put 0 in ylabel
+        yticksv(jj)      = 0;
+        yticklabelsv{jj} = 0;
+    else
+        yticklabelsv{jj} = [num2str(rats(yticksv(jj))),' $s_0$'];           % Else It takes value of times so in Radius.
+    end
+end
+set(gca,'ytick',yticksv);                                                   % Set values of ticks. 
+set(gca,'yticklabel',yticklabelsv)                                          % Set labels in ticks. 
+ylim([1.05*radiusGaussianBeam(-(timesso/2)*so,wo) ...                       % Limit axes
+     ,1.05*radiusGaussianBeam( (timesso/2)*so,wo)])
+
+grid
+leg = legend({'$R(s)$','$R_e(s)$'},'Interpreter','latex');                  % Legends
+leg.Position = [0.6326    0.4531    0.1514    0.0978];                      % Change position of legends
+
+daspect([1 1 1])                                                            % relation aspect 1:1 in axes
+
+%% Normalized Waist, Elegant Waist and Sigma of Gaussian Beams
+
+%Plot different waist of Gaussian Beams
+figure(2)
+plot(s,waistGaussianBeam(s,wo),'b','LineWidth',1.5)
+hold on
+plot(s,sigmaGaussianBeam(s,wo),'r','LineWidth',1.5)
+plot(s,elegantWaistGaussianBeam(s,wo),'g','LineWidth',1.5)
+plot(s,-waistGaussianBeam(s,wo),'b','LineWidth',1.5)
+plot(s,-sigmaGaussianBeam(s,wo),'r','LineWidth',1.5)
+plot(s,-elegantWaistGaussianBeam(s,wo),'g','LineWidth',1.5)
+hold off
+xlabel('$s$','Interpreter','latex')
+%%ylabel('$w(s)$','Interpreter','latex')
+xticksv =[-4*so,-3*so,-2*so,-3*so/2,-so,-so/2,0,so/2,so,3*so/2,2*so,3*so,4*so];
+xticklabelsv={'$-4s_0$','$-3s_0$','$-2s_0$','$-\frac{3s_0}{2}$','$-s_0$','$-\frac{s_0}{2}$','$0$','$\frac{s_0}{2}$','$s_0$','$\frac{3s_0}{2}$','$2s_0$','$3s_0$','$4s_0$'};
+set(gca,'xtick',xticksv); 
+set(gca,'xticklabel',xticklabelsv)
+yticksv =[-waistGaussianBeam(2*so,wo),-waistGaussianBeam(3*so/2,wo),-waistGaussianBeam(so,wo), -waistGaussianBeam(so/2,wo),-  waistGaussianBeam(0,wo),-wo/2,0,...
+          wo/2,    waistGaussianBeam(0,wo),   waistGaussianBeam(so/2,wo), waistGaussianBeam(so,wo),waistGaussianBeam(3*so/2,wo),waistGaussianBeam(2*so,wo)];
+yticklabelsv={'$-\sqrt{5}w_0$','$-\frac{\sqrt{13}}{2}w_0$','$-\sqrt{2}w_0$','$-\frac{\sqrt{5}}{2}w_0\quad$','$-w_0$','$-\frac{w_0}{2}$','$0$'...
+               '$\frac{w_0}{2}$','$w_0$','$\frac{\sqrt{5}}{2}w_0\quad$','$\sqrt{2}w_0$','$\frac{\sqrt{13}}{2}w_0$','$\sqrt{5}w_0$'};
+set(gca,'ytick',yticksv); 
+set(gca,'yticklabel',yticklabelsv)
+title('Waist, Standard Devation and Elegant Term of Normalized Gaussian Beam')
+xlim([-1.02*4*so 1.02*4*so])
+ylim([-1.02*sigmaGaussianBeam(7*so,wo) 1.02*sigmaGaussianBeam(7*so,wo)])
+daspect([1 1 1])
+grid
+ax=gca;
+ax.GridLineStyle = 'REPLACE_WITH_DASH_DASH';
+ax.GridAlpha = 0.5;
+legend('w(s) Waist of Gaussian Beam','\sigma(s) Standard Deviation of Gaussian Beam','w_e(s) Elegant Term of Gaussian Beam')
+%% Slopes Normalized Waist, Elegant Waist and Sigma of Gaussian Beams 
+Ns = 2^9;                     % number of points
+ns = -Ns/2:Ns/2-1;            % index vector with 1 of resolution
+
+%%vector s
+Ds = 20*so;                   % size of window of vector
+ds = Ds/Ns;                   % resolution of vector
+s  = ns.*ds;                  % vector
+
+Colors = {'b','r','g'};
+
+numberofplots = 2;
+legendplot = {};
+K =1:1:numberofplots;
+figure(3)
+plots = {};
+for jj = K
+    plot(s,s*(1/(jj*wo)),['REPLACE_WITH_DASH_DASH',Colors{jj}],'LineWidth',1)
+    hold on
+    plot(s,-s*(1/(jj*wo)),['REPLACE_WITH_DASH_DASH',Colors{jj}],'LineWidth',1)
+    plots{jj}=plot(s, waistGaussianBeam(s,jj*wo),Colors{jj},'LineWidth',1.5);
+    plot(s,-waistGaussianBeam(s,jj*wo),Colors{jj},'LineWidth',1.5)
+    legendplot{jj} = ['beam with $w_0=',num2str(jj),'w_0$'];
+end
+hold off
+legend([plots{:}],legendplot,'Interpreter','latex')
+xlabel('$s$','Interpreter','latex')
+ylabel('$w(s)$','Interpreter','latex')
+title('Asynths of waist')
+
+%ticks
+nrticksx     = 19;
+xticksv      = zeros(1,nrticksx);
+xticklabelsv = {};
+for ii = 1:nrticksx
+    xticksv(ii)  = (ii-floor(nrticksx/2)-1)*so;
+    xticklabelsv{ii} = ['$',num2str(ii-floor(nrticksx/2)-1),'s_0$'];
+end
+set(gca,'xtick',xticksv); 
+set(gca,'xticklabel',xticklabelsv)
+
+nrticksy     = 11;
+yticksv      = zeros(1,nrticksy);
+yticklabelsv = {};
+for ii = 1:nrticksy
+    yticksv(ii)      = waistGaussianBeam(0,(ii-floor(nrticksy/2)-1)*wo);
+    yticklabelsv{ii} = ['$',num2str(ii-floor(nrticksy/2)-1),'w_0$'];
+    
+end
+yticksv(isnan(yticksv))=0;
+set(gca,'ytick',yticksv); 
+set(gca,'yticklabel',yticklabelsv)
+
+grid
+
+
+
+ylim([-1.02*waistGaussianBeam(5*so,wo) 1.02*waistGaussianBeam(5*so,wo)])
+xlim([-10*so 10*so])
+daspect([1 1 1])
+
+
+%%
+
+% 
+% plot(s,waistGaussianBeam(s,wo),'b','LineWidth',1.5)
+% hold on
+% plot(s,waistGaussianBeam(s,2*wo),'g','LineWidth',1.5)
+% plot(s,waistGaussianBeam(s,3*wo),'r','LineWidth',1.5)
+% 
+% plot(s,waistGaussianBeam(s,-wo),'b','LineWidth',1.5)
+% plot(s,waistGaussianBeam(s,-2*wo),'g','LineWidth',1.5)
+% plot(s,waistGaussianBeam(s,-3*wo),'r','LineWidth',1.5)
+% plot(s,waistGaussianBeam(s,wo),'b','LineWidth',1.5)
+% plot(s,s*(1/wo),'REPLACE_WITH_DASH_DASHb','LineWidth',1.5)
+% plot(s,-s*(1/wo),'REPLACE_WITH_DASH_DASHb','LineWidth',1.5)
+% plot(s,s*(1/(2*wo)),'REPLACE_WITH_DASH_DASHg','LineWidth',1.5)
+% plot(s,-s*(1/(2*wo)),'REPLACE_WITH_DASH_DASHg','LineWidth',1.5)
+% plot(s,s*(1/(3*wo)),'REPLACE_WITH_DASH_DASHr','LineWidth',1.5)
+% plot(s,-s*(1/(3*wo)),'REPLACE_WITH_DASH_DASHr','LineWidth',1.5)
+% hold off
+%xlim([-1.02*2*so 1.02*2*so])
+legend('beam with \sigma_0 = \sigma_0','beam with \sigma_0 = 2\sigma_0', 'beam with \sigma_0 = 3\sigma_0')
+xlabel('$s$','Interpreter','latex')
+ylabel('$w(s)$','Interpreter','latex')
+
+nrticksx     = 30;
+xticksv      = zeros(1,15);
+xticklabelsv = {};
+
+for ii = 1:nrticksx
+    xticksv(ii)  = (ii-floor(nrticksx/2)-1)*so;
+    xticklabelsv{ii} = ['$',num2str(ii-floor(nrticksx/2)-1),'s_0$'];
+end
+set(gca,'xtick',xticksv); 
+set(gca,'xticklabel',xticklabelsv)
+
+
+
+
+
+xticksv =[-7*so,-6*so,-5*so,-4*so,-3*so,-2*so,-so,0,so,2*so,3*so,4*so,5*so,6*so,7*so];
+xticklabelsv={'$-7s_0$','$-6s_0$','$-5s_0$','$-4s_0$','$-3s_0$','$-2s_0$','$-s_0$','$0$','$s_0$','$2s_0$','$3s_0$','$4s_0$','$5s_0$','$6s_0$','$7s_0$'};
+set(gca,'xtick',xticksv); 
+set(gca,'xticklabel',xticklabelsv)
+
+
+
+yticksv =[-waistGaussianBeam(0,5*wo),-waistGaussianBeam(0,4*wo),-waistGaussianBeam(0,3*wo),-waistGaussianBeam(0,2*wo),-waistGaussianBeam(0,wo),0,...
+             waistGaussianBeam(0,wo),waistGaussianBeam(0,2*wo),waistGaussianBeam(0,3*wo),waistGaussianBeam(0,4*wo),waistGaussianBeam(0,5*wo)];
+yticklabelsv={'$-5w_0$','$-4w_0$','$-3w_0$','$-2w_0$','$-w_0$','$0$',...
+              '$w_0$','$2w_0$','$3w_0$','$4w_0$','$5w_0$'};
+
+set(gca,'ytick',yticksv); 
+set(gca,'yticklabel',yticklabelsv)
+grid
+ax=gca;
+ax.GridLineStyle = 'REPLACE_WITH_DASH_DASH';
+ax.GridAlpha = 0.5;
+xlim([-20*so 20*so])
+title('Normalized Gaussian Beams with different \sigma_{0} ')
+daspect([1 1 1])
+ylim([-1.02*waistGaussianBeam(5*so,wo) 1.02*waistGaussianBeam(5*so,wo)])
+
+
+%% Changing Condition initial to Elegant Waist = 1
+%
+%initial parameters
+
+omegao = 1;
+sigmao = omegao/sqrt(2);
+wo     = sqrt(2)*omegao;
+
+% wo = 1;
+% sigmao = 2*wo;
+ so = wo^2;
+
+
+%
+Ns = 2^9;                     % number of points
+ns = -Ns/2:Ns/2-1;            % index vector with 1 of resolution
+
+
+%number of so 
+
+timesso = 12;
+
+%%vector s
+Ds = timesso*so;                    % size of window of vector
+ds = Ds/Ns;                   % resolution of vector
+s  = ns.*ds;                  % vector
+
+
+
+figure(2)
+
+plot(s,waistGaussianBeam(s,wo),'b','LineWidth',1.5)
+hold on
+plot(s,sigmaGaussianBeam(s,wo),'r','LineWidth',1.5)
+plot(s,omegaGaussianBeam(s,wo),'g','LineWidth',1.5)
+plot(s,-waistGaussianBeam(s,wo),'b','LineWidth',1.5)
+plot(s,-sigmaGaussianBeam(s,wo),'r','LineWidth',1.5)
+plot(s,-omegaGaussianBeam(s,wo),'g','LineWidth',1.5)
+hold off
+xlabel('$s$','Interpreter','latex')
+%%ylabel('$w(s)$','.abel',xticklabelsv)
+
+xticksv =[-4*so,-3*so,-2*so,-3*so/2,-so,-so/2,0,so/2,so,3*so/2,2*so,3*so,4*so];
+xticklabelsv={'$-4s_0$','$-3s_0$','$-2s_0$','$-\frac{3s_0}{2}$','$-s_0$','$-\frac{s_0}{2}$','$0$','$\frac{s_0}{2}$','$s_0$','$\frac{3s_0}{2}$','$2s_0$','$3s_0$','$4s_0$'};
+set(gca,'xtick',xticksv); 
+set(gca,'xticklabel',xticklabelsv)
+yticksv =[-wo,-omegao,-sigmao,0,sigmao,omegao,wo];
+yticklabelsv={'$-\sqrt{2}w_{es0}$','$-w_{es0}$','$-w_{es0}/\sqrt{2}$','$0$'...
+               '$w_{es0}/\sqrt{2}$','$w_{se0}$','$\sqrt{2}w_{es0}$'};
+%yticklabelsv = {'a','b','c','d','e','f','g'};
+set(gca,'ytick',yticksv); 
+set(gca,'yticklabel',yticklabelsv)
+title('Waist, Standard Devation and Elegant Term of Normalized Gaussian Beam')
+xlim([-1.02*4*so 1.02*4*so])
+ylim([-1.02*omegaGaussianBeam(4*so,wo) 1.02*omegaGaussianBeam(4*so,wo)])
+daspect([1 1 1])
+grid
+ax=gca;
+ax.GridLineStyle = 'REPLACE_WITH_DASH_DASH';
+ax.GridAlpha = 0.5;
+legend('w(s) Waist of Gaussian Beam','\sigma(s) Standard Deviation of Gaussian Beam','w_{e}(s) Elegant Term of Gaussian Beam')
+
+%% Functions Defined in Script
+% <include>radiusGaussianBeam.m</include>
+%
+% <include>elegantRadiusGaussianBeam.m</include>
+
+
+##### SOURCE END #####
+--></body></html>
