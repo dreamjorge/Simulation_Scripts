@@ -1,4 +1,4 @@
-classdef HermiteParameters < GaussianParameters
+classdef HermiteParameters < GaussianParameters & handle & matlab.mixin.Copyable
   
   properties
     n
@@ -6,28 +6,42 @@ classdef HermiteParameters < GaussianParameters
   end
   
   properties (Dependent)
+    HermiteWaistX
+    HermiteWaistY
     HermiteWaist
     PhiPhase
   end
   
   methods(Static)
-    waistL = Waist(zDistance,InitialWaist,RayleighDistance,nu,mu);
+    waistHermite             = getWaist(zDistance,InitialWaist,RayleighDistance,nu,mu);
+  end
+  
+  methods(Static)
+    waistHermiteOneDirection = getWaistOneDirection(zDistance,InitialWaist,RayleighDistance,l);
   end
     
-   methods
+  methods
     
     function PhiPhase = get.PhiPhase(obj) 
       PhiPhase = (abs(obj.n)+2*obj.m).*obj.GouyPhase;
     end
 
-    function HermiteWaist = get.HermiteWaist(obj)
-      HermiteWaist = LaguerreParameters.Waist(obj.PropagationDistance,obj.InitialWaist,obj.RayleighDistance,obj.n,obj.m);
+    function HermiteWaist = get.HermiteWaistX(obj)
+      HermiteWaist = HermiteParameters.getWaistOneDirection(obj.zCoordinate,obj.InitialWaist,obj.RayleighDistance,obj.n);
     end
    
+    function HermiteWaist = get.HermiteWaistY(obj)
+      HermiteWaist = HermiteParameters.getWaistOneDirection(obj.zCoordinate,obj.InitialWaist,obj.RayleighDistance,obj.m);
+    end
+        
+    function HermiteWaist = get.HermiteWaist(obj)
+      HermiteWaist = HermiteParameters.getWaist(obj.zCoordinate,obj.InitialWaist,obj.RayleighDistance,obj.n,obj.m);
+    end
+    
     %% Constructor
-    function Parameters = HermiteParameters(PropagationDistance,InitialWaist,Wavelength,nu,mu)
+    function Parameters = HermiteParameters(zCoordinate,InitialWaist,Wavelength,nu,mu)
      
-     Parameters@GaussianParameters(PropagationDistance,InitialWaist,Wavelength);
+     Parameters@GaussianParameters(zCoordinate,InitialWaist,Wavelength);
      
      if nargin == 5 
        Parameters.n             = nu;
@@ -35,7 +49,8 @@ classdef HermiteParameters < GaussianParameters
      else
         error('You need introduce PropagationDistance, InitialWaist and Wavelength, l, p inputs')
      end
-
+     
     end
+    
   end
 end
