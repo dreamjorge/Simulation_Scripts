@@ -75,16 +75,15 @@ plotCircle(0,0,GaussianBeamParameters.InitialWaist);
 g   = GB.OpticalField;
 
 % Matrix for save transversal fields
-gx  = zeros(N,length(z)); 
-gy  = zeros(N,length(z));
+gx      = zeros(N,length(z)); 
+gy      = zeros(N,length(z));
+% Save field in z = 0 
+gx(:,1) = g(N/2+1,:);
+gy(:,1) = g(:,N/2+1);
 
 
-for ii = 1:length(z) % propagation with respect to z
+for ii = 2:length(z) % propagation with respect to z
     
-    % saving transversal fields
-    gx(:,1) = g(N/2+1,:);
-    gy(:,1) = g(:,N/2+1);
-
     fig = figure(3);
     fig.Position = [460,74,1111,798];
    
@@ -95,9 +94,9 @@ for ii = 1:length(z) % propagation with respect to z
     pause(0.1)
 
     %propagated theoric field
-    GB.zCoordinate = z(ii);
+    GB.zCoordinate = z(ii);...*exp(-1j.*(u(1)).*(X))*exp(-1j.*(u(1)).*(X'));
     g = GB.OpticalField;
-    
+    %saving transversal fields
     gx(:,ii)=g(N/2+1,:);
     gy(:,ii)=g(:,N/2+1);
 %     
