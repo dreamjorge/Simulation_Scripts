@@ -1,4 +1,4 @@
-classdef HermiteParameters < GaussianParameters & handle & matlab.mixin.Copyable
+classdef HermiteParameters < GaussianParameters
   
   properties
     n
@@ -6,42 +6,28 @@ classdef HermiteParameters < GaussianParameters & handle & matlab.mixin.Copyable
   end
   
   properties (Dependent)
-    HermiteWaistX
-    HermiteWaistY
     HermiteWaist
     PhiPhase
   end
   
   methods(Static)
-    waistHermite             = getWaist(zDistance,InitialWaist,RayleighDistance,nu,mu);
-  end
-  
-  methods(Static)
-    waistHermiteOneDirection = getWaistOneDirection(zDistance,InitialWaist,RayleighDistance,l);
+    waistL = Waist(zDistance,InitialWaist,RayleighDistance,nu,mu);
   end
     
-  methods
+   methods
     
     function PhiPhase = get.PhiPhase(obj) 
       PhiPhase = (abs(obj.n)+2*obj.m).*obj.GouyPhase;
     end
 
-    function HermiteWaist = get.HermiteWaistX(obj)
-      HermiteWaist = HermiteParameters.getWaistOneDirection(obj.zCoordinate,obj.InitialWaist,obj.RayleighDistance,obj.n);
+    function HermiteWaist = get.HermiteWaist(obj)
+      HermiteWaist = LaguerreParameters.Waist(obj.PropagationDistance,obj.InitialWaist,obj.RayleighDistance,obj.n,obj.m);
     end
    
-    function HermiteWaist = get.HermiteWaistY(obj)
-      HermiteWaist = HermiteParameters.getWaistOneDirection(obj.zCoordinate,obj.InitialWaist,obj.RayleighDistance,obj.m);
-    end
-        
-    function HermiteWaist = get.HermiteWaist(obj)
-      HermiteWaist = HermiteParameters.getWaist(obj.zCoordinate,obj.InitialWaist,obj.RayleighDistance,obj.n,obj.m);
-    end
-    
     %% Constructor
-    function Parameters = HermiteParameters(zCoordinate,InitialWaist,Wavelength,nu,mu)
+    function Parameters = HermiteParameters(PropagationDistance,InitialWaist,Wavelength,nu,mu)
      
-     Parameters@GaussianParameters(zCoordinate,InitialWaist,Wavelength);
+     Parameters@GaussianParameters(PropagationDistance,InitialWaist,Wavelength);
      
      if nargin == 5 
        Parameters.n             = nu;
@@ -49,8 +35,7 @@ classdef HermiteParameters < GaussianParameters & handle & matlab.mixin.Copyable
      else
         error('You need introduce PropagationDistance, InitialWaist and Wavelength, l, p inputs')
      end
-     
+
     end
-    
   end
 end

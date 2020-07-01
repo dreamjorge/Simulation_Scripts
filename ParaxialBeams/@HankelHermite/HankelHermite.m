@@ -1,4 +1,4 @@
-classdef HankelHermite
+classdef HankelHermite... < LaguerreBeam & XLaguerreBeam
   
   properties   
     HankelType
@@ -6,44 +6,36 @@ classdef HankelHermite
   end
   
   methods(Static)
-    Rays = getPropagateCartesianRays(Rays,...
-                                     x,y,...
-                                     difr,...
-                                     HParametersZi,...
-                                     HParametersZ,...
-                                     HankelType) 
+    [ray] = getHermiteSlopes(ray,x,y,z,...
+                             dx,dy,dz,...
+                             xi,yi,zi,...
+                             InitialWaist,Wavelength,nu,mu,nh)
   end
   
   methods
     
-    function Hankel = HankelHermite(x,y,hermiteParameters,hankelType)
+    function Hankel = HankelHermite(x,y,PropagationDistance,InitialWaist,Wavelength,nu,mu,xnh,ynh)
 
-      Hankel.HankelType = hankelType;
-      WaistGauss        = hermiteParameters.Waist;
+      Hankel.HankelType = [xnh,ynh];
 
-      [Hx,NHx] = ...
-      HermiteBeam.hermiteSolutions(hermiteParameters.n...
-                                  ,(sqrt(2)./WaistGauss).*x);
-      
-      [Hy,NHy] = ...
-      HermiteBeam.hermiteSolutions(hermiteParameters.m...
-                                  ,(sqrt(2)./WaistGauss).*y);
-                            
-      
-      GaussB   = GaussianBeam(sqrt(x.^2+y.^2),hermiteParameters).OpticalField;
+      HB  =  HermiteBeam(x,y,PropagationDistance,InitialWaist,Wavelength,nu,mu);
+      XHB = XHermiteBeam(x,y,PropagationDistance,InitialWaist,Wavelength,nu,mu);
 
+      if     ((xnh == 1) && (ynh == 1))
+        Hankel.OpticalField = (HB.OpticalField + 1i*XHB.OpticalField)...
+                            .*(HB.OpticalField + 1i*XHB.OpticalField);
 
-      if     (hankelType == 11)
-        Hankel.OpticalField = (Hx+1i*NHx).*(Hy+1i*NHy).*GaussB;
-       
-      elseif (hankelType == 12)
-        Hankel.OpticalField = (Hx+1i*NHx).*(Hy-1i*NHy).*GaussB;
+      elseif ((xnh == 1) && (ynh == 2))
+        Hankel.OpticalField = (HB.OpticalField + 1i*XHB.OpticalField)...
+                            .*(HB.OpticalField - 1i*XHB.OpticalField);
 
-      elseif (hankelType == 21)
-        Hankel.OpticalField = (Hx-1i*NHx).*(Hy+1i*NHy).*GaussB;
+      elseif ((xnh == 2) && (ynh == 1))
+        Hankel.OpticalField = (HB.OpticalField - 1i*XHB.OpticalField)...
+                            .*(HB.OpticalField + 1i*XHB.OpticalField);
 
-      elseif (hankelType == 22)
-        Hankel.OpticalField = (Hx-1i*NHx).*(Hy-1i*NHy).*GaussB;
+      elseif ((xnh == 2) && (ynh ==2))
+        Hankel.OpticalField = (HB.OpticalField - 1i*XHB.OpticalField)...
+                            .*(HB.OpticalField - 1i*XHB.OpticalField);
 
       end
 
