@@ -11,9 +11,10 @@ function h=plotOpticalField(xAxis,yAxis,OpticalField,ColorMap,units)
   colormap(ColorMap)
   axis square
   %shading flat
-  labelxaxis=['$x \left[ ',units,' \right]$'];
-  xlabel(labelxaxis,'Interpreter','latex')
-  labelyaxis=['$y \left[ ',units,' \right]$'];
-  ylabel(labelyaxis,'Interpreter','latex') 
+  labelxaxis=['$x$'];
+  xlabel(labelxaxis,'Interpreter','latex','FontSize',18)
+  labelyaxis=['$y$'];
+  ylabel(labelyaxis,'Interpreter','latex','FontSize',18)
   set(gca,'YDir','normal')
+  set(get(gca,'YLabel'),'Rotation',0)
 end 
