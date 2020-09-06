@@ -18,7 +18,6 @@ function [rayOutput]= copyArrayRay2Ray(rayInput,...
     rayOutput.zrSlope         = rayInput.zrSlope (index_point);
     rayOutput.zthSlope        = rayInput.zthSlope(index_point);
     rayOutput.rthSlope        = rayInput.rthSlope(index_point);
-    rayOutput.hankelType      = rayInput.hankelType(index_point);
   end
   
 end

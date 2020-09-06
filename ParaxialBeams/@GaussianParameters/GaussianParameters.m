@@ -24,8 +24,7 @@ classdef GaussianParameters <  handle & matlab.mixin.Copyable
   end
   
   properties(Access = private)
-     %% Don't set Optical Field
-    OpticalField
+
   end
   
   
@@ -40,9 +39,8 @@ classdef GaussianParameters <  handle & matlab.mixin.Copyable
     DivergenceAngle  % Angle of Divergence of Gaussian Beam
   end
 
-  
   methods(Static)
-    %% functions ofr obtain parameters of Gaussian Beam     
+    %% functions for obtain parameters of Gaussian Beam     
     Waist  = waistFunction(zCoordinate,...
                            InitialWaist,...
                            RayleighDistance);
