@@ -9,7 +9,7 @@ mapgreen = AdvancedColormap('kgg',256,[0 100 255]/255);
 runGPU = 'no';
 %%          Initial parameters of Laguerre Gaussian Beams
 
-l = 15;
+l = 11;
 p = 0;
 
 % Physical parameters [microns]
@@ -29,10 +29,10 @@ LPinZ0 = LaguerreParameters(PropagationDistance...
 %%                        Sampling of vectors 
 % Estimate sampling in z-direction with propagation distance 
 % z-direction
-Dz = LPinZ0.RayleighDistance; % z-window (propagation distance)
-Nz = 2^9;                     % number of points in z-direction
-dz = Dz/Nz;                   % Resolution in z
-z  = 0:dz:Dz;                 % z-vector z of propagation 
+Dz = LPinZ0.RayleighDistance*(0.75); % z-window (propagation distance)
+Nz = 2^9;                            % number of points in z-direction
+dz = Dz/Nz;                          % Resolution in z
+z  = 0:dz:Dz;                        % z-vector z of propagation 
 
 % Calculating Laguerre parameters in z distance vector
 % LPinZ = LaguerreParameters(z...
@@ -127,44 +127,92 @@ pxy = max(max(g));
 %% ----------------- Obstruction on Lagurre in z = 0 ------------------- %%
 % Initial Waist of Laguerre Beam
 
-lo      = (LPinZ0.LaguerreWaist)/4.3;  % size of obstruction in terms of waist of Laguerre
-xt      = LPinZ0.LaguerreWaist/5.8;                           % traslation of obstruction in x-axis
-yt      = LPinZ0.LaguerreWaist/5.8;                           % traslation of onstruction in y-axis
-[~,rho] = cart2pol(X-xt,X'-yt);        % Convert this in polar coordinates
-obo     = double(rho<=lo);             % Create Obstruction   
+lo       = (LPinZ0.LaguerreWaist)*.2;  % size of obstruction in terms of waist of Laguerre
+xt1      = 0;                          % traslation of obstruction in x-axis
+yt1      = 0;                          % traslation of onstruction in y-axis
+[~,rho]  = cart2pol(X-xt1,X'-yt1);     % Convert this in polar coordinates
+obo      = double(rho<=lo);            % Create Obstruction   
 clear rho      
 % Clean Matrix of polar coordinates
 % Applying obstruction in optic field
-g       = g.*(1-obo);
+g1       = g.*(1-obo);
 %Ploting Laguerre with obstruction
 figure(3)
-plotOpticalField(x,x,abs(g),mapgreen,'microns');
+plotOpticalField(x,x,abs(g1),mapgreen,'microns');
 plotCircle(0,0,LPinZ0.LaguerreWaist);
-plotCircle(xt,yt,lo);
+plotCircle(xt1,yt1,lo);
+%% second obstruction
+lo       = (LPinZ0.LaguerreWaist)*.2;  % size of obstruction in terms of waist of Laguerre
+xt2      = (LPinZ0.LaguerreWaist)/8;   % traslation of obstruction in x-axis
+yt2      = 0;                          % traslation of onstruction in y-axis
+[~,rho]  = cart2pol(X-xt2,X'-yt2);     % Convert this in polar coordinates
+obo      = double(rho<=lo);            % Create Obstruction   
+clear rho      
+% Clean Matrix of polar coordinates
+% Applying obstruction in optic field
+g2       = g.*(1-obo);
+%Ploting Laguerre with obstruction
+figure(3)
+plotOpticalField(x,x,abs(g2),mapgreen,'microns');
+plotCircle(0,0,LPinZ0.LaguerreWaist);
+plotCircle(xt2,yt2,lo);
+%% third obstruction
+lo       = (LPinZ0.LaguerreWaist)*.2;  % size of obstruction in terms of waist of Laguerre
+xt3      = (LPinZ0.LaguerreWaist)*.78; % traslation of obstruction in x-axis
+yt3      = 0;                          % traslation of onstruction in y-axis
+[~,rho]  = cart2pol(X-xt3,X'-yt3);     % Convert this in polar coordinates
+obo      = double(rho<=lo);            % Create Obstruction   
+clear rho      
+% Clean Matrix of polar coordinates
+% Applying obstruction in optic field
+g3       = g.*(1-obo);
+%Ploting Laguerre with obstruction
+figure(3)
+plotOpticalField(x,x,abs(g3),mapgreen,'microns');
+plotCircle(0,0,LPinZ0.LaguerreWaist);
+plotCircle(xt3,yt3,lo);
 
 
 %% ----------------------- Ray tracing (rx,z=0)  ----------------------- %%
 
-TotalRays = 4;          % Number of rays
+TotalRays = 20;          % Number of rays
 
-rayH1(Nz) = CylindricalRay();
-rayH2(Nz) = CylindricalRay();
+rayH1obs1(Nz) = CylindricalRay();
+rayH2obs1(Nz) = CylindricalRay();
+rayH1obs2(Nz) = CylindricalRay();
+rayH2obs2(Nz) = CylindricalRay();
+rayH1obs3(Nz) = CylindricalRay();
+rayH2obs3(Nz) = CylindricalRay();
 
 for point_index = 1 : TotalRays
     % Cartersian coordinates of point in circunference of obstruction
-    xi = xt + lo*cos(point_index*(2*pi)/(TotalRays))+.001; 
-    yi = yt + lo*sin(point_index*(2*pi)/(TotalRays))+.001;
+    xi = xt1 + lo*cos(point_index*(2*pi)/(TotalRays))+.001; 
+    yi = yt1 + lo*sin(point_index*(2*pi)/(TotalRays))+.001;
     zi = 0;
     % assign coordinate to Optical Rays in z = 0, i.e index_z = 1  
-    [rayH1(1)] = assignCoordinates2CylindricalRay(xi,yi,zi,rayH1(1),point_index,1);
-    [rayH2(1)] = assignCoordinates2CylindricalRay(xi,yi,zi,rayH2(1),point_index,2);
+    [rayH1obs1(1)] = assignCoordinates2CylindricalRay(xi,yi,zi,rayH1obs1(1),point_index,1);
+    [rayH2obs1(1)] = assignCoordinates2CylindricalRay(xi,yi,zi,rayH2obs1(1),point_index,2);
+    
+    xi = xt2 + lo*cos(point_index*(2*pi)/(TotalRays))+.001; 
+    yi = yt2 + lo*sin(point_index*(2*pi)/(TotalRays))+.001;
+    zi = 0;
+    % assign coordinate to Optical Rays in z = 0, i.e index_z = 1  
+    [rayH1obs2(1)] = assignCoordinates2CylindricalRay(xi,yi,zi,rayH1obs2(1),point_index,1);
+    [rayH2obs2(1)] = assignCoordinates2CylindricalRay(xi,yi,zi,rayH2obs2(1),point_index,2);
+    
+    xi = xt3 + lo*cos(point_index*(2*pi)/(TotalRays))+.001; 
+    yi = yt3 + lo*sin(point_index*(2*pi)/(TotalRays))+.001;
+    zi = 0;
+    % assign coordinate to Optical Rays in z = 0, i.e index_z = 1  
+    [rayH1obs3(1)] = assignCoordinates2CylindricalRay(xi,yi,zi,rayH1obs3(1),point_index,1);
+    [rayH2obs3(1)] = assignCoordinates2CylindricalRay(xi,yi,zi,rayH2obs3(1),point_index,2);
     
 end
 
 % Initial Field with rays in this init conditions
 figure(3) 
 plotOpticalField(x,x,abs(g).^2,mapgreen,'microns');
-plotRays(rayH1(1),'r')
+plotRays(rayH1obs1(1),'r')
 
 
 %%                         Physical Propagation
@@ -188,16 +236,27 @@ end
 gx(:,1) = g(N/2+1,:);
 gy(:,1) = g(:,N/2+1);
 
+W       = zeros(N,Nz,N);
+W1      = zeros(N,Nz,N);
+W2      = zeros(N,Nz,N);
+W3      = zeros(N,Nz,N);
 
 for z_index = 1:length(z)-1 % propagation with respect to z
 %% loop of each component in z
 
   % propagation of Optical Field 
-  g = propagateOpticalField(g,prop);
+  g  = propagateOpticalField(g,prop);
+  g1 = propagateOpticalField(g1,prop);
+  g2 = propagateOpticalField(g2,prop);
+  g3 = propagateOpticalField(g3,prop);
   %saving transversal fields
   gx(:,z_index+1) = g(N/2+1,:);
   gy(:,z_index+1) = g(:,N/2+1);  
-    
+  %save optical field on slices
+  W (:,z_index,:)  = g;
+  W1 (:,z_index,:) = g1;
+  W2 (:,z_index,:) = g2;
+  W3 (:,z_index,:) = g3;
   %%                    Calculating Rays
 
   % propagation distance 
@@ -206,7 +265,26 @@ for z_index = 1:length(z)-1 % propagation with respect to z
   LPinZi = LaguerreParameters(zi,InitialWaist,Wavelength,l,p);   
 
   % propagate all rays of H1
-  [rayH1(z_index+1)] = getPropagateCylindricalRays(rayH1(z_index),...
+  [rayH1obs1(z_index+1)] = getPropagateCylindricalRays(rayH1obs1(z_index),...
+                                                       TotalRays,...
+                                                       r,th,...
+                                                       difr,...
+                                                       LPinZi,...
+                                                       LPinZ); 
+ 
+
+  % propagate all rays of H2
+  [rayH2obs1(z_index+1)] = getPropagateCylindricalRays(rayH2obs1(z_index),...
+                                                   TotalRays,...
+                                                   r,th,...
+                                                   difr,...
+                                                   LPinZi,...
+                                                   LPinZ);
+                                                 
+                                                 
+
+  % propagate all rays of H1
+  [rayH1obs2(z_index+1)] = getPropagateCylindricalRays(rayH1obs2(z_index),...
                                                    TotalRays,...
                                                    r,th,...
                                                    difr,...
@@ -215,28 +293,45 @@ for z_index = 1:length(z)-1 % propagation with respect to z
  
 
   % propagate all rays of H2
-  [rayH2(z_index+1)] = getPropagateCylindricalRays(rayH2(z_index),...
-                                                   TotalRays,...
-                                                   r,th,...
-                                                   difr,...
-                                                   LPinZi,...
-                                                   LPinZ);
-                         
+  [rayH2obs2(z_index+1)] = getPropagateCylindricalRays(rayH2obs2(z_index),...
+                                                       TotalRays,...
+                                                       r,th,...
+                                                       difr,...
+                                                       LPinZi,...
+                                                       LPinZ);                                                 
+
+
+  % propagate all rays of H1
+  [rayH1obs3(z_index+1)] = getPropagateCylindricalRays(rayH1obs3(z_index),...
+                                                       TotalRays,...
+                                                       r,th,...
+                                                       difr,...
+                                                       LPinZi,...
+                                                       LPinZ); 
+ 
+
+  % propagate all rays of H2
+  [rayH2obs3(z_index+1)] = getPropagateCylindricalRays(rayH2obs3(z_index),...
+                                                       TotalRays,...
+                                                       r,th,...
+                                                       difr,...
+                                                       LPinZi,...
+                                                       LPinZ);                                                 
 
   %                             End calculating rays 
   %%
 
   fig = figure(6);
-  fig.Position = [-1349 147 813 733];
-  plotOpticalField(x,x,abs(g).^2,mapgreen,'microns');
+  fig.Position = [0 147 813 733];
+  imagesc(x,x,abs(g2));
   title(['z = ', num2str(z_index), ' of ', num2str(Nz)])
-  drawnow 
+   
   hold on
 
   % Plot propagated points of H1 and H2 in iteration before
-  plotRays(rayH1(z_index+1),'r')
-  plotRays(rayH2(z_index+1),'y')
-
+  plotRays(rayH1obs2(z_index+1),'r')
+  plotRays(rayH2obs2(z_index+1),'y')
+  drawnow
   pause(0.1)
 
 end
@@ -248,8 +343,8 @@ figure(8)
 imagesc(z,x,abs(gx))
 hold on
 for z_index = 1:length(z)-1
-  scatter(rayH2(z_index).zCoordinate,rayH2(z_index).xCoordinate,10,'filled','MarkerFaceColor',[1 0 0])
-  scatter(rayH1(z_index).zCoordinate,rayH1(z_index).xCoordinate,10,'filled','MarkerFaceColor',[0 1 0])
+  scatter(rayH2obs1(z_index).zCoordinate,rayH2obs1(z_index).xCoordinate,10,'filled','MarkerFaceColor',[1 0 0])
+  scatter(rayH1obs1(z_index).zCoordinate,rayH1obs1(z_index).xCoordinate,10,'filled','MarkerFaceColor',[0 1 0])
 end
 hold off
 
@@ -257,8 +352,8 @@ figure(9)
 
 for z_index = 1:length(z)-1
   
-  radial1(z_index) = rayH2(z_index).rCoordinate(1);
-  radial2(z_index) = rayH2(z_index).rCoordinate(2);
+  radial1(z_index) = rayH2obs1(z_index).rCoordinate(1);
+  radial2(z_index) = rayH2obs1(z_index).rCoordinate(2);
 end
 hold on
 plot(radial1)

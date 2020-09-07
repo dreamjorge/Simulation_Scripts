@@ -5,7 +5,7 @@ function [rayOutput]= copyArrayRay2Ray(rayInput,...
   rayOutput.xCoordinate     = rayInput.xCoordinate    (index_point);
   rayOutput.yCoordinate     = rayInput.yCoordinate    (index_point);
   rayOutput.zCoordinate     = rayInput.zCoordinate    (index_point);                                   
-  rayOutput.hankelType      = rayInput.hankelType(index_point);
+  rayOutput.hankelType      = rayInput.hankelType     (index_point);
     
   if isa(rayInput,'OpticalRay')
     rayOutput.zxSlope         = rayInput.zxSlope(index_point);
@@ -15,10 +15,9 @@ function [rayOutput]= copyArrayRay2Ray(rayInput,...
   else
     rayOutput.rCoordinate     = rayInput.rCoordinate    (index_point);
     rayOutput.thetaCoordinate = rayInput.thetaCoordinate(index_point);
-    rayOutput.zrSlope         = rayInput.zrSlope (index_point);
-    rayOutput.zthSlope        = rayInput.zthSlope(index_point);
-    rayOutput.rthSlope        = rayInput.rthSlope(index_point);
-    rayOutput.hankelType      = rayInput.hankelType(index_point);
+    rayOutput.zrSlope         = rayInput.zrSlope        (index_point);
+    rayOutput.zthSlope        = rayInput.zthSlope       (index_point);
+    rayOutput.rthSlope        = rayInput.rthSlope       (index_point);
   end
   
 end

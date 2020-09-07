@@ -4,6 +4,11 @@ function    [Ray]=assignCoordinates2CylindricalRay(xi,yi,zi,Ray,point_index,hank
   Ray.yCoordinate(point_index) = yi;
   Ray.zCoordinate(point_index) = zi;
   
+  [thi,ri] = cart2pol(xi,yi);
+  
+  Ray.rCoordinate(point_index)     = ri;
+  Ray.thetaCoordinate(point_index) = thi;
+  
   %initial conditions of slopes
   Ray.rthSlope(point_index) = Inf;
   Ray.zrSlope(point_index)  = Inf;

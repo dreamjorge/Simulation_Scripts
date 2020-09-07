@@ -15,12 +15,13 @@ function [Rays] = getPropagateCylindricalRays(Rays,...
   temporalRay = CylindricalRay(); 
 
   for point_index = 1 : TotalRays
-      % copy data a temporal ray 
-      temporalRay = copyArrayRay2Ray(Rays,temporalRay,point_index);
+    
+     % copy data a temporal ray 
+     
+     temporalRay = copyArrayRay2Ray(Rays,temporalRay,point_index);
 
      % new coordinates of ray
-    rtemp  = temporalRay.rCoordinate ;
-    thtemp = temporalRay.thetaCoordinate;
+
     temporalRay.rCoordinate     = temporalRay.rCoordinate     + (1./temporalRay.zrSlope )*dz;
     temporalRay.thetaCoordinate = temporalRay.thetaCoordinate + (1./temporalRay.zthSlope)*dz;
     temporalRay.zCoordinate     = temporalRay.zCoordinate + dz;
