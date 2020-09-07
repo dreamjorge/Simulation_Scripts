@@ -25,8 +25,7 @@ LPinZ0 = LaguerreParameters(PropagationDistance...
                            ,InitialWaist...
                            ,Wavelength...
                            ,l...
-                           ,p);
-                     
+                           ,p);               
 %%                        Sampling of vectors 
 % Estimate sampling in z-direction with propagation distance 
 % z-direction
@@ -61,7 +60,7 @@ plotLaguerreParameters(LPinZ);
  % waist in max z, from LaguereParametersz0                                               
 MaxLaguerreWaist = LPinZ.LaguerreWaist(end);
 
-N   = 2^10;                  % Number of points in x,y axis
+N   = 2^10;                 % Number of points in x,y axis
 n   = -N/2+.05:N/2-1+.05;   % vector with N-points with resolution 1
 Dx  = 2.2*MaxLaguerreWaist; % Size of window 
 dx  = Dx/N;                 % Resolution
@@ -81,7 +80,7 @@ dr = Dr/N;
 r  = r*dr;
 
 th   = -N/2:N/2-1;
-Dth  = atan2(Dx,Dx);
+Dth  = 2*pi;
 dth  = Dth/N;
 th   = th*dth;
 
@@ -111,7 +110,7 @@ if strcmp(runGPU,'yes')
   RCoordinate     = gpuArray(RCoordinate);
   ThetaCoordinate = gpuArray(ThetaCoordinate);
 end
-%% ----------------------- Laguerre Gauss in z = 0 --------------------- %%
+%%            Laguerre Gauss in z = 0                                    %%
 
 % With laguerre parameters calculated, it estimates Laguerre Gauss Beam
 LG = LaguerreBeam(RCoordinate,ThetaCoordinate,LPinZ0);
@@ -125,7 +124,6 @@ plotCircle(0,0,LPinZ0.LaguerreWaist);
 g   = LG.OpticalFieldLaguerre;
 % Max Peak
 pxy = max(max(g));
-
 %% ----------------- Obstruction on Lagurre in z = 0 ------------------- %%
 % Initial Waist of Laguerre Beam
 
@@ -140,7 +138,7 @@ clear rho
 g       = g.*(1-obo);
 %Ploting Laguerre with obstruction
 figure(3)
-plotOpticalField(x,x,abs(g).^2,mapgreen,'microns');
+plotOpticalField(x,x,abs(g),mapgreen,'microns');
 plotCircle(0,0,LPinZ0.LaguerreWaist);
 plotCircle(xt,yt,lo);
 
@@ -158,8 +156,8 @@ for point_index = 1 : TotalRays
     yi = yt + lo*sin(point_index*(2*pi)/(TotalRays))+.001;
     zi = 0;
     % assign coordinate to Optical Rays in z = 0, i.e index_z = 1  
-    [rayH1(1)] = assignCoordinates2CylindricalRay(xi,yi,zi,rayH1(1),point_index);
-    [rayH2(1)] = assignCoordinates2CylindricalRay(xi,yi,zi,rayH2(1),point_index);
+    [rayH1(1)] = assignCoordinates2CylindricalRay(xi,yi,zi,rayH1(1),point_index,1);
+    [rayH2(1)] = assignCoordinates2CylindricalRay(xi,yi,zi,rayH2(1),point_index,2);
     
 end
 
@@ -208,25 +206,21 @@ for z_index = 1:length(z)-1 % propagation with respect to z
   LPinZi = LaguerreParameters(zi,InitialWaist,Wavelength,l,p);   
 
   % propagate all rays of H1
-  HankelType = 1;
   [rayH1(z_index+1)] = getPropagateCylindricalRays(rayH1(z_index),...
                                                    TotalRays,...
                                                    r,th,...
                                                    difr,...
                                                    LPinZi,...
-                                                   LPinZ,...
-                                                   HankelType); 
+                                                   LPinZ); 
  
 
   % propagate all rays of H2
-  HankelType  = 2;
   [rayH2(z_index+1)] = getPropagateCylindricalRays(rayH2(z_index),...
                                                    TotalRays,...
                                                    r,th,...
                                                    difr,...
                                                    LPinZi,...
-                                                   LPinZ,...
-                                                   HankelType);
+                                                   LPinZ);
                          
 
   %                             End calculating rays 
@@ -247,8 +241,8 @@ for z_index = 1:length(z)-1 % propagation with respect to z
 
 end
 %%
-figure(7)
-plotRaysPropagated(rayH1,rayH2,Nz);
+% figure(7)
+% plotRaysPropagated(rayH1,rayH2,Nz);
 %%
 figure(8)
 imagesc(z,x,abs(gx))
