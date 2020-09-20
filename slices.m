@@ -234,7 +234,7 @@ morado = [0.3010, 0.7450, 0.9330];
 close(figure(2))
 fig2 = figure(2); 
 % set(gca,'Color','k')
-set(gcf, 'color', [0 0 0])
+% set(gcf, 'color', [0 0 0])
 
 fig2.Position = [537 381 1106 597];
 ha  = tight_subplot(2,2,[.01 .01],[.1 .1],[.1 .07]);
@@ -249,7 +249,7 @@ fieldfw = reshape(fieldfw,[Nx,Nx]);
 
 
 axes(ha(1))
-set(gca,'Color','k')
+% set(gca,'Color','k')
 plotOpticalField(x/InitialWaist,x/InitialWaist,abs(fieldf),mapgreen,'n')
 
 % plotPropagatedRaysInZ(rayH11,rayH12,rayH21,rayH22,1,1,floor(Nz))
@@ -273,7 +273,7 @@ hold off
 
 
 axes(ha(3))
-set(gca,'Color','k')
+% set(gca,'Color','k')
 plotOpticalField(x/InitialWaist,x/InitialWaist,abs(fieldfw),mapgreen,'n')
 
 hold on
@@ -304,8 +304,8 @@ pbaspect([2.5 1 1])
 hold off
 xlabel('$x$','Interpreter','latex','FontSize',18)
 ylabel('Amplitude')
-set(gca,'Color','k')
-set(gcf,'color', [0 0 0])
+% set(gca,'Color','k')
+% set(gcf,'color', [0 0 0])
 
 axes(ha(2))
 plot(x/InitialWaist,abs(gw1),'color','m','LineWidth',2)
@@ -319,8 +319,8 @@ pbaspect([2.5 1 1])
 hold off
 xlabel('$x$','Interpreter','latex','FontSize',18)
 ylabel('Amplitude')
-set(gca,'Color','k')
-set(gcf,'color', [0 0 0])
+% set(gca,'Color','k')
+% set(gcf,'color', [0 0 0])
 
 % set(ha(1),'ycolor','w')
 % set(ha(2),'ycolor','w')
@@ -333,6 +333,97 @@ set(gcf,'color', [0 0 0])
 
 export_fig('Selfhealingv5','-png','-transparent')
 
+%% figure 3d of selfhealing
+%field without obstruction
+fieldf  = (Wo(:,floor(Nz),:));
+fieldf  = reshape(fieldf,[Nx,Nx]);
+%field with obstruction
+fieldfw = (W(:,floor(Nz),:));
+fieldfw = reshape(fieldfw,[Nx,Nx]);
+
+%firt cut transversal
+dtx0    = -20;
+g0      = fieldf(512+dtx0,:);
+gw0     = fieldfw(512+dtx0,:);
+
+%second cut transversal
+dtx1    = 135;
+g1      = fieldf(512+dtx1,:);
+gw1     = fieldfw(512+dtx1,:);
+
+%vector for translation in axis
+xo = zeros(1,numel(x));
+
+%build points for vertical lines
+P1   = [rayH11(end).xCoordinate(1)/InitialWaist,(dtx0)/InitialWaist,0];
+P2   = [rayH11(end).xCoordinate(1)/InitialWaist,(dtx0)/InitialWaist,1.5];
+% Their vertial concatenation is what you want
+pts1 = [P1; P2];
+
+P1   = [-rayH11(end).xCoordinate(1)/InitialWaist,(dtx0)/InitialWaist,0];
+P2   = [-rayH11(end).xCoordinate(1)/InitialWaist,(dtx0)/InitialWaist,1.5];
+pts2 = [P1; P2];
+
+P1   = [rayH22(end).xCoordinate(1)/InitialWaist,(dtx0)/InitialWaist,0];
+P2   = [rayH22(end).xCoordinate(1)/InitialWaist,(dtx0)/InitialWaist,1.5];
+pts3 = [P1; P2];
+
+P1   = [-rayH22(end).xCoordinate(1)/InitialWaist,(dtx0)/InitialWaist,0];
+P2   = [-rayH22(end).xCoordinate(1)/InitialWaist,(dtx0)/InitialWaist,1.5];
+pts4 = [P1; P2];
+
+P1   = [rayH11(end).xCoordinate(1)/InitialWaist,(dtx1)/InitialWaist,0];
+P2   = [rayH11(end).xCoordinate(1)/InitialWaist,(dtx1)/InitialWaist,1.5];
+% Their vertial concatenation is what you want
+pts11 = [P1; P2];
+
+P1   = [-rayH11(end).xCoordinate(1)/InitialWaist,(dtx1)/InitialWaist,0];
+P2   = [-rayH11(end).xCoordinate(1)/InitialWaist,(dtx1)/InitialWaist,1.5];
+pts21 = [P1; P2];
+
+P1   = [rayH22(end).xCoordinate(1)/InitialWaist,(dtx1)/InitialWaist,0];
+P2   = [rayH22(end).xCoordinate(1)/InitialWaist,(dtx1)/InitialWaist,1.5];
+pts31 = [P1; P2];
+
+P1   = [-rayH22(end).xCoordinate(1)/InitialWaist,(dtx1)/InitialWaist,0];
+P2   = [-rayH22(end).xCoordinate(1)/InitialWaist,(dtx1)/InitialWaist,1.5];
+pts41 = [P1; P2];
+
+
+%plot figure
+fig10 = figure(10);
+fig10.Position = [789, 360, 783, 577];
+morado = [165,60,246]/256;
+imagesc(x/InitialWaist,y/InitialWaist,abs(fieldf))
+colormap(mapgreen)
+set(gca,'YDir','normal')
+hold on
+plot3(x/InitialWaist,xo+(dtx1*dx)/InitialWaist,100*abs(g1),'color','r','LineWidth',1.5)
+plot3(x/InitialWaist,xo+(dtx1*dx)/InitialWaist,100*abs(gw1),'-.','color','b','LineWidth',1.7)
+plot3(x/InitialWaist,xo+(dtx0*dx)/InitialWaist,100*abs(g0),'color','r','LineWidth',1.5)
+plot3(x/InitialWaist,xo+(dtx0*dx)/InitialWaist,100*abs(gw0),'-.','color','b','LineWidth',1.7)
+plot3(pts1(:,1) , pts1(:,2) , pts1(:,3) ,'LineWidth',1.5,'color','y')
+plot3(pts2(:,1) , pts2(:,2) , pts2(:,3) ,'LineWidth',1.5,'color','y')
+plot3(pts3(:,1) , pts3(:,2) , pts3(:,3) ,'LineWidth',1.5,'color','y')
+plot3(pts4(:,1) , pts4(:,2) , pts4(:,3) ,'LineWidth',1.5,'color','y')
+plot3(pts11(:,1), pts11(:,2), pts11(:,3),'LineWidth',1.5,'color','y')
+plot3(pts21(:,1), pts21(:,2), pts21(:,3),'LineWidth',1.5,'color','y')
+plot3(pts31(:,1), pts31(:,2), pts31(:,3),'LineWidth',1.5,'color','y')
+plot3(pts41(:,1), pts41(:,2), pts41(:,3),'LineWidth',1.5,'color','y')
+plotPropagatedRaysInZ(rayH11,rayH12,rayH21,rayH22,InitialWaist,InitialWaist,z_index)
+hold off
+view(29,77)
+axis tight 
+% camproj perspective
+set(gcf, 'color', [0 0 0])
+set(gca, 'color', [0 0 0])
+set(gca,'XColor',[1 1 1]);
+set(gca,'YColor',[1 1 1]);
+set(gca,'ZColor',[1 1 1]);
+xlabel('$x$','Interpreter','latex','FontSize',18)
+ylabel('$y$','Interpreter','latex','FontSize',18)
+zlabel('Amplitude','Interpreter','latex','FontSize',15)
+export_fig('SelfHealingHermite','-png','-transparent')
 %%
 dtx  = 00;
 g    = fieldf(512+dtx,:);
