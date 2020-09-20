@@ -123,7 +123,7 @@ Hy        = Hy .*GaussX.*exp(1i*PhiPhase);
 NHy       = NHy.*GaussX.*exp(1i*PhiPhase);
 
 SupGaussY = exp(-(sqrt(2)*y./(HermiteInitialWaistY)).^50);
-% NHy       = NHy.*SupGaussY;
+NHy       = NHy.*SupGaussY;
 H1y       = Hy+1i*NHy;
 H2y       = Hy-1i*NHy;
 
@@ -272,7 +272,7 @@ mesh(PHASE21,X,Y,'FaceAlpha', 0.1,'EdgeAlpha',0.4);
 close(figure(3))
 fig3 = figure(3);
 fig3.Position = [680 164 721 814];
-ha = tight_subplot(2,2,[.01 .01],[.05 .1],[.1 .1]);
+ha = tight_subplot(2,2,[.01 .01],[.05 .01],[.1 .01]);
 axes(ha(1))
 plotOpticalField(x/InitialWaist,x/InitialWaist,abs(H22+H21),mapgreen,'');
 ha(1).XAxis.Visible = 'off';
@@ -283,6 +283,7 @@ axes(ha(2))
 plotOpticalField(x/InitialWaist,x/InitialWaist,abs(H22+H11),mapgreen,'');
 title('$|\psi_{n,m}^{1,1}+\psi_{n,m}^{2,2}|$','interpreter','latex','FontSize',18)
 ha(2).XAxis.Visible = 'off';
+ha(2).YAxis.Visible = 'off';
 ha(2).YAxisLocation = 'right';
 set(gca,'FontSize',18);
 axes(ha(3))
@@ -294,12 +295,13 @@ axes(ha(4))
 plotOpticalField(x/InitialWaist,x/InitialWaist,abs(H22+H21+H11+H12),mapgreen,'');
 title('$|\psi_{n,m}^{1,1}+\psi_{n,m}^{2,1}+\psi_{n,m}^{1,2}+\psi_{n,m}^{2,2}|$','interpreter','latex','FontSize',18)
 ha(4).YAxisLocation = 'right';
+ha(4).YAxis.Visible = 'off';
 set(gca,'FontSize',18);
-sgtitle('Superposition of Hankels','FontSize',18)
+% sgtitle('Superposition of Hankels','FontSize',18)
 %saveas(gcf,'SuperpositionOfHankels.png')
 export_fig('SuperpositionOfHankels','-png','-transparent')
 
-%%
+%% abs of combinations of hankels
 
 close(figure(4))
 fig4 = figure(4);
