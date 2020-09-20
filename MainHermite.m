@@ -35,7 +35,7 @@ RayleighDistance     = HermiteParametersz0.RayleighDistance;
 %First, we estimate samplig in z-direction with propagation distance 
 % z-direction
 Dz    = 0.5*RayleighDistance;     % z-window (propagation distance)
-Nz    = 2^5;                      % number of points in z-direction
+Nz    = 2^7;                      % number of points in z-direction
 dz    = Dz/Nz;                    % Resolution in z
 nz    = 0:Nz-1;                   % vector with N-points with resolution 1
 z     = nz*dz;                    % z-vector z of propagation 
@@ -47,7 +47,7 @@ MaxHermiteWaist = HermiteParameters.getWaist(z(end),InitialWaist,RayleighDistanc
 %Hermite Beam
 
 % y,x-direction
-Nx    =  2^6;                 % Number of points in x,y axis
+Nx    =  2^10;                 % Number of points in x,y axis
 n     = -Nx/2:Nx/2-1;         % vector with N-points with resolution 1
 Dx    = 1.1*MaxHermiteWaist;  % Size of window 
 dx    = Dx/Nx;                % Resolution
@@ -83,6 +83,9 @@ Hx                    = Hx.*GaussX.*exp(1i*PhiPhase);
 NHx                   = NHx.*GaussX.*exp(1i*PhiPhase);
 
 SupGaussX             = exp(-(sqrt(2)*x./(HermiteInitialWaistX)).^(50)); 
+
+NHx                   = NHx.*SupGaussX;
+
 H1x                   = Hx+1j*NHx;
 H2x                   = Hx-1j*NHx;
 
@@ -98,10 +101,10 @@ hold on
 plot(x/(HermiteParametersz0.Waist),abs(NHx),'--','LineWidth',1.6)
 plot(x/(HermiteParametersz0.Waist),abs(H1x),'-.','LineWidth',1.6)
 hold off
-xlim([-5 5])
+xlim([-7 7])
 ylim([0 .019])
-xlabel('$x$','Interpreter','latex')
-leg1=legend('Hermite Gauss','NHermite Gauss',' Hankel-1 Hermite Gauss');
+xlabel('$\xi$','Interpreter','latex')
+leg1=legend('$H_n$','$NH_n$','$HH_n^{1}$','interpreter','latex');
 leg1.Position = [0.6885 0.7093 0.2021 0.1747];
 title(['Solutions of Hermite Equation with integer number equal to ',num2str(nu)])
 legend off
@@ -135,7 +138,7 @@ plot(x/(HermiteParametersz0.Waist),abs(H1y),'-.','LineWidth',1.6)
 hold off
 xlim([-5 5])
 ylim([0 .019])
-xlabel('$y$','Interpreter','latex')
+xlabel('$\eta$','Interpreter','latex')
 leg2= legend('Hermite Gauss','NHermite Gauss',' Hankel-1 Hermite Gauss');
 leg2.Position = [0.7880 0.8115 0.2021 0.1747];
 title(['Solutions of Hermite Equation with integer number equal to',num2str(mu)])
@@ -166,7 +169,7 @@ H12 = (H2y')*(H1x);
 H21 = (H1y')*(H2x);
 H22 = (H2y')*(H2x);
 
-g = H11.*H22;
+% g = H11.*H22;
 %% phases
 close(figure(2))
 fig2 = figure(2);
