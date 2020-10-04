@@ -13,25 +13,33 @@ classdef HermiteParameters < GaussianParameters & handle & matlab.mixin.Copyable
   end
   
   methods(Static)
-    waistHermite             = getWaist(zDistance,InitialWaist,RayleighDistance,nu,mu);
+    waistHermite                   = getWaist(zDistance,...
+                                              InitialWaist,...
+                                              RayleighDistance,...
+                                              nu,...
+                                              mu);
+                                      
+    waistHermiteOneDirection       = getWaistOneDirection(zDistance,...
+                                                          InitialWaist,...
+                                                          RayleighDistance,...
+                                                          l);
+                                                  
+    [firstSolution,secondSolution] = getHermiteSolutions(nu,x)                                             
+                                                  
   end
-  
-  methods(Static)
-    waistHermiteOneDirection = getWaistOneDirection(zDistance,InitialWaist,RayleighDistance,l);
-  end
-    
+      
   methods
     
     function PhiPhase = get.PhiPhase(obj) 
       PhiPhase = (abs(obj.n)+2*obj.m).*obj.GouyPhase;
     end
 
-    function HermiteWaist = get.HermiteWaistX(obj)
-      HermiteWaist = HermiteParameters.getWaistOneDirection(obj.zCoordinate,obj.InitialWaist,obj.RayleighDistance,obj.n);
+    function HermiteWaistX = get.HermiteWaistX(obj)
+      HermiteWaistX = HermiteParameters.getWaistOneDirection(obj.zCoordinate,obj.InitialWaist,obj.RayleighDistance,obj.n);
     end
    
-    function HermiteWaist = get.HermiteWaistY(obj)
-      HermiteWaist = HermiteParameters.getWaistOneDirection(obj.zCoordinate,obj.InitialWaist,obj.RayleighDistance,obj.m);
+    function HermiteWaistY = get.HermiteWaistY(obj)
+      HermiteWaistY = HermiteParameters.getWaistOneDirection(obj.zCoordinate,obj.InitialWaist,obj.RayleighDistance,obj.m);
     end
         
     function HermiteWaist = get.HermiteWaist(obj)

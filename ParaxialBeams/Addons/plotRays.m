@@ -1,8 +1,8 @@
-function [] = plotRays(rayObject,color)
+function [] = plotRays(rayObject,color,scale)
 
 hold on
 
-scatter(rayObject.xCoordinate,rayObject.yCoordinate,10,color,'filled','o')
+scatter(rayObject.xCoordinate/scale,rayObject.yCoordinate/scale,10,color,'filled','o')
 pause(0.05)
 hold off
 

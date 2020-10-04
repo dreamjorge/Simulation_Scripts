@@ -1,4 +1,4 @@
-function [HG,NHG] = hermiteSolutions(nu,x)
+function [HG,NHG] = getHermiteSolutions(nu,x)
 %Funcion que determina las series de Hermite para un eigenvalor nu
 %fpar da la serie para el eigenvalor nu
 %fimpar da la serie para el eigenvalor nu

@@ -9,7 +9,7 @@ mapgreen = AdvancedColormap('kgg',256,[0 100 255]/255);
 runGPU = 'no';
 %%          Initial parameters of Laguerre Gaussian Beams
 
-l = 15;
+l = 11;
 p = 0;
 
 % Physical parameters [microns]
@@ -118,7 +118,8 @@ LG = LaguerreBeam(RCoordinate,ThetaCoordinate,LPinZ0);
 
 % Plot of Field
 figure(2)
-plotOpticalField(x,x,abs(LG.OpticalFieldLaguerre).^2,mapgreen,'microns');
+subplot(1,2,1)
+plotOpticalField(x,x,abs(LG.OpticalFieldLaguerre),mapgreen,'microns');
 plotCircle(0,0,LPinZ0.LaguerreWaist);
 
 % Optic Field to propagate 
@@ -128,10 +129,14 @@ pxy = max(max(g));
 
 %% ----------------- Obstruction on Lagurre in z = 0 ------------------- %%
 % Initial Waist of Laguerre Beam
+% 
+% lo      = (LPinZ0.LaguerreWaist)/4.3;  % size of obstruction in terms of waist of Laguerre
+% xt      = LPinZ0.LaguerreWaist/5.8;                           % traslation of obstruction in x-axis
+% yt      = LPinZ0.LaguerreWaist/5.8;                           % traslation of onstruction in y-axis
+lo      = (LPinZ0.LaguerreWaist)*.195;  % size of obstruction in terms of waist of Laguerre
+xt     = 0;                           % traslation of obstruction in x-axis
+yt     = 0;         
 
-lo      = (LPinZ0.LaguerreWaist)/4.3;  % size of obstruction in terms of waist of Laguerre
-xt      = LPinZ0.LaguerreWaist/5.8;                           % traslation of obstruction in x-axis
-yt      = LPinZ0.LaguerreWaist/5.8;                           % traslation of onstruction in y-axis
 [~,rho] = cart2pol(X-xt,X'-yt);        % Convert this in polar coordinates
 obo     = double(rho<=lo);             % Create Obstruction   
 clear rho      
@@ -158,15 +163,15 @@ for point_index = 1 : TotalRays
     yi = yt + lo*sin(point_index*(2*pi)/(TotalRays))+.001;
     zi = 0;
     % assign coordinate to Optical Rays in z = 0, i.e index_z = 1  
-    [rayH1(1)] = assignCoordinates2CylindricalRay(xi,yi,zi,rayH1(1),point_index);
-    [rayH2(1)] = assignCoordinates2CylindricalRay(xi,yi,zi,rayH2(1),point_index);
+    [rayH1(1)] = assignCoordinates2CylindricalRay(xi,yi,zi,rayH1(1),point_index,1);
+    [rayH2(1)] = assignCoordinates2CylindricalRay(xi,yi,zi,rayH2(1),point_index,2);
     
 end
 
 % Initial Field with rays in this init conditions
 figure(3) 
 plotOpticalField(x,x,abs(g).^2,mapgreen,'microns');
-plotRays(rayH1(1),'r')
+plotRays(rayH1(1),'r',1)
 
 
 %%                         Physical Propagation
@@ -208,25 +213,23 @@ for z_index = 1:length(z)-1 % propagation with respect to z
   LPinZi = LaguerreParameters(zi,InitialWaist,Wavelength,l,p);   
 
   % propagate all rays of H1
-  HankelType = 1;
   [rayH1(z_index+1)] = getPropagateCylindricalRays(rayH1(z_index),...
                                                    TotalRays,...
                                                    r,th,...
                                                    difr,...
                                                    LPinZi,...
-                                                   LPinZ,...
-                                                   HankelType); 
+                                                   LPinZ...
+                                                   ); 
  
 
   % propagate all rays of H2
-  HankelType  = 2;
   [rayH2(z_index+1)] = getPropagateCylindricalRays(rayH2(z_index),...
                                                    TotalRays,...
                                                    r,th,...
                                                    difr,...
                                                    LPinZi,...
-                                                   LPinZ,...
-                                                   HankelType);
+                                                   LPinZ...
+                                                   );
                          
 
   %                             End calculating rays 
