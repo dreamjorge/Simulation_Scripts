@@ -36,7 +36,7 @@ GaussianBeamParametersZ.zCoordinate = z;
 
 figure(1)
 plotGaussianParameters(GaussianBeamParametersZ);
-
+export_fig('GaussianParametersWaistAngle','-png','-transparent')
 % After sampling z vector, Estimate sampling in x,y-direction in terms of
 % of max waist Gauss Beam until max z-propagation
 
