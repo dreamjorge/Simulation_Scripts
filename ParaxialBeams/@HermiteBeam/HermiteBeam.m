@@ -14,11 +14,6 @@ classdef HermiteBeam < matlab.mixin.Copyable & handle & HermiteParameters & Gaus
     Normalization
   end
   
-  methods(Static) 
-    [HG,NHG] = hermiteSolutions(nu,x);
-    wh       = waistHermite(zDistance,initialWaist,rayleighDistance,n,m);
-  end
-  
   methods 
 
     function HermiteAmplitude = get.HermiteAmplitude(obj)
@@ -31,9 +26,9 @@ classdef HermiteBeam < matlab.mixin.Copyable & handle & HermiteParameters & Gaus
 
     function OpticalFieldHermite  = get.OpticalFieldHermite(obj)
     %% Obatining Optical Field of Hermite
-      [Hn,~] = HermiteBeam.hermiteSolutions(obj.n,(sqrt(2)./obj.Waist).*obj.x);
-      
-      [Hm,~] = HermiteBeam.hermiteSolutions(obj.m,(sqrt(2)./obj.Waist).*obj.y);
+      [Hn,~] = HermiteBeam.getHermiteSolutions(obj.n,(sqrt(2)./obj.Waist).*obj.x);
+
+      [Hm,~] = HermiteBeam.getHermiteSolutions(obj.m,(sqrt(2)./obj.Waist).*obj.y);
 
       OpticalFieldHermite = obj.Normalization.*...
                             obj.HermiteAmplitude.*...
