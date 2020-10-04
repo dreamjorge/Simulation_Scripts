@@ -36,7 +36,7 @@ GaussianBeamParametersZ.zCoordinate = z;
 
 figure(1)
 plotGaussianParameters(GaussianBeamParametersZ);
-
+export_fig('GaussianParametersWaistAngle','-png','-transparent')
 % After sampling z vector, Estimate sampling in x,y-direction in terms of
 % of max waist Gauss Beam until max z-propagation
 
@@ -54,13 +54,13 @@ y     = x;
 %Last we estimate vectors of frequency for Fourier Transforms associated
 %with x,y
 
-Du   = 1/dx;           % Size of window 
-du   = 1/Dx;           % Resolution
-u    = n*du;           % Vector with dimentions
-[U]  = meshgrid(u);
+Du    = 1/dx;           % Size of window 
+du    = 1/Dx;           % Resolution
+u     = n*du;           % Vector with dimentions
+[U]   = meshgrid(u);
 %kx,ky vectors
-kx   = 2*pi*u;
-[Kx] = meshgrid(kx);
+kx    = 2*pi*u;
+[Kx]  = meshgrid(kx);
 %% ------------------------ Gaussian Beam in z = 0 ---------------------- %%
 
 GaussianBeamParameters = GaussianParameters(0,InitialWaist,Wavelength);
