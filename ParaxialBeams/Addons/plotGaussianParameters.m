@@ -16,11 +16,14 @@ function [] = plotGaussianParameters(GBParameters)
   p4 = plot( GBParameters.zCoordinate...
            ,-GBParameters.zCoordinate*tan(GBParameters.DivergenceAngle)...
            ,'Color','blue');
+         
+  p5 = plot( GBParameters.zCoordinate,...
+             GBParameters.Radius);      
   xlabel('Distance of Propagation [microns]')
   ylabel('[microns]')
   title('Parameters of Gaussian Beam')
   p1legend = 'Waist of Gaussian Beam';
   p3legend = ['Angle of Divergence = ',num2str(rad2deg(GBParameters.DivergenceAngle)),'°'];
   legend([p1,p3],{p1legend,p3legend})
-
+  ylim([-250 250])
 end
