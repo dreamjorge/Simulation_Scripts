@@ -76,7 +76,7 @@ PhiPhase              = HermiteParametersz0.PhiPhase;
 % for x-direction
 InitialWaist          = HermiteParametersz0.InitialWaist;
 [Hx,NHx]              = ...
-HermiteBeam.hermiteSolutions(nu,(sqrt(2)./InitialWaist).*x);
+HermiteParameters.getHermiteSolutions(nu,(sqrt(2)./InitialWaist).*x);
 
 GaussX                = GaussianBeam(x,HermiteParametersz0).OpticalField;
 Hx                    = Hx.*GaussX.*exp(1i*PhiPhase);
@@ -105,7 +105,7 @@ xlim([-7 7])
 ylim([0 .019])
 xlabel('$\xi$','Interpreter','latex')
 leg1=legend('$H_n$','$NH_n$','$HH_n^{1}$','interpreter','latex');
-leg1.Position = [0.6885 0.7093 0.2021 0.1747];
+% leg1.Position = [0.6885 0.7093 0.2021 0.1747];
 title(['Solutions of Hermite Equation with integer number equal to ',num2str(nu)])
 legend off
 
@@ -114,7 +114,7 @@ legend off
 
 % for y-direction
 [Hy,NHy]  = ...
-HermiteBeam.hermiteSolutions(mu,(sqrt(2)./InitialWaist).*x);
+HermiteParameters.getHermiteSolutions(mu,(sqrt(2)./InitialWaist).*x);
 
 % Hermite Gauss 1D and Hankel Hermite Gauss 
 PhiPhase  = HermiteParametersz0.PhiPhase;
@@ -145,6 +145,50 @@ title(['Solutions of Hermite Equation with integer number equal to',num2str(mu)]
 % saveas(gcf,'hankelHermiteGaussSolutions.png')
  export_fig('hankelHermiteGaussSolutionsPsn','-png','-pdf','-transparent')
  
+ 
+ %%
+close(figure(1))
+fig1 = figure(1);
+fig1.Position = [716, 444, 1235, 389];
+plot(x/(HermiteParametersz0.Waist),abs(Hy),'LineWidth',1.6)
+hold on
+plot(x/(HermiteParametersz0.Waist),abs(NHy),'--','LineWidth',1.6)
+colorp = [0,200,100]/256;
+plot(x/(HermiteParametersz0.Waist),abs(H1y),'-.','LineWidth',1.6,'color',colorp)
+hold off
+xlim([-5 5])
+ylim([0 .019])
+xlabel('$y$','Interpreter','latex','FontSize',14)
+leg1=legend('$|\psi_{n,m}^{(1,1)}|$','$|Re\left(\psi_{n,m}^{(1,1)}\right)|$','$|Im\left(\psi_{n,m}^{(1,1)}\right)|$','interpreter','latex','FontSize',14,'NumColumns',3);
+leg1.Position = [0.5693, 0.8203, 0.3337, 0.0967];
+% title(['Solutions of Hermite Equation with integer number equal to ',num2str(nu)])
+% legend off
+ set(gca,'FontSize',18);
+export_fig('hankelHermiteGaussSolutionsY','-png','-transparent')
+ 
+
+%%
+close(figure(1))
+fig1 = figure(1);
+fig1.Position = [716, 444, 1235, 389];
+plot(x/(HermiteParametersz0.Waist),abs(Hx),'LineWidth',1.6)
+hold on
+plot(x/(HermiteParametersz0.Waist),abs(NHx),'--','LineWidth',1.6)
+colorp = [0,200,100]/256;
+plot(x/(HermiteParametersz0.Waist),abs(H1x),'-.','LineWidth',1.6,'color',colorp)
+hold off
+xlim([-5 5])
+ylim([0 .019])
+xlabel('$y$','Interpreter','latex','FontSize',14)
+leg1=legend('$|\psi_{n,m}^{(1,1)}|$','$|Re\left(\psi_{n,m}^{(1,1)}\right)|$','$|Im\left(\psi_{n,m}^{(1,1)}\right)|$','interpreter','latex','FontSize',14,'NumColumns',3);
+leg1.Position = [0.5693, 0.8203, 0.3337, 0.0967];
+% title(['Solutions of Hermite Equation with integer number equal to ',num2str(nu)])
+% legend off
+ set(gca,'FontSize',18);
+export_fig('hankelHermiteGaussSolutionsX','-png','-transparent')
+
+
+
 %% Hermite Gauss in z = 0
 HGB   = HermiteBeam(X,Y,HermiteParametersz0);
 
@@ -271,29 +315,33 @@ mesh(PHASE21,X,Y,'FaceAlpha', 0.1,'EdgeAlpha',0.4);
 
 close(figure(3))
 fig3 = figure(3);
-fig3.Position = [680 164 721 814];
+fig3.Position = [680 177 732 801];
 ha = tight_subplot(2,2,[.01 .01],[.05 .01],[.1 .01]);
 axes(ha(1))
 plotOpticalField(x/InitialWaist,x/InitialWaist,abs(H22+H21),mapgreen,'');
 ha(1).XAxis.Visible = 'off';
 ha(1).YAxisLocation = 'left';
-title('$|\psi_{n,m}^{1,1}+\psi_{n,m}^{2,1}|$','interpreter','latex','FontSize',18)
+title('$a)|\psi_{n,m}^{1,1}+\psi_{n,m}^{2,1}|$','interpreter','latex','FontSize',18)
+% title('$a)$','interpreter','latex','FontSize',18)
 set(gca,'FontSize',18);
 axes(ha(2))
 plotOpticalField(x/InitialWaist,x/InitialWaist,abs(H22+H11),mapgreen,'');
-title('$|\psi_{n,m}^{1,1}+\psi_{n,m}^{2,2}|$','interpreter','latex','FontSize',18)
+title('$b)|\psi_{n,m}^{1,1}+\psi_{n,m}^{2,2}|$','interpreter','latex','FontSize',18)
+%title('$b)$','interpreter','latex','FontSize',18)
 ha(2).XAxis.Visible = 'off';
 ha(2).YAxis.Visible = 'off';
 ha(2).YAxisLocation = 'right';
 set(gca,'FontSize',18);
 axes(ha(3))
 plotOpticalField(x/InitialWaist,x/InitialWaist,abs(H22+H21+H11),mapgreen,'');
-title('$|\psi_{n,m}^{1,1}+\psi_{n,m}^{2,1}+\psi_{n,m}^{2,2}|$','interpreter','latex','FontSize',18)
+title('$c)|\psi_{n,m}^{1,1}+\psi_{n,m}^{2,1}+\psi_{n,m}^{2,2}|$','interpreter','latex','FontSize',18)
+%title('$c)$','interpreter','latex','FontSize',18)
 set(gca,'FontSize',18);
 ha(3).YAxisLocation = 'left';
 axes(ha(4))
 plotOpticalField(x/InitialWaist,x/InitialWaist,abs(H22+H21+H11+H12),mapgreen,'');
-title('$|\psi_{n,m}^{1,1}+\psi_{n,m}^{2,1}+\psi_{n,m}^{1,2}+\psi_{n,m}^{2,2}|$','interpreter','latex','FontSize',18)
+title('$d)|\psi_{n,m}^{1,1}+\psi_{n,m}^{2,1}+\psi_{n,m}^{1,2}+\psi_{n,m}^{2,2}|$','interpreter','latex','FontSize',18)
+%title('$d)$','interpreter','latex','FontSize',18)
 ha(4).YAxisLocation = 'right';
 ha(4).YAxis.Visible = 'off';
 set(gca,'FontSize',18);
@@ -325,7 +373,7 @@ ha(3).YAxisLocation = 'right';
 set(gca,'FontSize',18);
 sgtitle('Superposition of Hankels','FontSize',18)
 %saveas(gcf,'SuperpositionOfHankels.png')
-export_fig('SuperpositionOfHankels2','-png','-transparent')
+export_fig('SuperpositionOfHankelsV4','-png','-transparent')
 
 
 %% Obstruction on Hermite in z = 0
@@ -404,6 +452,8 @@ gy      = zeros(Nx,length(z));
 W       = zeros(Nx,Nz,Nx);
 W11o    = zeros(Nx,Nz,Nx);
 W22o    = zeros(Nx,Nz,Nx);
+W12o    = zeros(Nx,Nz,Nx);
+W21o    = zeros(Nx,Nz,Nx);
 W11     = zeros(Nx,Nz,Nx);
 W22     = zeros(Nx,Nz,Nx);
 Wo      = zeros(Nx,Nz,Nx);
@@ -442,6 +492,8 @@ for z_index = 1:length(z)
   W    (:,z_index,:) = g;
   W11o (:,z_index,:) = g11o;
   W22o (:,z_index,:) = g22o;
+  W12o (:,z_index,:) = g12o;
+  W21o (:,z_index,:) = g21o;
   Wo   (:,z_index,:) = go;
   W11  (:,z_index,:) = g11;
   W22  (:,z_index,:) = g22;
@@ -454,6 +506,8 @@ for z_index = 1:length(z)
   G21  = fftshift(fft2((g21)));
   G11o = fftshift(fft2((g11o)));
   G22o = fftshift(fft2((g22o)));
+  G12o = fftshift(fft2((g12o)));
+  G21o = fftshift(fft2((g21o)));
   
   % obtain new propagated field
   go   = (ifft2(ifftshift(Go.*prop)));
@@ -463,6 +517,8 @@ for z_index = 1:length(z)
   g11  = (ifft2(ifftshift(G11.*prop)));
   g11o = (ifft2(ifftshift(G11o.*prop)));
   g22o = (ifft2(ifftshift(G22o.*prop)));
+  g12o = (ifft2(ifftshift(G12o.*prop)));
+  g21o = (ifft2(ifftshift(G21o.*prop)));
   
 %%  Calculating propagation of Rays
   % propagation distance 
@@ -573,17 +629,18 @@ hold on
  hold off
 %%
 %% distances
+distances = [25/12,10/2,inf];
+% distances = [2/2,6/2,inf];
 
-distances = [2/2,6/2,inf];
-
-texts     = {'$z_R/2$','$z_R/6$','0'};
+texts     = {'$(6/25) z_R$','$(1/10) z_R$','0'};
 
 
 FG = W22o;
 
 close(figure(800))
 fig800 = figure(800);
-ha = tight_subplot(2,3,[.01 .01],[.05 .08],[.12 .09]);
+fig800.Position = [680   363   911   615];
+ha = tight_subplot(2,3,[.01 .01],[.05 .01],[.09 .09]);
 
 
 kk = 1;
@@ -595,16 +652,21 @@ for jj = distances
   end
   
   gg = W22(:,index,:);
+  maxvalue = max(abs((W22(:))));
   gg = reshape(gg,[Nx,Nx]);
   axes(ha(4-kk))
   plotOpticalField(x/InitialWaist,x/InitialWaist,abs(gg).^1.5,mapgreen,'');
-  title(['$z$ = ', texts{kk}],'Interpreter','latex')
+  caxis ([0 maxvalue])
+  set(gca,'FontSize',12);
+   title(['$z$ = ', texts{kk}],'FontSize',14,'Interpreter','latex')
 
   gg1 = W22o(:,index,:);
   gg1 = reshape(gg1,[Nx,Nx]);
   axes(ha(7 - kk))
   plotOpticalField(x/InitialWaist,x/InitialWaist,abs(gg1).^1.5,mapgreen,'');
-  title(['$z$ = ', texts{kk}],'Interpreter','latex')
+  set(gca,'FontSize',12);
+  caxis ([0 maxvalue])
+%   title(['$z$ = ', texts{kk}],'FontSize',14,'Interpreter','latex')
 
   kk = kk+1;
 
@@ -614,7 +676,7 @@ for jj = distances
   
 end
 
-sgtitle('Propagation of $\psi_{n,m}^{(1,1)}$','interpreter','latex')
+% sgtitle('Propagation of $\psi_{n,m}^{(1,1)}$','interpreter','latex')
 
 
 ha(1).XAxis.Visible = 'off';
@@ -656,12 +718,26 @@ for jj = distances
   figure(1000)
   plotOpticalField(x,x,abs(gg1).^1.5,mapgreen,'');
   plotRays(rayH12(index),'m',1)
-  title(['$z$ = ', texts{kk}],'Interpreter','latex')
+%   title(['$z$ = ', texts{kk}],'Interpreter','latex')
 
   kk = kk+1;
 
-  saveas(gcf,['HH11Propagation',num2str(jj),'.png'])
+  saveas(gcf,['HH22Propagation',num2str(jj),'.png'])
 
+  
+%   gg1 = W12o(:,index,:);
+%   gg1 = reshape(gg1,[Nx,Nx]);
+%   figure(1000)
+%   plotOpticalField(x,x,abs(gg1).^1.5,mapgreen,'');
+%   plotRays(rayH12(index),'y',1)
+% %   title(['$z$ = ', texts{jj}],'Interpreter','latex')
+% 
+% %   kk = kk+1;
+% 
+ saveas(gcf,['HH12Propagation',num2str(jj),'.png'])
+
+  
+  
 
   
 end
