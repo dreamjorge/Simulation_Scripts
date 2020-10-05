@@ -1,4 +1,4 @@
-function LWaistZ = waistLFunction(distancePropagation,InitialWaist,RayleighDistance,nu,mu)
+function LWaistZ = getWaist(distancePropagation,InitialWaist,RayleighDistance,nu,mu)
 %This function estimates waist of Laguerre Gaussian Beam
 % receives distancePropagation,initialWaist,RayleighDistance as inputs and
 % gives waist of Gaussian Beam
