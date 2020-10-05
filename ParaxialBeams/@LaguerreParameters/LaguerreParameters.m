@@ -34,7 +34,7 @@ classdef LaguerreParameters < GaussianParameters & handle & matlab.mixin.Copyabl
   end
   
   methods(Static)   
-    waistL = waistLFunction(zCoordinate,InitialWaist,RayleighDistance,nu,mu); % Function for estimate wast of Laguerre Gauss Beam
+    waistL = getWaist(zCoordinate,InitialWaist,RayleighDistance,nu,mu); % Function for estimate wast of Laguerre Gauss Beam
   end
   
   
@@ -47,9 +47,12 @@ classdef LaguerreParameters < GaussianParameters & handle & matlab.mixin.Copyabl
 
     function LaguerreWaist = get.LaguerreWaist(obj)
       % Function for estimate phase of Laguerre Gaussian Beam
-      LaguerreWaist = LaguerreParameters.waistLFunction(obj.zCoordinate,obj.InitialWaist,obj.RayleighDistance,obj.l,obj.p);
+      LaguerreWaist = LaguerreParameters.getWaist(obj.zCoordinate,obj.InitialWaist,obj.RayleighDistance,obj.l,obj.p);
     end
 
+    
+    
+    
     function Parameters = LaguerreParameters(zCoordinate,InitialWaist,Wavelength,l,p)
     % Constructor of Laguerre Parameters Object 
      %Call Gaussian Parameters
