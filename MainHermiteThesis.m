@@ -22,23 +22,14 @@ HermiteParametersz0  = HermiteParameters(0,InitialWaist,Wavelength,nu,mu);
 k                    = HermiteParametersz0.k;
 RayleighDistance     = HermiteParametersz0.RayleighDistance;
 
-%% Normalized parameters
-% 
-% Wavelength           = pi;
-% InitialWaist         = 1;
-% HermiteInitialWaist  = InitialWaist*sqrt(nu+mu+1);
-% HPz0                 = HermiteParameters(0,InitialWaist,Wavelength,nu,mu);
-% k                    = HPz0.k;
-% RayleighDistance     = HPz0.RayleighDistance;
-
 %% sampling of vectors 
 %First, we estimate samplig in z-direction with propagation distance 
 % z-direction
-Dz    = RayleighDistance;     % z-window (propagation distance)
-Nz    = 2^7;                      % number of points in z-direction
-dz    = Dz/Nz;                    % Resolution in z
-nz    = 0:Nz-1;                   % vector with N-points with resolution 1
-z     = nz*dz;                    % z-vector z of propagation 
+Dz    = RayleighDistance;  % z-window (propagation distance)
+Nz    = 2^7;               % number of points in z-direction
+dz    = Dz/Nz;             % Resolution in z
+nz    = 0:Nz-1;            % vector with N-points with resolution 1
+z     = nz*dz;             % z-vector z of propagation 
 
 % waist of Hermite Gauss Beam until z-propagation
 MaxHermiteWaist = HermiteParameters.getWaist(z(end),InitialWaist,RayleighDistance,nu,mu);
@@ -48,12 +39,12 @@ MaxHermiteWaist = HermiteParameters.getWaist(z(end),InitialWaist,RayleighDistanc
 
 % y,x-direction
 Nx    =  2^10;                 % Number of points in x,y axis
-n     = -Nx/2:Nx/2-1;         % vector with N-points with resolution 1
-Dx    = 1.1*MaxHermiteWaist;  % Size of window 
-dx    = Dx/Nx;                % Resolution
-x     = n*dx;                 % Vector
-y     = x;
-[X,Y] = meshgrid(x,y);
+n     = -Nx/2:Nx/2-1;          % vector with N-points with resolution 1
+Dx    =  1.1*MaxHermiteWaist;  % Size of window 
+dx    =  Dx/Nx;                % Resolution
+x     =  n*dx;                 % Vector
+y     =  x;
+[X,Y] =  meshgrid(x,y);
 
 %Last, we estimate vectors of frequency for Fourier Transforms
 Du    = 1/dx;                 % Size of window 
@@ -66,6 +57,36 @@ kx    = 2*pi*u;
 
 %diferential
 dr    = [dx,dx,dz];
+
+%% Hermite Gauss in z = 0
+HGB   = HermiteBeam(X,Y,HermiteParametersz0);
+
+% Optic Field to propagate 
+g     = HGB.OpticalFieldHermite;
+% Plot of Function
+figure(3)
+plotOpticalField(x/(HermiteParametersz0.Waist),x/(HermiteParametersz0.Waist),abs(g),mapgreen,'$x/w_o$','$y/w_o$');
+% title('Superposition of 4 Hankels')
+saveas(gcf,'HermiteZo.png')
+%% Hermite Gauss in zi
+% copy of parameters
+HPzi   = copy(HermiteParametersz0);
+
+% Changing parameters to vector z
+HPzi.zCoordinate = z;  
+
+HGBzi   = HermiteBeam(X,Y,HermiteParametersz0);
+
+
+
+
+
+
+
+
+
+
+
 
 %% Hankel 1D
 
@@ -189,22 +210,6 @@ export_fig('hankelHermiteGaussSolutionsX','-png','-transparent')
 
 
 
-%% Hermite Gauss in z = 0
-HGB   = HermiteBeam(X,Y,HermiteParametersz0);
-
-% copy of parameters
-HPz   = copy(HermiteParametersz0);
-
-% Changing parameters to vector z
-HPz.zCoordinate = z;  
-
-% Optic Field to propagate 
-g     = HGB.OpticalFieldHermite;
-% Plot of Function
-figure(3)
-plotOpticalField(x/(HermiteParametersz0.Waist),x/(HermiteParametersz0.Waist),abs(g),mapgreen,'');
-title('Superposition of 4 Hankels')
-saveas(gcf,'SumAllHankels.png')
 
 
 %% Hankels 2D
