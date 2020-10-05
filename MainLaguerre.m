@@ -71,7 +71,6 @@ y   = x;                    % same for y
 
 
 % Transformation of coordinates
-[dth,dr]                      = cart2pol(dx,dx');
 [thetaCoordinate,rCoordinate] = cart2pol(x,x);
 [ThetaCoordinate,RCoordinate] = cart2pol(X,X');
 
@@ -120,7 +119,7 @@ LG = LaguerreBeam(RCoordinate,ThetaCoordinate,LPinZ0);
 figure(2)
 subplot(1,2,1)
 plotOpticalField(x,x,abs(LG.OpticalFieldLaguerre),mapgreen,'microns');
-plotCircle(0,0,LPinZ0.LaguerreWaist);
+plotCircle(0,0,LPinZ0.LaguerreWaist,'r',1.5);
 
 % Optic Field to propagate 
 g   = LG.OpticalFieldLaguerre;
@@ -146,8 +145,8 @@ g       = g.*(1-obo);
 %Ploting Laguerre with obstruction
 figure(3)
 plotOpticalField(x,x,abs(g).^2,mapgreen,'microns');
-plotCircle(0,0,LPinZ0.LaguerreWaist);
-plotCircle(xt,yt,lo);
+plotCircle(0,0,LPinZ0.LaguerreWaist,'r',1.5);
+plotCircle(xt,yt,lo,'r',1.5);
 
 
 %% ----------------------- Ray tracing (rx,z=0)  ----------------------- %%
