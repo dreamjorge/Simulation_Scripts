@@ -34,7 +34,7 @@ RayleighDistance     = HermiteParametersz0.RayleighDistance;
 %% sampling of vectors 
 %First, we estimate samplig in z-direction with propagation distance 
 % z-direction
-Dz    = RayleighDistance;     % z-window (propagation distance)
+Dz    = 0.5*RayleighDistance;     % z-window (propagation distance)
 Nz    = 2^7;                      % number of points in z-direction
 dz    = Dz/Nz;                    % Resolution in z
 nz    = 0:Nz-1;                   % vector with N-points with resolution 1
