@@ -74,7 +74,7 @@ HPzi             = copy(HermiteParametersz0);
 % distances for plot
 zi               = [0, RayleighDistance/4, RayleighDistance/3, RayleighDistance/2, ...
                     2*RayleighDistance/3, 3*RayleighDistance/4, RayleighDistance];
-textdis          = ['0','zR4','zR3','zR2','2zR3','3zR4','zR'];
+textdis          = {'0','zR4','zR3','zR2','2zR3','3zR4','zR'};
 
 for jj = 1 : numel(zi)
   
@@ -88,9 +88,9 @@ for jj = 1 : numel(zi)
   fig3.Position = [680 406 802 572];
   plotOpticalField(x/InitialWaist,x/InitialWaist,abs(g).^2,mapgreen,'$x/w_o$','$y/w_o$');
   % set(gca,'FontSize',18);
-  export_fig(['Hermite',textdis(jj)],'-png','-transparent')
+  export_fig(['Hermite',textdis{jj}],'-png','-transparent')
   h = plotWaistHermite2D(HPzi,InitialWaist,'r');
-  export_fig(['Hermite',textdis(jj),'Waist'],'-png','-transparent')
+  export_fig(['Hermite',textdis{jj},'Waist'],'-png','-transparent')
   
 end
 
