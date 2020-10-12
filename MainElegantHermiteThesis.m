@@ -25,7 +25,7 @@ RayleighDistance    = HermiteParametersz0.RayleighDistance;
 %% sampling of vectors 
 %First, we estimate samplig in z-direction with propagation distance 
 % z-direction
-Dz    = 6*RayleighDistance;  % z-window (propagation distance)
+Dz    = RayleighDistance;  % z-window (propagation distance)
 Nz    = 2^7;                  % number of points in z-direction
 dz    = Dz/Nz;                % Resolution in z
 nz    = 0:Nz-1;               % vector with N-points with resolution 1
@@ -284,7 +284,7 @@ end
 
 fig6 = figure(6);
 fig6.Position = [382 228 1375 537];
-imagesc(z/RayleighDistance,y/InitialWaist,abs(gy).^0.2);
+imagesc(z/RayleighDistance,y/InitialWaist,abs(gy).^1.5);
 xlabel('$z/z_R$','Interpreter','latex','FontSize',18)
 ylabel('$y/w_o$','Interpreter','latex','FontSize',18)
 export_fig('eHermiteLateralY','-png','-transparent')
