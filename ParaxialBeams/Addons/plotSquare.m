@@ -1,5 +1,5 @@
 function [h] = plotSquare(x,y,color)
-%% Function for plot square given vertices
+%% Function for plot square given vertices in x,y vectors
 
   hold on
 
