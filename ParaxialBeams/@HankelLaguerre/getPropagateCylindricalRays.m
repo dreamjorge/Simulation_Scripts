@@ -31,12 +31,13 @@ function [Rays] = getPropagateCylindricalRays(Rays,...
     thi = temporalRay.thetaCoordinate;
 
     
-%     if (ri < 0) && (HankelType == 2)
-%       temporalRay.hankelType = 1;
-%     end 
+    if (ri < 0) && (HankelType == 2)
+      temporalRay.hankelType = 1;
+    end 
     
     % always it takes positive value of r
-%     temporalRay.rCoordinate = abs(ri);
+    ri                      = abs(ri);
+    temporalRay.rCoordinate = ri;
     
     % calculating Hankels in point (r,th,z) of ray
     
@@ -44,9 +45,9 @@ function [Rays] = getPropagateCylindricalRays(Rays,...
     HLth = HankelLaguerre(ri,th ,LParametersZi,temporalRay.hankelType);
     HLz  = HankelLaguerre(ri,thi,LParametersZ ,temporalRay.hankelType);     
 
-    fr   = unwrap(angle(HLr.OpticalFieldLaguerre));
+    fr   = unwrap(angle( HLr.OpticalFieldLaguerre));
     fth  = unwrap(angle(HLth.OpticalFieldLaguerre));
-    fz   = unwrap(angle(HLz.OpticalFieldLaguerre));
+    fz   = unwrap(angle( HLz.OpticalFieldLaguerre));
 
      % Calculating gradient
     [temporalRay] = getCylindricalGradient(fr,fth,fz,k,difr,temporalRay);
