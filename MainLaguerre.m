@@ -3,21 +3,17 @@
 % adding path for classes and functions
 addpath ParaxialBeams
 addpath ParaxialBeams\Addons
-% Selecting green color for beam
-mapgreen = AdvancedColormap('kgg',256,[0 100 255]/255);
-% use gpu? 
-runGPU = 'no';
-%%          Initial parameters of Laguerre Gaussian Beams
+addpath ParaxialBeams\Addons\export_fig-master
 
+% Selecting green color for beam
+mapgreen = AdvancedColormap('kggg',256,[0 30 70 255]/255);
+
+%%          Initial parameters of Laguerre Gaussian Beams
 l = 11;
 p = 0;
-
 % Physical parameters [microns]
-InitialWaist        = 10;%179*2;
+InitialWaist        = 100;%179*2;
 Wavelength          = 0.6328;
-% normalized parameters
-% InitialWaist = 1;
-% Wavelength   = pi;
 PropagationDistance = 0;
 
 % Calculating Laguerre parameters in z=0
@@ -27,21 +23,15 @@ LPinZ0 = LaguerreParameters(PropagationDistance...
                            ,l...
                            ,p);
                      
+RayleighDistance    = LPinZ0.RayleighDistance;
 %%                        Sampling of vectors 
 % Estimate sampling in z-direction with propagation distance 
 % z-direction
-Dz = LPinZ0.RayleighDistance; % z-window (propagation distance)
+Dz = RayleighDistance;        % z-window (propagation distance)
 Nz = 2^9;                     % number of points in z-direction
 dz = Dz/Nz;                   % Resolution in z
 z  = 0:dz:Dz;                 % z-vector z of propagation 
 
-% Calculating Laguerre parameters in z distance vector
-% LPinZ = LaguerreParameters(z...
-%                           ,InitialWaist...
-%                           ,Wavelength...
-%                           ,l...
-%                           ,p);
-                        
 % Calculating Laguerre parameters in z distance vector copying object in z = 0
 LPinZ  = copy(LPinZ0);
 LPinZ.zCoordinate = z;                         
@@ -49,19 +39,10 @@ LPinZ.zCoordinate = z;
 fig1          = figure(1);
 fig1.Position = [314 300 1097 479];
 plotLaguerreParameters(LPinZ);
-
-% Estimate sampling in x,y-direction in terms of waist of max  
-% Laguerre Gauss Beam waist until max z-propagation
-
-% MaxLaguerreWaist = LaguerreParameters.waistFunction(z(end)...
-%                                                    ,InitialWaist...
-%                                                    ,LPinZ0.RayleighDistance...
-%                                                    ,l...
-%                                                    ,p);
- % waist in max z, from LaguereParametersz0                                               
+                                             
 MaxLaguerreWaist = LPinZ.LaguerreWaist(end);
 
-N   = 2^10;                  % Number of points in x,y axis
+N   = 2^9;                  % Number of points in x,y axis
 n   = -N/2+.05:N/2-1+.05;   % vector with N-points with resolution 1
 Dx  = 2.2*MaxLaguerreWaist; % Size of window 
 dx  = Dx/N;                 % Resolution
@@ -69,15 +50,14 @@ x   = n*dx;                 % Vector with dimentions
 y   = x;                    % same for y
 [X] = meshgrid(x,y);        % Matrix for x,y
 
-
 % Transformation of coordinates
-[thetaCoordinate,rCoordinate] = cart2pol(x,x);
 [ThetaCoordinate,RCoordinate] = cart2pol(X,X');
 
-r  = 0:N-1;
-Dr = sqrt(2)*Dx;
-dr = Dr/N;
-r  = r*dr;
+% 1d (r,th) coordinates
+r    = 0:N-1;
+Dr   = sqrt(2)*Dx;
+dr   = Dr/N;
+r    = r*dr;
 
 th   = -N/2:N/2-1;
 Dth  = 2*pi;
@@ -85,8 +65,8 @@ dth  = Dth/N;
 th   = th*dth;
 
 % Diferential vector in cylindrical coordinates
-%difr = [dx,dx,dz];
 difr = [dr,dth,dz];
+
 % Estimate vectors of frequency for Fourier Transforms associated
 % with x,y
 Du   = 1/dx;         % Size of window 
@@ -96,32 +76,45 @@ u    = n*du;         % freq vector with dimentions
 %kx,ky vectors
 kx   = 2*pi*u;       % angular freq vector
 [Kx] = meshgrid(kx); % angular freq matrix
+%% 
+LPinZi  = copy(LPinZ0);
 
+% distances for plot
+zi      = [0, RayleighDistance/4,   RayleighDistance/3,   RayleighDistance/2, ...
+              2*RayleighDistance/3, 3*RayleighDistance/4, RayleighDistance  ];
+textdis = {'0','zR4','zR3','zR2','2zR3','3zR4','zR'};
 
-if strcmp(runGPU,'yes')
-%Parallel Computing Toolbox
-  x               = gpuArray(x);
-  X               = gpuArray(X);
-  u               = gpuArray(u);
-  U               = gpuArray(U);
-  kx              = gpuArray(kx);
-  rCoordinate     = gpuArray(rCoordinate);
-  thetaCoordinate = gpuArray(thetaCoordinate);
-  RCoordinate     = gpuArray(RCoordinate);
-  ThetaCoordinate = gpuArray(ThetaCoordinate);
+for jj = 1 : numel(zi)
+  
+  LPinZi.zCoordinate = zi(jj);
+  % Build new Optical Field
+  LGBzi              = LaguerreBeam(RCoordinate,ThetaCoordinate,LPinZi);
+  % Optic Field
+  g                  = LGBzi.OpticalFieldLaguerre;
+
+  fig3 = figure(3);
+  fig3.Position = [680 406 802 572];
+  plotOpticalField(x/InitialWaist,x/InitialWaist,abs(g).^2,mapgreen,'$x/w_o$','$y/w_o$');
+  % set(gca,'FontSize',18);
+  export_fig(['Laguerre',textdis{jj}],'-png','-transparent')
+  plotCircle(0,0,LGBzi.LaguerreWaist/InitialWaist,'r',1.5);
+  export_fig(['Hermite',textdis{jj},'Waist'],'-png','-transparent')
+  
 end
+
+
+
+
 %% ----------------------- Laguerre Gauss in z = 0 --------------------- %%
 
 % With laguerre parameters calculated, it estimates Laguerre Gauss Beam
 LG = LaguerreBeam(RCoordinate,ThetaCoordinate,LPinZ0);
-
+g  = LG.OpticalFieldLaguerre;
 % Plot of Field
 figure(2)
-plotOpticalField(x,x,abs(LG.OpticalFieldLaguerre),mapgreen,'$x/w_0$','$x/w_0$');
-plotCircle(0,0,LPinZ0.LaguerreWaist,'r',1.5);
+plotOpticalField(x/InitialWaist,x/InitialWaist,abs(g).^2,mapgreen,'$x/w_0$','$x/w_0$');
+plotCircle(0,0,LPinZ0.LaguerreWaist/InitialWaist,'r',1.5);
 
-% Optic Field to propagate 
-g   = LG.OpticalFieldLaguerre;
 % Max Peak
 pxy = max(max(g));
 
@@ -140,10 +133,12 @@ clear rho
 g       = g.*(1-obo);
 %Ploting Laguerre with obstruction
 figure(3)
-plotOpticalField(x,x,abs(g).^2,mapgreen,'$x/w_0$','$x/w_0$');
+pxyz   = g(1,1);
+g(1,1) = pxy;
+plotOpticalField(x/InitialWaist,x/InitialWaist,abs(g).^2,mapgreen,'$x/w_0$','$x/w_0$');
 plotCircle(0,0,LPinZ0.LaguerreWaist,'r',1.5);
 plotCircle(xt,yt,lo,'r',1.5);
-
+g(1,1) = pxyz;
 %% ----------------------- Ray tracing (rx,z=0)  ----------------------- %%
 
 TotalRays = 20;          % Number of rays
@@ -235,8 +230,12 @@ for z_index = 1:length(z)-1 % propagation with respect to z
 
   fig = figure(6);
 %   fig.Position = [-1349 147 813 733];
+
+  pxyz   = g(1,1);
+  g(1,1) = pxy;
   plotOpticalField(x,x,abs(g),mapgreen,'$x/w_0$','$x/w_0$');
   title(['z = ', num2str(z_index), ' of ', num2str(Nz)])
+  g(1,1) = pxyz;
   drawnow 
   hold on
 
@@ -253,6 +252,8 @@ plotRaysPropagated(rayH1,rayH2,Nz);
 %%
 figure(8)
 imagesc(z,x,abs(gx))
+
+%%
 hold on
 for z_index = 1:length(z)-1
   scatter(rayH2(z_index).zCoordinate,rayH2(z_index).xCoordinate,10,'filled','MarkerFaceColor',[1 0 0])
