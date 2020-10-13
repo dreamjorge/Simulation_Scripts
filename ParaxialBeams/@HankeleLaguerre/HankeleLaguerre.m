@@ -1,4 +1,4 @@
-classdef HankelLaguerre 
+classdef HankeleLaguerre 
   
   properties   
     HankelType    % hankel type (1,2)
@@ -19,7 +19,7 @@ classdef HankelLaguerre
   methods
     
     % Constructor of Object
-    function Hankel = HankelLaguerre(rCoordinate,thetaCoordinate,LaguerreParameters,nh)
+    function Hankel = HankeleLaguerre(rCoordinate,thetaCoordinate,LaguerreParameters,nh)
      
       %Hankel Type of input
       Hankel.HankelType = nh;

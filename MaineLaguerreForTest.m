@@ -54,7 +54,7 @@ y   = x;                    % same for y
 [ThetaCoordinate,RCoordinate] = cart2pol(X,X');
 
 % 1d (r,th) coordinates
-r    = 0:N-1;
+r    = 1:N;
 Dr   = sqrt(2)*Dx;
 dr   = Dr/N;
 r    = r*dr;
@@ -103,12 +103,12 @@ for jj = 1 : numel(zi)
 end
 
 
-c
+
 
 %% ----------------------- Laguerre Gauss in z = 0 --------------------- %%
 
 % With laguerre parameters calculated, it estimates Laguerre Gauss Beam
-LG = LaguerreBeam(RCoordinate,ThetaCoordinate,LPinZ0);
+LG = eLaguerreBeam(RCoordinate,ThetaCoordinate,LPinZ0);
 g  = LG.OpticalFieldLaguerre;
 % Plot of Field
 figure(2)
@@ -121,7 +121,7 @@ pxy = max(max(g));
 %% ----------------- Obstruction on Lagurre in z = 0 ------------------- %%
 % Initial Waist of Laguerre Beam
 
-lo      = (LPinZ0.LaguerreWaist)*0.3;  % size of obstruction in terms of waist of Laguerre
+lo      = (LPinZ0.LaguerreWaist)*0.1;  % size of obstruction in terms of waist of Laguerre
 xt      = 0;                           % traslation of obstruction in x-axis
 yt      = 0;         
 
@@ -175,11 +175,6 @@ title('Propagator')
 gx      = zeros(N,length(z)); 
 gy      = zeros(N,length(z));
 
-if strcmp(runGPU,'yes')
-  gx      = gpuArray(gx); 
-  gy      = gpuArray(gy); 
-end
-
 % Save field in z = 0 
 gx(:,1) = g(N/2+1,:);
 gy(:,1) = g(:,N/2+1);
@@ -203,7 +198,7 @@ for z_index = 1:length(z)-1 % propagation with respect to z
 
   % propagate all rays of H1
   HankelType = 1;
-  [rayH1(z_index+1)] = HankelLaguerre.getPropagateCylindricalRays(rayH1(z_index),...
+  [rayH1(z_index+1)] = HankeleLaguerre.getPropagateCylindricalRays(rayH1(z_index),...
                                                                   TotalRays,...
                                                                   r,th,...
                                                                   difr,...
@@ -215,7 +210,7 @@ for z_index = 1:length(z)-1 % propagation with respect to z
 
   % propagate all rays of H2
   HankelType = 2;
-  [rayH2(z_index+1)] = HankelLaguerre.getPropagateCylindricalRays(rayH2(z_index),...
+  [rayH2(z_index+1)] = HankeleLaguerre.getPropagateCylindricalRays(rayH2(z_index),...
                                                                   TotalRays,...
                                                                   r,th,...
                                                                   difr,...

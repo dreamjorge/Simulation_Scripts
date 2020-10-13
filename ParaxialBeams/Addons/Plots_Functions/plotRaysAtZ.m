@@ -8,7 +8,7 @@ function [h] = plotRaysAtZ(rayObject,scale,lineWidth,color)
 % - scale       scale for rescale elements in ray.
 
   hold on
-
+  
   h = scatter(rayObject.xCoordinate/scale,rayObject.yCoordinate/scale,lineWidth,color,'filled','o');
 
   hold off
