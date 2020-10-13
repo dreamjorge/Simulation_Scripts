@@ -13,11 +13,11 @@ function [rayOutput]= copyRay2ArrayRay(rayInput,...
     rayOutput.xySlope(index_output_point) = rayInput.xySlope;
     
   elseif(isa(rayInput,'CylindricalRay'))
-    rayOutput.rCoordinate    (index_output_point) = rayInput.rCoordinate    ;
+    rayOutput.rCoordinate    (index_output_point) = rayInput.rCoordinate;
     rayOutput.thetaCoordinate(index_output_point) = rayInput.thetaCoordinate;
-    rayOutput.zrSlope (index_output_point) = rayInput.zrSlope;
-    rayOutput.zthSlope(index_output_point) = rayInput.zthSlope;
-    rayOutput.rthSlope(index_output_point) = rayInput.rthSlope;
+    rayOutput.zrSlope        (index_output_point) = rayInput.zrSlope;
+    rayOutput.zthSlope       (index_output_point) = rayInput.zthSlope;
+    rayOutput.rthSlope       (index_output_point) = rayInput.rthSlope;
     
   end
   
