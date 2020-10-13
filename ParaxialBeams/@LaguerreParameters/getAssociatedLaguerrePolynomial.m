@@ -1,4 +1,4 @@
-function [Ln] = AssociatedLaguerrePolynomial(n,m,x)
+function [Ln] = getAssociatedLaguerrePolynomial(n,m,x)
 %This function calculates Asociated Laguerre Polinomyal with recursive
 %method (Alfonso's formula)
 
