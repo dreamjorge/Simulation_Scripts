@@ -27,7 +27,9 @@ classdef eLaguerreBeam <  matlab.mixin.Copyable & handle & LaguerreParameters & 
 
     function Normalization = get.Normalization(obj)
      %% Factor of Normalizartion for Laguerre Gauss Beam
-      Normalization =  sqrt(2*factorial(obj.p)/(pi*factorial(obj.p+abs(obj.l))));
+     
+      q = obj.zCoordinate-1i*1i*obj.RayleighDistance;
+      Normalization = (-1i*obj.RayleighDistance./q).^(abs(obj.l)+obj.p+1);
     end
 
     function Laguerre = eLaguerreBeam(rCoordinate,thetaCoordinate,LaguerreParameters)
@@ -60,7 +62,7 @@ classdef eLaguerreBeam <  matlab.mixin.Copyable & handle & LaguerreParameters & 
       k            = obj.k;
       alpha        = 1i*(k)./(2*q); 
       
-      opticalField = ...Laguerre.Normalization.*...
+      opticalField = obj.Normalization.*...
                      ...Laguerre.LaguerreAmplitude.*... 
                      exp( 1i*PhiPhase).*...
                      exp(-1i*abs(p)*(theta)).*...
