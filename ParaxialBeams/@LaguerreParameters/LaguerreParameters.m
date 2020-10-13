@@ -33,10 +33,17 @@ classdef LaguerreParameters < GaussianParameters & handle & matlab.mixin.Copyabl
     PhiPhase       % Phase of Laguerre Gauss Beam
   end
   
-  methods(Static)   
-    waistL = getWaist(zCoordinate,InitialWaist,RayleighDistance,nu,mu); % Function for estimate wast of Laguerre Gauss Beam
+  methods(Static)  
+    % Function for estimate wast of Laguerre Gauss Beam
+    waistL = getWaist(zCoordinate,InitialWaist,RayleighDistance,nu,mu); 
+    % Formula for Obtain Associated Laguerre Polynomial (Lnm)
+    Lnm    = getAssociatedLaguerrePolynomial(nu,mu,x);
+    % Formula for Obtain second solution of Associated Laguerre Polynomial (Xnm)
+    XLn    = getXAssociatedLaguerrePolynomial(nu,mu,x);
+    
   end
-  
+ 
+
   
   methods
     
@@ -49,9 +56,6 @@ classdef LaguerreParameters < GaussianParameters & handle & matlab.mixin.Copyabl
       % Function for estimate phase of Laguerre Gaussian Beam
       LaguerreWaist = LaguerreParameters.getWaist(obj.zCoordinate,obj.InitialWaist,obj.RayleighDistance,obj.l,obj.p);
     end
-
-    
-    
     
     function Parameters = LaguerreParameters(zCoordinate,InitialWaist,Wavelength,l,p)
     % Constructor of Laguerre Parameters Object 

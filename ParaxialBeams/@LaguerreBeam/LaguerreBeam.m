@@ -18,11 +18,6 @@ classdef LaguerreBeam <  matlab.mixin.Copyable & handle & LaguerreParameters & G
     Normalization         % Normalization Factor 
   end
   
-  methods(Static)
-    %% Formula for Obtain Associated Laguerre Polynomial (Lnm)
-    Lnm     = AssociatedLaguerrePolynomial(nu,mu,x);
-  end
-  
   methods
     
     function LaguerreAmplitude = get.LaguerreAmplitude(obj)
@@ -65,7 +60,7 @@ classdef LaguerreBeam <  matlab.mixin.Copyable & handle & LaguerreParameters & G
                      ...Laguerre.LaguerreAmplitude.*... 
                      exp( 1i*PhiPhase).*...
                      exp(-1i*abs(p)*(theta)).*...
-                     LaguerreBeam.AssociatedLaguerrePolynomial(l,abs(p),xArgument).*...
+                     LaguerreParameters.getAssociatedLaguerrePolynomial(l,abs(p),xArgument).*...
                      obj.OpticalField;
     end
     
