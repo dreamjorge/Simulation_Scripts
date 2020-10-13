@@ -6,7 +6,7 @@ addpath ParaxialBeams\Addons
 addpath ParaxialBeams\Addons\export_fig-master
 
 % Selecting green color for beam
-mapgreen = AdvancedColormap('kggg',256,[0 30 70 255]/255);
+mapgreen = AdvancedColormap('kgg',256,[0 100 255]/255);
 
 %%          Initial parameters of Laguerre Gaussian Beams
 l = 11;
@@ -27,7 +27,7 @@ RayleighDistance    = LPinZ0.RayleighDistance;
 %%                        Sampling of vectors 
 % Estimate sampling in z-direction with propagation distance 
 % z-direction
-Dz = RayleighDistance;        % z-window (propagation distance)
+Dz = 2*RayleighDistance;        % z-window (propagation distance)
 Nz = 2^9;                     % number of points in z-direction
 dz = Dz/Nz;                   % Resolution in z
 z  = 0:dz:Dz;                 % z-vector z of propagation 
@@ -80,15 +80,15 @@ kx   = 2*pi*u;       % angular freq vector
 LPinZi  = copy(LPinZ0);
 
 % distances for plot
-zi      = [0, RayleighDistance/4,   RayleighDistance/3,   RayleighDistance/2, ...
-              2*RayleighDistance/3, 3*RayleighDistance/4, RayleighDistance  ];
+zi      = [0, Dz/4,   Dz/3,   Dz/2, ...
+              2*Dz/3, 3*Dz/4, Dz  ];
 textdis = {'0','zR4','zR3','zR2','2zR3','3zR4','zR'};
 
 for jj = 1 : numel(zi)
   
   LPinZi.zCoordinate = zi(jj);
   % Build new Optical Field
-  LGBzi              = LaguerreBeam(RCoordinate,ThetaCoordinate,LPinZi);
+  LGBzi              = eLaguerreBeam(RCoordinate,ThetaCoordinate,LPinZi);
   % Optic Field
   g                  = LGBzi.OpticalFieldLaguerre;
 
@@ -103,7 +103,7 @@ for jj = 1 : numel(zi)
 end
 
 
-
+c
 
 %% ----------------------- Laguerre Gauss in z = 0 --------------------- %%
 
@@ -233,15 +233,18 @@ for z_index = 1:length(z)-1 % propagation with respect to z
 
   pxyz   = g(1,1);
   g(1,1) = pxy;
-  plotOpticalField(x,x,abs(g),mapgreen,'$x/w_0$','$x/w_0$');
+  plotOpticalField(x/InitialWaist,x/InitialWaist,abs(g).^2,mapgreen,'$x/w_0$','$x/w_0$');
+  plotCircle(0,0,LPinZi.LaguerreWaist,'r',1.5);
+  
+  
   title(['z = ', num2str(z_index), ' of ', num2str(Nz)])
   g(1,1) = pxyz;
   drawnow 
   hold on
 
   % Plot propagated points of H1 and H2 in iteration before
-  plotRaysAtZ(rayH1(z_index+1),1,10,'r');
-  plotRaysAtZ(rayH2(z_index+1),1,10,'r');
+  plotRaysAtZ(rayH1(z_index+1),InitialWaist,10,'r');
+  plotRaysAtZ(rayH2(z_index+1),InitialWaist,10,'y');
 
   pause(0.1)
 

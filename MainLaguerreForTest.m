@@ -4,7 +4,7 @@
 addpath ParaxialBeams
 addpath ParaxialBeams\Addons
 addpath ParaxialBeams\Addons\export_fig-master
-
+addpath ParaxialBeams\Addons\Plots_Functions
 % Selecting green color for beam
 mapgreen = AdvancedColormap('kggg',256,[0 30 70 255]/255);
 
@@ -54,7 +54,7 @@ y   = x;                    % same for y
 [ThetaCoordinate,RCoordinate] = cart2pol(X,X');
 
 % 1d (r,th) coordinates
-r    = 0:N-1;
+r    = 1:N;
 Dr   = sqrt(2)*Dx;
 dr   = Dr/N;
 r    = r*dr;
@@ -175,15 +175,9 @@ title('Propagator')
 gx      = zeros(N,length(z)); 
 gy      = zeros(N,length(z));
 
-if strcmp(runGPU,'yes')
-  gx      = gpuArray(gx); 
-  gy      = gpuArray(gy); 
-end
-
 % Save field in z = 0 
 gx(:,1) = g(N/2+1,:);
 gy(:,1) = g(:,N/2+1);
-
 
 for z_index = 1:length(z)-1 % propagation with respect to z
 %% loop of each component in z
@@ -224,7 +218,11 @@ for z_index = 1:length(z)-1 % propagation with respect to z
                                                                   HankelType...
                                                                  );
                          
+   %% check slopes for propagation
+ %  [rayH2(z_index+1)] = checkSlopes(rayH2(z_index))
 
+                                                                 
+                                                               
   %                             End calculating rays 
   %%
 
@@ -233,42 +231,56 @@ for z_index = 1:length(z)-1 % propagation with respect to z
 
   pxyz   = g(1,1);
   g(1,1) = pxy;
-  plotOpticalField(x,x,abs(g),mapgreen,'$x/w_0$','$x/w_0$');
+  plotOpticalField(x/InitialWaist,x/InitialWaist,abs(g).^2,mapgreen,'$x/w_0$','$x/w_0$');
+  plotCircle(0,0,LPinZi.LaguerreWaist,'r',1.5);
+  
+  
   title(['z = ', num2str(z_index), ' of ', num2str(Nz)])
   g(1,1) = pxyz;
   drawnow 
   hold on
 
   % Plot propagated points of H1 and H2 in iteration before
-  plotRaysAtZ(rayH1(z_index+1),1,10,'r');
-  plotRaysAtZ(rayH2(z_index+1),1,10,'r');
+  plotRaysAtZ(rayH1(z_index+1),InitialWaist,10,'r');
+  plotRaysAtZ(rayH2(z_index+1),InitialWaist,10,'y');
 
   pause(0.1)
 
 end
 %%
-figure(7)
-plotRaysPropagated(rayH1,rayH2,Nz);
+% figure(7)
+% plotRaysPropagated(rayH1,rayH2,Nz);
 %%
 figure(8)
 imagesc(z,x,abs(gx))
 
-%%
+%
 hold on
 for z_index = 1:length(z)-1
   scatter(rayH2(z_index).zCoordinate,rayH2(z_index).xCoordinate,10,'filled','MarkerFaceColor',[1 0 0])
   scatter(rayH1(z_index).zCoordinate,rayH1(z_index).xCoordinate,10,'filled','MarkerFaceColor',[0 1 0])
 end
 hold off
+%%
 
 figure(9)
-
+imagesc(z,x,abs(gx))
 for z_index = 1:length(z)-1
   
   radial1(z_index) = rayH2(z_index).rCoordinate(1);
   radial2(z_index) = rayH2(z_index).rCoordinate(2);
 end
+
 hold on
 plot(radial1)
 plot(radial2)
+hold off
+%%
+close(figure(10))
+figure(10)
+imagesc(z,y,abs(gy))
+  set(gca,'YDir','normal')
+hold on
+plotPropagatedRayZYPlane(rayH1,5,1,1,'y',2)
+plotPropagatedRayZYPlane(rayH2,15,1,1,'r',2)
 hold off
