@@ -6,8 +6,9 @@ addpath ParaxialBeams\Addons
 addpath ParaxialBeams\Addons\export_fig-master
 addpath ParaxialBeams\Addons\Plots_Functions
 % Selecting green color for beam
-mapgreen = AdvancedColormap('kggg',256,[0 30 70 255]/255);
-
+mapgreen    = AdvancedColormap('kggg',256,[0 30 70 255]/255);
+redColor    = [1,0,0];
+yellowColor = [1,1,0];
 %%          Initial parameters of Laguerre Gaussian Beams
 l = 11;
 p = 0;
@@ -103,8 +104,6 @@ for jj = 1 : numel(zi)
 end
 
 
-
-
 %% ----------------------- Laguerre Gauss in z = 0 --------------------- %%
 
 % With laguerre parameters calculated, it estimates Laguerre Gauss Beam
@@ -122,7 +121,7 @@ pxy = max(max(g));
 % Initial Waist of Laguerre Beam
 
 lo      = (LPinZ0.LaguerreWaist)*0.3;  % size of obstruction in terms of waist of Laguerre
-xt      = 0;                           % traslation of obstruction in x-axis
+xt      = (LPinZ0.LaguerreWaist)*0.27;                           % traslation of obstruction in x-axis
 yt      = 0;         
 
 [~,rho] = cart2pol(X-xt,X'-yt);        % Convert this in polar coordinates
@@ -136,12 +135,12 @@ figure(3)
 pxyz   = g(1,1);
 g(1,1) = pxy;
 plotOpticalField(x/InitialWaist,x/InitialWaist,abs(g).^2,mapgreen,'$x/w_0$','$x/w_0$');
-plotCircle(0,0,LPinZ0.LaguerreWaist,'r',1.5);
-plotCircle(xt,yt,lo,'r',1.5);
+plotCircle(0,0,LPinZ0.LaguerreWaist/InitialWaist,'r',1.5);
+plotCircle(xt/InitialWaist,yt/InitialWaist,lo/InitialWaist,'r',1.5);
 g(1,1) = pxyz;
 %% ----------------------- Ray tracing (rx,z=0)  ----------------------- %%
 
-TotalRays = 20;          % Number of rays
+TotalRays = 100;          % Number of rays
 
 rayH1(Nz) = CylindricalRay();
 rayH2(Nz) = CylindricalRay();
@@ -218,13 +217,6 @@ for z_index = 1:length(z)-1 % propagation with respect to z
                                                                   HankelType...
                                                                  );
                          
-   %% check slopes for propagation
- %  [rayH2(z_index+1)] = checkSlopes(rayH2(z_index))
-
-                                                                 
-                                                               
-  %                             End calculating rays 
-  %%
 
   fig = figure(6);
 %   fig.Position = [-1349 147 813 733];
@@ -241,15 +233,20 @@ for z_index = 1:length(z)-1 % propagation with respect to z
   hold on
 
   % Plot propagated points of H1 and H2 in iteration before
-  plotRaysAtZ(rayH1(z_index+1),InitialWaist,10,'r');
-  plotRaysAtZ(rayH2(z_index+1),InitialWaist,10,'y');
+  
+  %change colors for H2 if cross origin
+  c1 = (rayH2(z_index+1).hankelType == 1)'*redColor;
+  c2 = (rayH2(z_index+1).hankelType == 2)'*yellowColor;    
+  c  = c1+c2;
+  
+  plotRaysAtZ(rayH1(z_index+1),InitialWaist,10,redColor);
+  plotRaysAtZ(rayH2(z_index+1),InitialWaist,10,c);
 
-  pause(0.1)
+  pause(0.01)
 
 end
 %%
-% figure(7)
-% plotRaysPropagated(rayH1,rayH2,Nz);
+
 %%
 figure(8)
 imagesc(z,x,abs(gx))
@@ -272,15 +269,15 @@ for z_index = 1:length(z)-1
 end
 
 hold on
-plot(radial1)
-plot(radial2)
+plot(z,radial1)
+plot(z,radial2)
 hold off
 %%
 close(figure(10))
 figure(10)
-imagesc(z,y,abs(gy))
+imagesc(z,y,abs(gx))
   set(gca,'YDir','normal')
 hold on
-plotPropagatedRayZYPlane(rayH1,5,1,1,'y',2)
-plotPropagatedRayZYPlane(rayH2,15,1,1,'r',2)
+plotPropagatedRayZYPlane(rayH1,8,1,1,'y',2)
+plotPropagatedRayZYPlane(rayH2,2,1,1,'r',2)
 hold off
