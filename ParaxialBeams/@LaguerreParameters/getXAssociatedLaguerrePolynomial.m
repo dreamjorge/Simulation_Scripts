@@ -1,10 +1,10 @@
-function [Xnmr]= XAssociatedLaguerrePolynomial(n,m,x)
+function [Xnmr]= getXAssociatedLaguerrePolynomial(n,m,x)
 %This function calculates second solution of associated laguerre equation
 %for n,m integers.
 nrterms = 48;
   if x == 0
     
-    Xnmr = Inf
+    Xnmr = Inf;
     
   else
 

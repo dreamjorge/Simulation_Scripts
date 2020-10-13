@@ -1,4 +1,4 @@
-classdef XLaguerreBeam < GaussianBeam & LaguerreParameters
+classdef XeLaguerreBeam < GaussianBeam & LaguerreParameters
   
   properties
     thetaCoordinate
@@ -13,12 +13,8 @@ classdef XLaguerreBeam < GaussianBeam & LaguerreParameters
     Normalization
   end
   
-  methods(Static)
-    XLg     = XAssociatedLaguerrePolynomial(nu,mu,x);
-  end
   
   methods
-    
     
     function XLaguerreAmplitude = get.XLaguerreAmplitude(obj)
       XLaguerreAmplitude = 1;...(sqrt(2)*(obj.RadialCoordinate)./obj.Waist).^(obj.l);
@@ -29,23 +25,23 @@ classdef XLaguerreBeam < GaussianBeam & LaguerreParameters
     end
 
     
-     function XLaguerre = XLaguerreBeam(rCoordinate,thetaCoordinate,LaguerreParameters)
-      
-      XLaguerre@LaguerreParameters(LaguerreParameters.zCoordinate...
-                                  ,LaguerreParameters.InitialWaist...
-                                  ,LaguerreParameters.Wavelength...
-                                  ,LaguerreParameters.l...
-                                  ,LaguerreParameters.p);
-      
-      XLaguerre@GaussianBeam(rCoordinate,LaguerreParameters); 
+   function XLaguerre = XeLaguerreBeam(rCoordinate,thetaCoordinate,LaguerreParameters)
 
-      XLaguerre.thetaCoordinate = thetaCoordinate;
+    XLaguerre@LaguerreParameters(LaguerreParameters.zCoordinate...
+                                ,LaguerreParameters.InitialWaist...
+                                ,LaguerreParameters.Wavelength...
+                                ,LaguerreParameters.l...
+                                ,LaguerreParameters.p);
+
+    XLaguerre@GaussianBeam(rCoordinate,LaguerreParameters); 
+
+    XLaguerre.thetaCoordinate = thetaCoordinate;
 
 %       [XLaguerre.ThetaCoordinate,XLaguerre.RadialCoordinate] = cart2pol(x,y);
 %       
-      %% Optical Field
+    %% Optical Field
 
-     end
+   end
     
      
     function [opticalField]=get.OpticalFieldLaguerre(obj)
@@ -63,7 +59,7 @@ classdef XLaguerreBeam < GaussianBeam & LaguerreParameters
       opticalField =... XLaguerre.Normalization.*...
                    ...XLaguerre.XLaguerreAmplitude.*... 
                     exp(1i*PhiPhase).*exp(-1i*abs(p)*theta).*...
-                    XLaguerreBeam.XAssociatedLaguerrePolynomial(l,abs(p),alpha.*r.^2).*...
+                    LaguerreParameters.getXAssociatedLaguerrePolynomial(l,abs(p),alpha.*r.^2).*...
                     obj.OpticalField;
     end
   end
