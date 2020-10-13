@@ -1,4 +1,4 @@
-function [] = plotPropagatedRaysInZ(rayH11,rayH12,rayH21,rayH22,scale1,scale2,z_index)
+function [] = plotPropagatedRays(rayH11,rayH12,rayH21,rayH22,scale1,scale2,z_index)
 % plot rays from hankels
   
   Nz = size(rayH11,2); %% number of points in z-direction
