@@ -31,20 +31,28 @@ function [Rays] = getPropagateCylindricalRays(Rays,...
     ri  = temporalRay.rCoordinate;
     thi = temporalRay.thetaCoordinate;
 
-    % Condition for cross origin (Change hankel type)
+    
+    % Condition for cross origin (Change hankel type) and keep r positive
     if (ri < 0) && (HankelType == 2)
       temporalRay.hankelType = 1;
+      ri                     = abs(ri);
+    end 
+    
+    temporalRay.rCoordinate     = ri;
+    temporalRay.thetaCoordinate = thi;
+    
+    %if we have change of hankel we need change sign of x,y coordinates
+    if((HankelType == 2) && (temporalRay.hankelType == 1))
+      [xi,yi] = pol2cart(thi,ri);
+      temporalRay.xCoordinate = - xi;
+      temporalRay.yCoordinate = - yi;
+      
+    else
       [xi,yi] = pol2cart(thi,ri);
       temporalRay.xCoordinate = xi;
       temporalRay.yCoordinate = yi;
-      ri      = abs(ri);
-    end 
-    
-    
-    temporalRay.rCoordinate = ri;
-    
-     % obtain new (x,y) coordinates 
-    [temporalRay.xCoordinate,temporalRay.yCoordinate] = pol2cart(thi,ri);
+      
+    end
 
     % calculating Hankels in point (r,th,z) of ray
     HLr  = HankelLaguerre(r ,thi,LParametersZi,temporalRay.hankelType);
