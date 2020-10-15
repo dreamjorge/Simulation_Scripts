@@ -13,8 +13,8 @@ nu = 12;
 mu = 11;
 
 %% Physical parameters [microns]
-InitialWaist          = 100;
-Wavelength            = 0.6328;
+InitialWaist = 100;
+Wavelength   = 0.6328;
 
 %% Build parameters of Hermite in z=0
 HermiteParametersz0  = HermiteParameters(0,InitialWaist,Wavelength,nu,mu);
@@ -39,7 +39,7 @@ MaxHermiteWaist = HermiteParameters.getWaist(z(end),InitialWaist,RayleighDistanc
 %Hermite Beam
 
 % y,x-direction
-Nx    =  2^10;                 % Number of points in x,y axis
+Nx    =  2^10;                % Number of points in x,y axis
 n     = -Nx/2:Nx/2-1;         % vector with N-points with resolution 1
 Dx    = 1.1*MaxHermiteWaist;  % Size of window 
 dx    = Dx/Nx;                % Resolution
