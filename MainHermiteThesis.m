@@ -16,19 +16,30 @@ mu = 11;
 InitialWaist = 100;
 Wavelength   = 0.6328;
 
+
 %% Build parameters of Hermite in z=0
 HermiteParametersz0 = HermiteParameters(0,InitialWaist,Wavelength,nu,mu);
 %obtain parameters of beam
 k                   = HermiteParametersz0.k;
 RayleighDistance    = HermiteParametersz0.RayleighDistance;
 
+
+%% Given Initial Waist and RayleighDistance we cand do Normalizations /Scale Factors
+scaleX = 1/(InitialWaist);
+scaleY = scaleX;
+scaleZ = 1/(RayleighDistance);
+
+labelX = '$x/w_o$';
+labelY = '$x/w_o$';
+labelZ = '$z/z_R$';
+
 %% sampling of vectors 
 %First, we estimate samplig in z-direction with propagation distance 
 % z-direction
 Dz    = RayleighDistance;  % z-window (propagation distance)
-Nz    = 2^7;               % number of points in z-direction
+Nz    = 2^7+1;             % number of points in z-direction
 dz    = Dz/Nz;             % Resolution in z
-nz    = 0:Nz-1;            % vector with N-points with resolution 1
+nz    = 0:Nz;              % vector with N-points with resolution 1
 z     = nz*dz;             % z-vector z of propagation 
 
 % waist of Hermite Gauss Beam until z-propagation
@@ -64,10 +75,10 @@ g     = HGB.OpticalFieldHermite;
 % Plot of Function
 fig3 = figure(3);
 fig3.Position = [680 406 802 572];
-plotOpticalField(x/(HermiteParametersz0.Waist),x/(HermiteParametersz0.Waist),abs(g),mapgreen,'$x/w_o$','$y/w_o$');
+plotOpticalField(scaleX.*x,scaleY.*x,abs(g),mapgreen,labelX,labelY);
 % title('Superposition of 4 Hankels')
 export_fig('HermiteZ0','-png','-transparent')
-%% Hermite Gauss in zi
+%% Generate and Save Plots of Hermite Gauss in zi
 
 % copy of parameters
 HPzi             = copy(HermiteParametersz0);
@@ -86,10 +97,11 @@ for jj = 1 : numel(zi)
 
   fig3 = figure(3);
   fig3.Position = [680 406 802 572];
-  plotOpticalField(x/InitialWaist,x/InitialWaist,abs(g).^2,mapgreen,'$x/w_o$','$y/w_o$');
+  plotOpticalField(scaleX.*x,scaleY.*x,abs(g),mapgreen,labelX,labelY);
   % set(gca,'FontSize',18);
   export_fig(['Hermite',textdis{jj}],'-png','-transparent')
-  h = plotWaistHermite2D(HPzi,InitialWaist,'r');
+  h = plotWaistHermite2D(HPzi,scaleX,scaleY,'r');
+  h.LineStyle = '-.';
   export_fig(['Hermite',textdis{jj},'Waist'],'-png','-transparent')
   
 end
@@ -111,7 +123,7 @@ obo   = (oby')*obx;
 go    = g.*(1-obo);
 %Ploting Laguerre with obstruction
 figure(2)
-plotOpticalField(x/InitialWaist,x/InitialWaist,abs(go),mapgreen,'$x/w_o$','$y/w_o$');
+plotOpticalField(scaleX*x,scaleY*x,abs(go),mapgreen,labelX,labelY);
 export_fig('HermiteObs','-png','-transparent')
 %% Parametrization of obstruction for rays
 % Total points/rays in obstruction
@@ -149,14 +161,14 @@ end
 
 fig3 = figure(3);
 fig3.Position = [680 406 802 572];
-plotOpticalField(x/InitialWaist,x/InitialWaist,abs(go).^2,mapgreen,'microns','microns');
-plotRays(rayH11(1),'r',InitialWaist)
+plotOpticalField(scaleX*x,scaleY*x,abs(go).^2,mapgreen,labelX,labelY);
+plotRays(rayH11(1),'r',scaleX,scaleY)
 export_fig('HermiteObsRays','-png','-transparent')
 
 fig3 = figure(3);
 fig3.Position = [680 406 802 572];
-plotOpticalField(x/InitialWaist,x/InitialWaist,abs(go).^2,mapgreen,'microns','microns');
-plotRaysSquare(rayH11(1),'r',InitialWaist)
+plotOpticalField(scaleX*x,scaleY*x,abs(go).^2,mapgreen,labelX,labelY);
+plotRaysSquare(rayH11(1),'r',scaleX,scaleY)
 export_fig('HermiteObsSquareRays','-png','-transparent')
 
 
@@ -187,14 +199,14 @@ for z_index = 1:length(z)
   %% plot propagate field                                      
   fig6 = figure(6);
   fig6.Position = [408 4 1037 973];
-  plotOpticalField(x,x,abs(go).^2,mapgreen,'microns','microns');
+  plotOpticalField(scaleX*x,scaleY*x,abs(go).^2,mapgreen,labelX,labelY);
   hold on
 %% Plot propagated points of hankels
-  plotRays(rayH11(z_index),'r',1)
-  plotRays(rayH21(z_index),'y',1)
-  plotRays(rayH12(z_index),'m',1)                                         
-  plotRays(rayH22(z_index),'c',1)
-  title(['z = ', num2str(z(z_index)), ' of ', num2str(z(end)), ' microns'])
+  plotRays(rayH11(z_index),'r',scaleX,scaleY)
+  plotRays(rayH21(z_index),'y',scaleX,scaleY)
+  plotRays(rayH12(z_index),'m',scaleX,scaleY)                                         
+  plotRays(rayH22(z_index),'c',scaleX,scaleY)
+  title([labelZ, num2str(scaleZ*z(z_index)), ' of ', num2str(scaleZ*z(end))])
   drawnow
 % Write video
   if strcmp(GenerateVideo,'YES')
@@ -266,14 +278,14 @@ end
 %% plot propagate field at z(end)                                    
 fig6 = figure(6);
 fig6.Position = [408 4 1037 973];
-plotOpticalField(x,x,abs(g).^2,mapgreen,'microns');
-title(['z = ', num2str(z(z_index)), ' of ', num2str(z(end)), ' microns'])
+plotOpticalField(scaleX*x,scaleY*x,abs(g).^2,mapgreen,labelX,labelY);
+title([labelZ, num2str(scaleZ*z(z_index)), ' of ', num2str(scaleZ*z(end))],'Interpreter','latex')
 
 %% Plot propagated points of hankels at z(end)
-plotRays(rayH11(z_index+1),'r',1)
-plotRays(rayH21(z_index+1),'y',1)
-plotRays(rayH12(z_index+1),'m',1)
-plotRays(rayH22(z_index+1),'c',1)
+plotRays(rayH11(z_index+1),'r',scaleX,scaleY)
+plotRays(rayH21(z_index+1),'y',scaleX,scaleY)
+plotRays(rayH12(z_index+1),'m',scaleX,scaleY)
+plotRays(rayH22(z_index+1),'c',scaleX,scaleY)
 
 if strcmp(GenerateVideo,'YES')
   writeVideo(vidObj1, getframe(gca));
@@ -282,15 +294,16 @@ end
 
 
 %%
-
-fig6 = figure(6);
+close(figure(6))
+fig6          = figure(6);
 fig6.Position = [382 228 1375 537];
-imagesc(z/RayleighDistance,y/InitialWaist,abs(gy).^2);
-xlabel('$z/z_R$','Interpreter','latex','FontSize',18)
-ylabel('$y/w_o$','Interpreter','latex','FontSize',18)
+imagesc(scaleZ*z,scaleY*y,abs(gy).^2);
+set(gca,'YDir','normal')
+xlabel(labelZ,'Interpreter','latex','FontSize',18)
+ylabel(labelY,'Interpreter','latex','FontSize',18)
 export_fig('HermiteLateralY','-png','-transparent')
 hold on
-plot(z/RayleighDistance, HPz.HermiteWaistX/(2*InitialWaist),'-.','Linewidth',2,'Color','r')
-plot(z/RayleighDistance,-HPz.HermiteWaistX/(2*InitialWaist),'-.','Linewidth',2,'Color','r')
+plot(scaleZ*z, scaleX*HPz.HermiteWaistX/2,'-.','Linewidth',2,'Color','r')
+plot(scaleZ*z,-scaleX*HPz.HermiteWaistX/2,'-.','Linewidth',2,'Color','r')
 hold off
 export_fig('HermiteLateralYRays','-png','-transparent')
