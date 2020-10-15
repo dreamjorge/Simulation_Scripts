@@ -1,5 +1,6 @@
 %%                      Main Hermite
 % Ugalde-Ontiveros J.A. 
+% This script generate plots 1D of Hermite
 %% add path for classes and functions
 clear all
 addpath ParaxialBeams
@@ -27,10 +28,10 @@ RayleighDistance    = HermiteParametersz0.RayleighDistance;
 %First, we estimate samplig in z-direction with propagation distance 
 % z-direction
 Dz    = RayleighDistance;     % z-window (propagation distance)
-Nz    = 2^7;                      % number of points in z-direction
-dz    = Dz/Nz;                    % Resolution in z
-nz    = 0:Nz-1;                   % vector with N-points with resolution 1
-z     = nz*dz;                    % z-vector z of propagation 
+Nz    = 2^7;                  % number of points in z-direction
+dz    = Dz/Nz;                % Resolution in z
+nz    = 0:Nz-1;               % vector with N-points with resolution 1
+z     = nz*dz;                % z-vector z of propagation 
 
 % waist of Hermite Gauss Beam until z-propagation
 MaxHermiteWaist = HermiteParameters.getWaist(z(end),InitialWaist,RayleighDistance,nu,mu);
@@ -39,24 +40,13 @@ MaxHermiteWaist = HermiteParameters.getWaist(z(end),InitialWaist,RayleighDistanc
 %Hermite Beam
 
 % y,x-direction
-Nx    =  2^10;                 % Number of points in x,y axis
+Nx    =  2^10;                % Number of points in x,y axis
 n     = -Nx/2:Nx/2-1;         % vector with N-points with resolution 1
 Dx    = 1.1*MaxHermiteWaist;  % Size of window 
 dx    = Dx/Nx;                % Resolution
 x     = n*dx;                 % Vector
 y     = x;
 [X,Y] = meshgrid(x,y);
-
-%Last, we estimate vectors of frequency for Fourier Transforms
-Du    = 1/dx;                 % Size of window 
-du    = 1/Dx;                 % Resolution
-u     = n*du;                 % Vector
-%kx,ky vectors
-kx    = 2*pi*u;
-[Kx]  = meshgrid(kx);
-
-%diferential
-dr    = [dx,dx,dz];
 
 
 %% Hankel 1D
@@ -96,21 +86,69 @@ NHy       = NHy.*SupGaussY;
 H1y       = Hy+1i*NHy;
 H2y       = Hy-1i*NHy;
 
+%% Plot First Solution
+close(figure(1))
+fig1 = figure(1);
+fig1.Position = [716, 444, 1235, 389];
+plot(x/InitialWaist,abs(Hy).^2,'LineWidth',1.6)
+xlim([-5 5])
+ylim([0 .0003])
+xlabel('$y/w_o$','Interpreter','latex','FontSize',14)
+% title(['Solutions of Hermite Equation with integer number equal to ',num2str(nu)])
+% legend off
+ set(gca,'FontSize',18);
+export_fig('HermiteGaussY','-png','-transparent')
+ 
+close(figure(1))
+fig1 = figure(1);
+fig1.Position = [716, 444, 1235, 389];
+plot(x/InitialWaist,abs(Hx).^2,'LineWidth',1.6)
+xlim([-5 5])
+ylim([0 .0003])
+xlabel('$x/w_o$','Interpreter','latex','FontSize',14)
+% title(['Solutions of Hermite Equation with integer number equal to ',num2str(nu)])
+% legend off
+ set(gca,'FontSize',18);
+export_fig('HermiteGaussX','-png','-transparent')
 
+%% Plot Second Solution
+close(figure(1))
+fig1 = figure(1);
+fig1.Position = [716, 444, 1235, 389];
+plot(x/InitialWaist,abs(NHy).^2,'LineWidth',1.6)
+xlim([-5 5])
+ylim([0 .0003])
+xlabel('$y/w_o$','Interpreter','latex','FontSize',14)
+% title(['Solutions of Hermite Equation with integer number equal to ',num2str(nu)])
+% legend off
+ set(gca,'FontSize',18);
+export_fig('NHermiteGaussY','-png','-transparent')
+ 
+close(figure(1))
+fig1 = figure(1);
+fig1.Position = [716, 444, 1235, 389];
+plot(x/InitialWaist,abs(NHx).^2,'LineWidth',1.6)
+xlim([-5 5])
+ylim([0 .0003])
+xlabel('$x/w_o$','Interpreter','latex','FontSize',14)
+% title(['Solutions of Hermite Equation with integer number equal to ',num2str(nu)])
+% legend off
+ set(gca,'FontSize',18);
+export_fig('NHermiteGaussX','-png','-transparent')
 
 %%
 close(figure(1))
 fig1 = figure(1);
 fig1.Position = [716, 444, 1235, 389];
-plot(x/(HermiteParametersz0.Waist),abs(Hy).^2,'LineWidth',1.6)
+plot(x/InitialWaist,abs(Hy).^2,'LineWidth',1.6)
 hold on
-plot(x/(HermiteParametersz0.Waist),abs(NHy).^2,'--','LineWidth',1.6)
+plot(x/InitialWaist,abs(NHy).^2,'--','LineWidth',1.6)
 colorp = [0,200,100]/256;
-plot(x/(HermiteParametersz0.Waist),abs(H1y).^2,'-.','LineWidth',1.6,'color',colorp)
+plot(x/InitialWaist,abs(H1y).^2,'-.','LineWidth',1.6,'color',colorp)
 hold off
 xlim([-5 5])
 ylim([0 .0003])
-xlabel('$y$','Interpreter','latex','FontSize',14)
+xlabel('$y/w_o$','Interpreter','latex','FontSize',14)
 leg1=legend('$\left|\psi_{n,m}^{(1,1)}\right|^2$','$\left|Re\left(\psi_{n,m}^{(1,1)}\right)\right|^2$','$\left|Im\left(\psi_{n,m}^{(1,1)}\right)\right|^2$','interpreter','latex','FontSize',14,'NumColumns',3);
 leg1.Position = [0.5693, 0.8203, 0.3337, 0.0967];
 % title(['Solutions of Hermite Equation with integer number equal to ',num2str(nu)])
@@ -123,15 +161,15 @@ export_fig('hankelHermiteGaussSolutionsY','-png','-transparent')
 close(figure(1))
 fig1 = figure(1);
 fig1.Position = [716, 444, 1235, 389];
-plot(x/(HermiteParametersz0.Waist),abs(Hx).^2,'LineWidth',1.6)
+plot(x/InitialWaist,abs(Hx).^2,'LineWidth',1.6)
 hold on
-plot(x/(HermiteParametersz0.Waist),abs(NHx).^2,'--','LineWidth',1.6)
+plot(x/InitialWaist,abs(NHx).^2,'--','LineWidth',1.6)
 colorp = [0,200,100]/256;
-plot(x/(HermiteParametersz0.Waist),abs(H1x).^2,'-.','LineWidth',1.6,'color',colorp)
+plot(x/InitialWaist,abs(H1x).^2,'-.','LineWidth',1.6,'color',colorp)
 hold off
 xlim([-5 5])
 ylim([0 .0003])
-xlabel('$y$','Interpreter','latex','FontSize',14)
+xlabel('$x/w_0$','Interpreter','latex','FontSize',14)
 leg1=legend('$\left|\psi_{n,m}^{(1,1)}\right|^2$','$\left|Re\left(\psi_{n,m}^{(1,1)}\right)\right|^2$','$\left|Im\left(\psi_{n,m}^{(1,1)}\right)\right|^2$','interpreter','latex','FontSize',14,'NumColumns',3);
 leg1.Position = [0.5693, 0.8203, 0.3337, 0.0967];
 % title(['Solutions of Hermite Equation with integer number equal to ',num2str(nu)])
