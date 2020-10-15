@@ -71,6 +71,33 @@ figure(2)
 plotOpticalField(x, x, abs(GB.OpticalField).^2,mapgreen,'microns');
 plotCircle(0,0,GaussianBeamParameters.InitialWaist);
 
+%% Analitic trasversal
+
+[Zm,Xm]         = meshgrid(z,x);
+GPz             = copy(GaussianBeamParameters);
+GPz.zCoordinate = Zm;
+
+GB              = GaussianBeam(Xm,GPz);
+figure(3)
+imagesc(z,x,abs(GB.OpticalField).^2)
+hold on
+GPzc             = copy(GaussianBeamParameters);
+GPzc.zCoordinate  =  z;
+plot(z,GPzc.Waist)
+plot(z,-GPzc.Waist)
+hold off
+%%
+
+
+
+
+
+
+
+
+%%numeric method 
+
+
 % Optic Field to propagate 
 g   = GB.OpticalField;
 
