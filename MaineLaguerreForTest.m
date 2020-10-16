@@ -4,10 +4,12 @@
 addpath ParaxialBeams
 addpath ParaxialBeams\Addons
 addpath ParaxialBeams\Addons\export_fig-master
+addpath ParaxialBeams\Addons\Plots_Functions
 
 % Selecting green color for beam
 mapgreen = AdvancedColormap('kgg',256,[0 100 255]/255);
-
+redColor    = [1,0,0];
+yellowColor = [1,1,0];
 %%          Initial parameters of Laguerre Gaussian Beams
 l = 11;
 p = 0;
@@ -24,10 +26,26 @@ LPinZ0 = LaguerreParameters(PropagationDistance...
                            ,p);
                      
 RayleighDistance    = LPinZ0.RayleighDistance;
+
+
+%% Given Initial Waist and RayleighDistance we can do Normalizations/Scale Factors
+scaleX = 1/(InitialWaist);
+scaleY = scaleX;
+scaleZ = 1/(RayleighDistance);
+
+labelX = '$x/w_o$';
+labelY = '$x/w_o$';
+labelZ = '$z/z_R$';
+
+%% vectors for generate figures
+figureSize   = [538, 376, 884, 568];
+largeAspect  = [1.0000, 0.4113, 0.4113];
+NormalAspect = [1, 1, 1]; 
+
 %%                        Sampling of vectors 
 % Estimate sampling in z-direction with propagation distance 
 % z-direction
-Dz = 2*RayleighDistance;        % z-window (propagation distance)
+Dz = RayleighDistance;        % z-window (propagation distance)
 Nz = 2^9;                     % number of points in z-direction
 dz = Dz/Nz;                   % Resolution in z
 z  = 0:dz:Dz;                 % z-vector z of propagation 
@@ -76,33 +94,6 @@ u    = n*du;         % freq vector with dimentions
 %kx,ky vectors
 kx   = 2*pi*u;       % angular freq vector
 [Kx] = meshgrid(kx); % angular freq matrix
-%% 
-LPinZi  = copy(LPinZ0);
-
-% distances for plot
-zi      = [0, Dz/4,   Dz/3,   Dz/2, ...
-              2*Dz/3, 3*Dz/4, Dz  ];
-textdis = {'0','zR4','zR3','zR2','2zR3','3zR4','zR'};
-
-for jj = 1 : numel(zi)
-  
-  LPinZi.zCoordinate = zi(jj);
-  % Build new Optical Field
-  LGBzi              = eLaguerreBeam(RCoordinate,ThetaCoordinate,LPinZi);
-  % Optic Field
-  g                  = LGBzi.OpticalFieldLaguerre;
-
-  fig3 = figure(3);
-  fig3.Position = [680 406 802 572];
-  plotOpticalField(x/InitialWaist,x/InitialWaist,abs(g).^2,mapgreen,'$x/w_o$','$y/w_o$');
-  % set(gca,'FontSize',18);
-  export_fig(['Laguerre',textdis{jj}],'-png','-transparent')
-  plotCircle(0,0,LGBzi.LaguerreWaist/InitialWaist,'r',1.5);
-  export_fig(['Hermite',textdis{jj},'Waist'],'-png','-transparent')
-  
-end
-
-
 
 
 %% ----------------------- Laguerre Gauss in z = 0 --------------------- %%
@@ -112,8 +103,9 @@ LG = eLaguerreBeam(RCoordinate,ThetaCoordinate,LPinZ0);
 g  = LG.OpticalFieldLaguerre;
 % Plot of Field
 figure(2)
-plotOpticalField(x/InitialWaist,x/InitialWaist,abs(g).^2,mapgreen,'$x/w_0$','$x/w_0$');
-plotCircle(0,0,LPinZ0.LaguerreWaist/InitialWaist,'r',1.5);
+plotOpticalField(scaleX*x,scaleY*x,abs(g).^2,mapgreen,labelX,labelY);
+axis square
+plotCircle(0,0,scaleX*LPinZ0.LaguerreWaist,'r',1.5);
 
 % Max Peak
 pxy = max(max(g));
@@ -135,13 +127,14 @@ g       = g.*(1-obo);
 figure(3)
 pxyz   = g(1,1);
 g(1,1) = pxy;
-plotOpticalField(x/InitialWaist,x/InitialWaist,abs(g).^2,mapgreen,'$x/w_0$','$x/w_0$');
-plotCircle(0,0,LPinZ0.LaguerreWaist,'r',1.5);
+plotOpticalField(scaleX*x,scaleY*x,abs(g).^2,mapgreen,labelX,labelY);
+axis square
+plotCircle(0,0,scaleX*LPinZ0.LaguerreWaist,'r',1.5);
 plotCircle(xt,yt,lo,'r',1.5);
 g(1,1) = pxyz;
 %% ----------------------- Ray tracing (rx,z=0)  ----------------------- %%
 
-TotalRays = 20;          % Number of rays
+TotalRays = 100;          % Number of rays
 
 rayH1(Nz) = CylindricalRay();
 rayH2(Nz) = CylindricalRay();
@@ -159,8 +152,8 @@ end
 
 % Initial Field with rays in this init conditions
 figure(3) 
-plotOpticalField(x,x,abs(g).^2,mapgreen,'$x/w_0$','$x/w_0$');
-plotRaysAtZ(rayH1(1),1,10,'r');
+plotOpticalField(scaleX*x,scaleY*x,abs(g).^2,mapgreen,labelX,labelY);
+plotRaysAtZ(rayH1(1),scaleX,scaleY,10,'r');
 
 
 %%                         Physical Propagation
@@ -228,19 +221,23 @@ for z_index = 1:length(z)-1 % propagation with respect to z
 
   pxyz   = g(1,1);
   g(1,1) = pxy;
-  plotOpticalField(x/InitialWaist,x/InitialWaist,abs(g).^2,mapgreen,'$x/w_0$','$x/w_0$');
-  plotCircle(0,0,LPinZi.LaguerreWaist,'r',1.5);
+  plotOpticalField(scaleX*x,scaleY*x,abs(g).^2,mapgreen,labelX,labelY);
+  plotCircle(0,0,scaleX*LPinZi.LaguerreWaist,'r',1.5);
   
   
-  title(['z = ', num2str(z_index), ' of ', num2str(Nz)])
+  title(['z/z_R = ', num2str(z(z_index)/RayleighDistance), ' of ', num2str(Dz/RayleighDistance)],'Interpreter','latex')
   g(1,1) = pxyz;
   drawnow 
   hold on
 
   % Plot propagated points of H1 and H2 in iteration before
-  plotRaysAtZ(rayH1(z_index+1),InitialWaist,10,'r');
-  plotRaysAtZ(rayH2(z_index+1),InitialWaist,10,'y');
-
+  %change colors for H2 if cross origin
+  c1 = (rayH2(z_index+1).hankelType == 1)'*redColor;
+  c2 = (rayH2(z_index+1).hankelType == 2)'*yellowColor;    
+  c  = c1+c2;
+  
+  plotRaysAtZ(rayH1(z_index+1),scaleX,scaleY,10,redColor);
+  plotRaysAtZ(rayH2(z_index+1),scaleX,scaleY,10,c);
   pause(0.1)
 
 end
