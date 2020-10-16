@@ -14,9 +14,6 @@ classdef XHermiteBeam < matlab.mixin.Copyable & handle & HermiteParameters & Gau
     Normalization
   end
   
-  methods(Static) 
-    [HG,NHG] = hermiteSolutions(nu,x);
-  end
   
   methods 
 
