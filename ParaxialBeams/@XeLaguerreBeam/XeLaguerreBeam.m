@@ -17,13 +17,15 @@ classdef XeLaguerreBeam < GaussianBeam & LaguerreParameters
   methods
     
     function XLaguerreAmplitude = get.XLaguerreAmplitude(obj)
-      XLaguerreAmplitude = 1;...(sqrt(2)*(obj.RadialCoordinate)./obj.Waist).^(obj.l);
+      
+      q = obj.zCoordinate-1i*1i*obj.RayleighDistance;
+      XLaguerreAmplitude = (-1i*obj.RayleighDistance./q).^(abs(obj.l)+obj.p+1);...(sqrt(2)*(obj.RadialCoordinate)./obj.Waist).^(obj.l);
+    
     end
 
     function Normalization = get.Normalization(obj)
       
-      q = obj.zCoordinate-1i*1i*obj.RayleighDistance;
-      Normalization = (-1i*obj.RayleighDistance./q).^(abs(obj.l)+obj.p+1);
+      Normalization = 1; 
       
     end
 
@@ -59,8 +61,8 @@ classdef XeLaguerreBeam < GaussianBeam & LaguerreParameters
       alpha        = 1i*(k)./(2*q); 
       
       
-      opticalField = XLaguerre.Normalization.*...
-                   ...XLaguerre.XLaguerreAmplitude.*... 
+      opticalField = obj.Normalization.*...
+                    obj.XLaguerreAmplitude.*... 
                     exp(1i*PhiPhase).*exp(-1i*abs(p)*theta).*...
                     LaguerreParameters.getXAssociatedLaguerrePolynomial(l,abs(p),alpha.*r.^2).*...
                     obj.OpticalField;
