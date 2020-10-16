@@ -17,7 +17,7 @@ classdef eHermiteBeam < matlab.mixin.Copyable & handle & HermiteParameters & Gau
   methods 
 
     function HermiteAmplitude    = get.HermiteAmplitude(obj)
-      HermiteAmplitude = 1;
+      HermiteAmplitude = 1./(obj.Waist).^2;
     end
     
     function Normalization       = get.Normalization(obj)
