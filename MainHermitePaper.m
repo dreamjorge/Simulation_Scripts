@@ -6,11 +6,13 @@ addpath ParaxialBeams
 addpath ParaxialBeams\Addons
 addpath ParaxialBeams\Addons\export_fig-master
 addpath ParaxialBeams\Addons\panel-2.14
+addpath ParaxialBeams\Addons\Plots_Functions
+
 mapgreen = AdvancedColormap('kgg',256,[0 100 255]/255);  %color of beam
 GenerateVideo = 'NO';
 %% indices of Hermite Gaussian Beams 
-nu = 22;
-mu = 21;
+nu = 12;
+mu = 11;
 
 
 %% Physical parameters [microns]
@@ -23,14 +25,18 @@ HermiteParametersz0  = HermiteParameters(0,InitialWaist,Wavelength,nu,mu);
 k                    = HermiteParametersz0.k;
 RayleighDistance     = HermiteParametersz0.RayleighDistance;
 
-%% Normalized parameters
-% 
-% Wavelength           = pi;
-% InitialWaist         = 1;
-% HermiteInitialWaist  = InitialWaist*sqrt(nu+mu+1);
-% HPz0                 = HermiteParameters(0,InitialWaist,Wavelength,nu,mu);
-% k                    = HPz0.k;
-% RayleighDistance     = HPz0.RayleighDistance;
+
+
+
+%% Given Initial Waist and RayleighDistance we cand do Normalizations /Scale Factors
+scaleX = 1/(InitialWaist);
+scaleY = scaleX;
+scaleZ = 1/(RayleighDistance);
+
+labelX = '$x/w_o$';
+labelY = '$x/w_o$';
+labelZ = '$z/z_R$';
+
 
 %% sampling of vectors 
 %First, we estimate samplig in z-direction with propagation distance 
@@ -68,127 +74,6 @@ kx    = 2*pi*u;
 %diferential
 dr    = [dx,dx,dz];
 
-%% Hankel 1D
-
-HermiteInitialWaistX  = HermiteParametersz0.HermiteWaistX;
-HermiteInitialWaistY  = HermiteParametersz0.HermiteWaistY;
-HermiteInitialWaist   = HermiteParametersz0.HermiteWaist;
-PhiPhase              = HermiteParametersz0.PhiPhase;
-% for x-direction
-InitialWaist          = HermiteParametersz0.InitialWaist;
-[Hx,NHx]              = ...
-HermiteParameters.getHermiteSolutions(nu,(sqrt(2)./InitialWaist).*x);
-
-GaussX                = GaussianBeam(x,HermiteParametersz0).OpticalField;
-Hx                    = Hx.*GaussX.*exp(1i*PhiPhase);
-NHx                   = NHx.*GaussX.*exp(1i*PhiPhase);
-
-SupGaussX             = exp(-(sqrt(2)*x./(HermiteInitialWaistX)).^(50)); 
-
-NHx                   = NHx.*SupGaussX;
-
-H1x                   = Hx+1j*NHx;
-H2x                   = Hx-1j*NHx;
-
-close(figure(1))
-
-
-fig1          = figure(1);
-fig1.Position = [421   312   945   464];
-ha            = tight_subplot(2,1,[.1 .1],[.1 .05],[.05 .05]);
-axes(ha(1))
-plot(x/(HermiteParametersz0.Waist),abs(Hx),'LineWidth',1.6)
-hold on
-plot(x/(HermiteParametersz0.Waist),abs(NHx),'--','LineWidth',1.6)
-plot(x/(HermiteParametersz0.Waist),abs(H1x),'-.','LineWidth',1.6)
-hold off
-xlim([-7 7])
-ylim([0 .019])
-xlabel('$\xi$','Interpreter','latex')
-leg1=legend('$H_n$','$NH_n$','$HH_n^{1}$','interpreter','latex');
-% leg1.Position = [0.6885 0.7093 0.2021 0.1747];
-title(['Solutions of Hermite Equation with integer number equal to ',num2str(nu)])
-legend off
-
-% saveas(gcf,'hankelHermiteGaussSolutionsX.png')
-% export_fig('hankelHermiteGaussSolutionsX','-png','-pdf','-transparent')
-
-% for y-direction
-[Hy,NHy]  = ...
-HermiteParameters.getHermiteSolutions(mu,(sqrt(2)./InitialWaist).*x);
-
-% Hermite Gauss 1D and Hankel Hermite Gauss 
-PhiPhase  = HermiteParametersz0.PhiPhase;
-GaussX    = GaussianBeam(x,HermiteParametersz0).OpticalField;
-Hy        = Hy .*GaussX.*exp(1i*PhiPhase);
-NHy       = NHy.*GaussX.*exp(1i*PhiPhase);
-
-SupGaussY = exp(-(sqrt(2)*y./(HermiteInitialWaistY)).^50);
-NHy       = NHy.*SupGaussY;
-H1y       = Hy+1i*NHy;
-H2y       = Hy-1i*NHy;
-
-% 
-% fig2          = figure(2);
-% fig2.Position = [574 297 945 313];
-axes(ha(2))
-plot(x/(HermiteParametersz0.Waist),abs(Hy),'LineWidth',1.6)
-hold on
-plot(x/(HermiteParametersz0.Waist),abs(NHy),'--','LineWidth',1.6)
-plot(x/(HermiteParametersz0.Waist),abs(H1y),'-.','LineWidth',1.6)
-hold off
-xlim([-5 5])
-ylim([0 .019])
-xlabel('$\eta$','Interpreter','latex')
-leg2= legend('Hermite Gauss','NHermite Gauss',' Hankel-1 Hermite Gauss');
-leg2.Position = [0.7880 0.8115 0.2021 0.1747];
-title(['Solutions of Hermite Equation with integer number equal to',num2str(mu)])
-% saveas(gcf,'hankelHermiteGaussSolutions.png')
- export_fig('hankelHermiteGaussSolutionsPsn','-png','-pdf','-transparent')
- 
- 
- %%
-close(figure(1))
-fig1 = figure(1);
-fig1.Position = [716, 444, 1235, 389];
-plot(x/(HermiteParametersz0.Waist),abs(Hy),'LineWidth',1.6)
-hold on
-plot(x/(HermiteParametersz0.Waist),abs(NHy),'--','LineWidth',1.6)
-colorp = [0,200,100]/256;
-plot(x/(HermiteParametersz0.Waist),abs(H1y),'-.','LineWidth',1.6,'color',colorp)
-hold off
-xlim([-5 5])
-ylim([0 .019])
-xlabel('$y$','Interpreter','latex','FontSize',14)
-leg1=legend('$|\psi_{n,m}^{(1,1)}|$','$|Re\left(\psi_{n,m}^{(1,1)}\right)|$','$|Im\left(\psi_{n,m}^{(1,1)}\right)|$','interpreter','latex','FontSize',14,'NumColumns',3);
-leg1.Position = [0.5693, 0.8203, 0.3337, 0.0967];
-% title(['Solutions of Hermite Equation with integer number equal to ',num2str(nu)])
-% legend off
- set(gca,'FontSize',18);
-export_fig('hankelHermiteGaussSolutionsY','-png','-transparent')
- 
-
-%%
-close(figure(1))
-fig1 = figure(1);
-fig1.Position = [716, 444, 1235, 389];
-plot(x/(HermiteParametersz0.Waist),abs(Hx),'LineWidth',1.6)
-hold on
-plot(x/(HermiteParametersz0.Waist),abs(NHx),'--','LineWidth',1.6)
-colorp = [0,200,100]/256;
-plot(x/(HermiteParametersz0.Waist),abs(H1x),'-.','LineWidth',1.6,'color',colorp)
-hold off
-xlim([-5 5])
-ylim([0 .019])
-xlabel('$y$','Interpreter','latex','FontSize',14)
-leg1=legend('$|\psi_{n,m}^{(1,1)}|$','$|Re\left(\psi_{n,m}^{(1,1)}\right)|$','$|Im\left(\psi_{n,m}^{(1,1)}\right)|$','interpreter','latex','FontSize',14,'NumColumns',3);
-leg1.Position = [0.5693, 0.8203, 0.3337, 0.0967];
-% title(['Solutions of Hermite Equation with integer number equal to ',num2str(nu)])
-% legend off
- set(gca,'FontSize',18);
-export_fig('hankelHermiteGaussSolutionsX','-png','-transparent')
-
-
 
 %% Hermite Gauss in z = 0
 HGB   = HermiteBeam(X,Y,HermiteParametersz0);
@@ -203,206 +88,25 @@ HPz.zCoordinate = z;
 g     = HGB.OpticalFieldHermite;
 % Plot of Function
 figure(3)
-plotOpticalField(x/(HermiteParametersz0.Waist),x/(HermiteParametersz0.Waist),abs(g),mapgreen,'$x/w_o$','$y/w_o$');
-title('Superposition of 4 Hankels')
-saveas(gcf,'SumAllHankels.png')
-
-
-%% Hankels 2D
-H11 = (H1y')*(H1x);
-H12 = (H2y')*(H1x);
-H21 = (H1y')*(H2x);
-H22 = (H2y')*(H2x);
-
-% g = H11.*H22;
-%% phases
-close(figure(2))
-fig2 = figure(2);
-fig2.Position = [680 273 721 705];
-ha = tight_subplot(2,2,[.01 .01],[.05 .05],[.1 .07]);
-axes(ha(1))
-plotOpticalField(x/InitialWaist,x/InitialWaist,unwrap_phase(angle(H22)),parula,'$x/w_o$','$y/w_o$');
-title('$\psi_{n,m}^{1,1}$','interpreter','latex','FontSize',10)
-ha(1).XAxis.Visible = 'off';
-axes(ha(2))
-plotOpticalField(x/InitialWaist,x/InitialWaist,unwrap_phase(angle(H21)),parula,'$x/w_o$','$y/w_o$');
-title('$\psi_{n,m}^{1,2}$','interpreter','latex','FontSize',10)
-ha(2).XAxis.Visible = 'off';
-ha(2).YAxis.Visible = 'off';
-%ha(2).YAxisLocation = 'right';
-axes(ha(3))
-plotOpticalField(x/InitialWaist,x/InitialWaist,unwrap_phase(angle(H12)),parula,'$x/w_o$','$y/w_o$');
-title('$\psi_{n,m}^{2,1}$','interpreter','latex','FontSize',10)
-%ha(3).YAxis.Visible = 'off';
-axes(ha(4))
-plotOpticalField(x/InitialWaist,x/InitialWaist,unwrap_phase(angle(H11)),parula,'$x/w_o$','$y/w_o$');
-ha(4).YAxisLocation = 'right';
-ha(4).YAxis.Visible = 'off';
-title('$\psi_{n,m}^{2,2}$','interpreter','latex','FontSize',10)
-sgtitle('Phase of Hankels')
-cb = colorbar;
-cb.Location = 'eastoutside';
-cb.Position =  [0.9490    0.0598    0.0255    0.8755];
-saveas(gcf,'PhaseHankels.png')
-% saveas(gcf,'angleHankels.pdf')
-% export_fig('angleHankels','-pdf','-transparent')
-
-
-%% 
-close(figure(3))
-fig3 = figure(3);
-
-t1 = 1;
-% 
-% PHASE22 = unwrap_phase(angle(H22));
-% [U,V,W] = surfnorm(PHASE22);
-% % quiver3(X,Y,PHASE22 ...
-% %        ,U,V,W,.2,'LineWidth',1)
-% %      hold on
-% % mesh(X,Y,PHASE22);...,'FaceAlpha', 0.1,'EdgeAlpha',0.4);    
-%           
-% hq3= quiver3(PHASE22(Nx/2+t1,Nx/2+t1),X(Nx/2+t1,Nx/2+t1),Y(Nx/2+t1,Nx/2+t1)...
-%        ,W(Nx/2+t1,Nx/2+t1),U(Nx/2+t1,Nx/2+t1),V(Nx/2+t1,Nx/2+t1),'LineWidth',1.5, 'ShowArrowHead','on','AutoScaleFactor',50,'MaxHeadSize',50);
-% %       hq3(h1,'AutoScale','on', 'AutoScaleFactor', 2)
-% hold on
-% h1=mesh(PHASE22,X,Y,'FaceAlpha', 0.1,'EdgeAlpha',0.4);
-% AxOne   = get(h1,'Parent');
-% colormap(AxOne,'cool');
-
-% PHASE11 = unwrap_phase(angle(H11));
-% [U,V,W] = surfnorm(PHASE11);
-% quiver3(PHASE11(Nx/2-t1,Nx/2-t1),X(Nx/2-t1,Nx/2-t1),Y(Nx/2-t1,Nx/2-t1)...
-%        ,W(Nx/2-t1,Nx/2-t1),U(Nx/2-t1,Nx/2-t1),V(Nx/2-t1,Nx/2-t1),'LineWidth',1.5, 'ShowArrowHead','on','AutoScaleFactor',50,'MaxHeadSize',50);
-% hold on
-% h2=mesh(PHASE11,X,Y,'FaceAlpha', 0.1,'EdgeAlpha',0.4);      
-% 
-% AxTwo   = get(h2,'Parent');
-% % colormap(AxTwo,'hot');
-% 
-% % colormap(parula)
-% axis normal
-% % 
-% PHASE12 = unwrap_phase(angle(H12));
-% [U,V,W] = surfnorm(PHASE12);
-% quiver3(PHASE12(Nx/2+t1,Nx/2-t1),X(Nx/2+t1,Nx/2-t1),Y(Nx/2+t1,Nx/2-t1)...
-%        ,W(Nx/2+t1,Nx/2-t1),U(Nx/2+t1,Nx/2-t1),V(Nx/2+t1,Nx/2-t1),30,'LineWidth',1.5, 'ShowArrowHead','on','AutoScaleFactor',50,'MaxHeadSize',50);
-% 
-% hold on
-% mesh(PHASE12,X,Y,'FaceAlpha', 0.1,'EdgeAlpha',0.4);
-% % 
-PHASE21 = unwrap_phase(angle(H21));
-[U,V,W] = surfnorm(PHASE21);
-quiver3(PHASE21(Nx/2-t1,Nx/2+t1),X(Nx/2-t1,Nx/2+t1),Y(Nx/2-t1,Nx/2+t1)...
-       ,W(Nx/2-t1,Nx/2+t1),U(Nx/2-t1,Nx/2+t1),V(Nx/2-t1,Nx/2+t1),30,'LineWidth',1.5, 'ShowArrowHead','on','AutoScaleFactor',50,'MaxHeadSize',50);
-hold on
-mesh(PHASE21,X,Y,'FaceAlpha', 0.1,'EdgeAlpha',0.4);
-% 
- zlim([-0.7*HermiteInitialWaistX 0.7*HermiteInitialWaistX])
- ylim([-0.7*HermiteInitialWaistY 0.7*HermiteInitialWaistY])
-% 
- hold off
-% 
-% 
- view(44,16) 
-% % hold on
-% % mesh(unwrap_phase(angle(H11')),X,Y)
-% % hold off
-% 
-% close(figure(4))
-% fig4 = figure(4);
-% mesh(X,Y,PHASE11+PHASE21)
-% view(-10,-40) 
-%% abs of hankels
-
-close(figure(3))
-fig3 = figure(3);
-fig3.Position = [680 177 732 801];
-ha = tight_subplot(2,2,[.01 .01],[.05 .01],[.1 .01]);
-axes(ha(1))
-plotOpticalField(x/InitialWaist,x/InitialWaist,abs(H22+H21),mapgreen,'$x/w_o$','$y/w_o$');
-ha(1).XAxis.Visible = 'off';
-ha(1).YAxisLocation = 'left';
-title('$a)|\psi_{n,m}^{1,1}+\psi_{n,m}^{2,1}|$','interpreter','latex','FontSize',18)
-% title('$a)$','interpreter','latex','FontSize',18)
-set(gca,'FontSize',18);
-axes(ha(2))
-plotOpticalField(x/InitialWaist,x/InitialWaist,abs(H22+H11),mapgreen,'$x/w_o$','$y/w_o$');
-title('$b)|\psi_{n,m}^{1,1}+\psi_{n,m}^{2,2}|$','interpreter','latex','FontSize',18)
-%title('$b)$','interpreter','latex','FontSize',18)
-ha(2).XAxis.Visible = 'off';
-ha(2).YAxis.Visible = 'off';
-ha(2).YAxisLocation = 'right';
-set(gca,'FontSize',18);
-axes(ha(3))
-plotOpticalField(x/InitialWaist,x/InitialWaist,abs(H22+H21+H11),mapgreen,'$x/w_o$','$y/w_o$');
-title('$c)|\psi_{n,m}^{1,1}+\psi_{n,m}^{2,1}+\psi_{n,m}^{2,2}|$','interpreter','latex','FontSize',18)
-%title('$c)$','interpreter','latex','FontSize',18)
-set(gca,'FontSize',18);
-ha(3).YAxisLocation = 'left';
-axes(ha(4))
-plotOpticalField(x/InitialWaist,x/InitialWaist,abs(H22+H21+H11+H12),mapgreen,'$x/w_o$','$y/w_o$');
-title('$d)|\psi_{n,m}^{1,1}+\psi_{n,m}^{2,1}+\psi_{n,m}^{1,2}+\psi_{n,m}^{2,2}|$','interpreter','latex','FontSize',18)
-%title('$d)$','interpreter','latex','FontSize',18)
-ha(4).YAxisLocation = 'right';
-ha(4).YAxis.Visible = 'off';
-set(gca,'FontSize',18);
-% sgtitle('Superposition of Hankels','FontSize',18)
-%saveas(gcf,'SuperpositionOfHankels.png')
-export_fig('SuperpositionOfHankels','-png','-transparent')
-
-%% abs of combinations of hankels
-
-close(figure(4))
-fig4 = figure(4);
-fig4.Position = [537 535 1067 443];
-ha = tight_subplot(1,3,[.01 .01],[.05 .1],[.1 .07]);
-
-axes(ha(1))
-plotOpticalField(x/InitialWaist,x/InitialWaist,abs(H22+H11),mapgreen,'$x/w_o$','$y/w_o$');
-title('$|\psi_{n,m}^{1,1}+\psi_{n,m}^{2,2}|$','interpreter','latex','FontSize',18)
-ha(2).YAxisLocation = 'left';
-set(gca,'FontSize',18);
-axes(ha(2))
-plotOpticalField(x/InitialWaist,x/InitialWaist,abs(H22+H21+H11),mapgreen,'$x/w_o$','$y/w_o$');
-title('$|\psi_{n,m}^{1,1}+\psi_{n,m}^{2,1}+\psi_{n,m}^{2,2}|$','interpreter','latex','FontSize',18)
-set(gca,'FontSize',18);
-ha(2).YAxis.Visible = 'off';
-axes(ha(3))
-plotOpticalField(x/InitialWaist,x/InitialWaist,abs(H22+H21+H11+H12),mapgreen,'$x/w_o$','$y/w_o$');
-title('$|\psi_{n,m}^{1,1}+\psi_{n,m}^{2,1}+\psi_{n,m}^{1,2}+\psi_{n,m}^{2,2}|$','interpreter','latex','FontSize',18)
-ha(3).YAxisLocation = 'right';
-set(gca,'FontSize',18);
-sgtitle('Superposition of Hankels','FontSize',18)
-%saveas(gcf,'SuperpositionOfHankels.png')
-export_fig('SuperpositionOfHankelsV4','-png','-transparent')
-
+plotOpticalField(scaleX*x,scaleY*x,abs(g),mapgreen,labelX,labelY);
+axis square
 
 %% Obstruction on Hermite in z = 0
 
 % Obstruction
 lx    = HermiteParametersz0.HermiteWaist/3.8;
-ly    = HermiteParametersz0.HermiteWaist/3.4;
-xt    = 0;
-yt    = HermiteParametersz0.HermiteWaist/3;
+ly    = HermiteParametersz0.HermiteWaist/4.5;
+xt    = 0;...HPz0.HermiteWaist/5;
+yt    = xt;
 obx   = double(abs(x-xt)<=lx/2);
 oby   = double(abs(x-yt)<=ly/2);
 obo   = (oby')*obx;
-
-
-
-g11o  = H11.*(1-obo);
-g12o  = H12.*(1-obo);
-g21o  = H21.*(1-obo);
-g22o  = H22.*(1-obo);
-g11   = H11;
-g22   = H22;
-g21   = H21;
 
 % Applying obstruction in optic field
 go    = g.*(1-obo);
 %Ploting Laguerre with obstruction
 figure(2)
-plotOpticalField(x/(HermiteParametersz0.Waist),x/(HermiteParametersz0.Waist),abs(go),mapgreen,'$x/w_o$','$y/w_o$');
+plotOpticalField(scaleX*x,scaleY*x,abs(go).^2,mapgreen,labelX,labelY);
 saveas(gcf,'HermiteBeamWithObstruction.png')
 %% Parametrization of obstruction for rays
 % Total points/rays in obstruction
@@ -439,8 +143,9 @@ for ray_index = 1:TotalRays
 end
 
 figure(3)
-plotOpticalField(x,x,abs(g).^2,mapgreen,'$x/w_o$','$y/w_o$');
-plotRays(rayH11(1),'r',1)
+plotOpticalField(scaleX*x,scaleY*x,abs(go).^2,mapgreen,labelX,labelY);
+axis square
+plotRays(rayH11(1),'r',scaleX,scaleY)
 saveas(gcf,'HermiteBeamWithObstructionRays.png')
 %% Physical Propagation
 
@@ -453,14 +158,7 @@ title('Propagator')
 gx      = zeros(Nx,length(z)); 
 gy      = zeros(Nx,length(z));
 W       = zeros(Nx,Nz,Nx);
-W11o    = zeros(Nx,Nz,Nx);
-W22o    = zeros(Nx,Nz,Nx);
-W12o    = zeros(Nx,Nz,Nx);
-W21o    = zeros(Nx,Nz,Nx);
-W11     = zeros(Nx,Nz,Nx);
-W22     = zeros(Nx,Nz,Nx);
 Wo      = zeros(Nx,Nz,Nx);
-W21     = zeros(Nx,Nz,Nx);
 % Videos Options for generate video
 if strcmp(GenerateVideo,'YES') % this was defined 8-line
   vidObj1 = VideoWriter('HGo.avi');
@@ -473,13 +171,14 @@ for z_index = 1:length(z)
   %% plot propagate field                                      
   fig6 = figure(6);
   fig6.Position = [408 4 1037 973];
-  plotOpticalField(x,x,abs(g).^2,mapgreen,'$x/w_o$','$y/w_o$');
+  plotOpticalField(scaleX*x,scaleY*x,abs(go).^2,mapgreen,labelX,labelY);
+  axis square
   hold on
 %% Plot propagated points of hankels
-  plotRays(rayH11(z_index),'r',1)
-  plotRays(rayH21(z_index),'y',1)
-  plotRays(rayH12(z_index),'m',1)                                         
-  plotRays(rayH22(z_index),'c',1)
+  plotRays(rayH11(z_index),'r',scaleX,scaleY)
+  plotRays(rayH21(z_index),'y',scaleX,scaleY)
+  plotRays(rayH12(z_index),'m',scaleX,scaleY)                                         
+  plotRays(rayH22(z_index),'c',scaleX,scaleY)
   title(['z = ', num2str(z(z_index)), ' of ', num2str(z(end)), ' microns'])
   drawnow
 % Write video
@@ -493,35 +192,16 @@ for z_index = 1:length(z)
   gy(:,z_index)   = g(:,Nx/2+1);
   % saving field for slices
   W    (:,z_index,:) = g;
-  W11o (:,z_index,:) = g11o;
-  W22o (:,z_index,:) = g22o;
-  W12o (:,z_index,:) = g12o;
-  W21o (:,z_index,:) = g21o;
   Wo   (:,z_index,:) = go;
-  W11  (:,z_index,:) = g11;
-  W22  (:,z_index,:) = g22;
-  W21  (:,z_index,:) = g21;
+
   % propagating field
   G    = fftshift(fft2((g)));
   Go   = fftshift(fft2((go)));
-  G11  = fftshift(fft2((g11)));
-  G22  = fftshift(fft2((g22)));
-  G21  = fftshift(fft2((g21)));
-  G11o = fftshift(fft2((g11o)));
-  G22o = fftshift(fft2((g22o)));
-  G12o = fftshift(fft2((g12o)));
-  G21o = fftshift(fft2((g21o)));
+  
   
   % obtain new propagated field
   go   = (ifft2(ifftshift(Go.*prop)));
   g    = (ifft2(ifftshift(G.*prop)));
-  g22  = (ifft2(ifftshift(G22.*prop)));
-  g21  = (ifft2(ifftshift(G21.*prop)));
-  g11  = (ifft2(ifftshift(G11.*prop)));
-  g11o = (ifft2(ifftshift(G11o.*prop)));
-  g22o = (ifft2(ifftshift(G22o.*prop)));
-  g12o = (ifft2(ifftshift(G12o.*prop)));
-  g21o = (ifft2(ifftshift(G21o.*prop)));
   
 %%  Calculating propagation of Rays
   % propagation distance 
@@ -572,14 +252,14 @@ end
 %% plot propagate field at z(end)                                    
 fig6 = figure(6);
 fig6.Position = [408 4 1037 973];
-plotOpticalField(x,x,abs(g).^2,mapgreen,'$x/w_o$','$y/w_o$');
+plotOpticalField(scaleX*x,scaleY*x,abs(go).^2,mapgreen,labelX,labelY);
 title(['z = ', num2str(z(z_index)), ' of ', num2str(z(end)), ' microns'])
 
 %% Plot propagated points of hankels at z(end)
-plotRays(rayH11(z_index+1),'r',1)
-plotRays(rayH21(z_index+1),'y',1)
-plotRays(rayH12(z_index+1),'m',1)
-plotRays(rayH22(z_index+1),'c',1)
+plotRays(rayH11(z_index+1),'r',scaleX,scaleY)
+plotRays(rayH21(z_index+1),'y',scaleX,scaleY)
+plotRays(rayH12(z_index+1),'m',scaleX,scaleY)
+plotRays(rayH22(z_index+1),'c',scaleX,scaleY)
 
 if strcmp(GenerateVideo,'YES')
   writeVideo(vidObj1, getframe(gca));
