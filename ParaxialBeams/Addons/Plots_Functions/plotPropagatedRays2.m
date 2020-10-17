@@ -1,4 +1,4 @@
-function [] = plotPropagatedRays2inZ(rayH11,rayH12,rayH21,rayH22,z_index)
+function [] = plotPropagatedRays2(rayH11,rayH12,rayH21,rayH22,z_index)
   Nz    = size(rayH11,2); %% number of points in z-direction
   Nrays = size(rayH11(1).zCoordinate,2);                      
 
