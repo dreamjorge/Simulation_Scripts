@@ -1,4 +1,4 @@
-function [h] = plotRaysAtZ(rayObject,scale,lineWidth,color)
+function [h] = plotRaysAtZ(rayObject,scaleX,scaleY,lineWidth,color)
 %% function for plot rays at z-distance in x,y plane
 % recives next elements
 % - rayObect    structure includes information of ray to plot.
@@ -9,7 +9,7 @@ function [h] = plotRaysAtZ(rayObject,scale,lineWidth,color)
 
   hold on
   
-  h = scatter(rayObject.xCoordinate/scale,rayObject.yCoordinate/scale,lineWidth,color,'filled','o');
+  h = scatter(scaleX*rayObject.xCoordinate,scaleY*rayObject.yCoordinate,lineWidth,color,'filled','o');
 
   hold off
 
