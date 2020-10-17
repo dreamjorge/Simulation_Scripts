@@ -82,7 +82,7 @@ GaussX                = GaussianBeam(x,HermiteParametersz0).OpticalField;
 Hx                    = Hx.*GaussX.*exp(1i*PhiPhase);
 NHx                   = NHx.*GaussX.*exp(1i*PhiPhase);
 
-SupGaussX             = exp(-(sqrt(2)*x./(HermiteInitialWaistX)).^(50)); 
+SupGaussX             = exp(-(x./(HermiteInitialWaistX/2)).^(50)); 
 
 NHx                   = NHx.*SupGaussX;
 
@@ -122,7 +122,7 @@ GaussX    = GaussianBeam(x,HermiteParametersz0).OpticalField;
 Hy        = Hy .*GaussX.*exp(1i*PhiPhase);
 NHy       = NHy.*GaussX.*exp(1i*PhiPhase);
 
-SupGaussY = exp(-(sqrt(2)*y./(HermiteInitialWaistY)).^50);
+SupGaussY = exp(-(y./(HermiteInitialWaistY/2)).^50);
 NHy       = NHy.*SupGaussY;
 H1y       = Hy+1i*NHy;
 H2y       = Hy-1i*NHy;
@@ -202,7 +202,7 @@ HPz.zCoordinate = z;
 g     = HGB.OpticalFieldHermite;
 % Plot of Function
 figure(3)
-plotOpticalField(x/(HermiteParametersz0.Waist),x/(HermiteParametersz0.Waist),abs(g),mapgreen,'');
+plotOpticalField(x/(HermiteParametersz0.Waist),x/(HermiteParametersz0.Waist),abs(g),mapgreen,'','');
 title('Superposition of 4 Hankels')
 saveas(gcf,'SumAllHankels.png')
 
@@ -315,32 +315,36 @@ mesh(PHASE21,X,Y,'FaceAlpha', 0.1,'EdgeAlpha',0.4);
 
 close(figure(3))
 fig3 = figure(3);
-fig3.Position = [680 177 732 801];
+fig3.Position = [680 123 773 855];
 ha = tight_subplot(2,2,[.01 .01],[.05 .01],[.1 .01]);
 axes(ha(1))
-plotOpticalField(x/InitialWaist,x/InitialWaist,abs(H22+H21),mapgreen,'');
+plotOpticalField(x/InitialWaist,x/InitialWaist,abs(H22+H21).^2,mapgreen,'$x$','$y$');
+axis square
 ha(1).XAxis.Visible = 'off';
 ha(1).YAxisLocation = 'left';
-title('$a)|\psi_{n,m}^{1,1}+\psi_{n,m}^{2,1}|$','interpreter','latex','FontSize',18)
+title('$a)|\psi_{n,m}^{1,1}+\psi_{n,m}^{2,1}|^2$','interpreter','latex','FontSize',18)
 % title('$a)$','interpreter','latex','FontSize',18)
 set(gca,'FontSize',18);
 axes(ha(2))
-plotOpticalField(x/InitialWaist,x/InitialWaist,abs(H22+H11),mapgreen,'');
-title('$b)|\psi_{n,m}^{1,1}+\psi_{n,m}^{2,2}|$','interpreter','latex','FontSize',18)
+plotOpticalField(x/InitialWaist,x/InitialWaist,abs(H22+H11).^2,mapgreen,'$x$','$y$');
+axis square
+title('$b)|\psi_{n,m}^{1,1}+\psi_{n,m}^{2,2}|^2$','interpreter','latex','FontSize',18)
 %title('$b)$','interpreter','latex','FontSize',18)
 ha(2).XAxis.Visible = 'off';
 ha(2).YAxis.Visible = 'off';
 ha(2).YAxisLocation = 'right';
 set(gca,'FontSize',18);
 axes(ha(3))
-plotOpticalField(x/InitialWaist,x/InitialWaist,abs(H22+H21+H11),mapgreen,'');
-title('$c)|\psi_{n,m}^{1,1}+\psi_{n,m}^{2,1}+\psi_{n,m}^{2,2}|$','interpreter','latex','FontSize',18)
+plotOpticalField(x/InitialWaist,x/InitialWaist,abs(H22+H21+H11).^2,mapgreen,'$x$','$y$');
+axis square
+title('$c)|\psi_{n,m}^{1,1}+\psi_{n,m}^{2,1}+\psi_{n,m}^{2,2}|^2$','interpreter','latex','FontSize',18)
 %title('$c)$','interpreter','latex','FontSize',18)
 set(gca,'FontSize',18);
 ha(3).YAxisLocation = 'left';
 axes(ha(4))
-plotOpticalField(x/InitialWaist,x/InitialWaist,abs(H22+H21+H11+H12),mapgreen,'');
-title('$d)|\psi_{n,m}^{1,1}+\psi_{n,m}^{2,1}+\psi_{n,m}^{1,2}+\psi_{n,m}^{2,2}|$','interpreter','latex','FontSize',18)
+plotOpticalField(x/InitialWaist,x/InitialWaist,abs(H22+H21+H11+H12).^2,mapgreen,'$x$','$y$');
+axis square
+title('$d)|\psi_{n,m}^{1,1}+\psi_{n,m}^{2,1}+\psi_{n,m}^{1,2}+\psi_{n,m}^{2,2}|^2$','interpreter','latex','FontSize',18)
 %title('$d)$','interpreter','latex','FontSize',18)
 ha(4).YAxisLocation = 'right';
 ha(4).YAxis.Visible = 'off';
