@@ -1,4 +1,5 @@
 %%Hankel 11 slices
+mapgreen = AdvancedColormap('kgg',256,[0 70 255]/255);  %color of beam
 
 
 bb = W22o;
@@ -20,7 +21,7 @@ axis off
 zprop  = [0, (1/10)*RayleighDistance, (1/6)*RayleighDistance, (1/5)*RayleighDistance];
 %zprop  = [0, 6*Dz/3 , Dz/2, 0.99*Dz];
 
-hzprop = slice(z,x,y,abs(bb),zprop,[],[]); 
+hzprop = slice(z,x,y,abs(bb).^2,zprop,[],[]); 
 hzprop(1).FaceColor = 'interp'; 
 hzprop(2).FaceColor = 'interp';
 hzprop(3).FaceColor = 'interp';
@@ -32,7 +33,7 @@ hzprop(4).EdgeColor = 'none';
 colormap(mapgreen)
 
 hold off
-%%
+%
 hzprop(1).FaceAlpha = 0.9;
 hzprop(2).FaceAlpha = 0.9;
 hzprop(3).FaceAlpha = 0.0;
