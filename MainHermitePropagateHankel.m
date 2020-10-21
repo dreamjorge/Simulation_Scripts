@@ -6,6 +6,8 @@ addpath ParaxialBeams
 addpath ParaxialBeams\Addons
 addpath ParaxialBeams\Addons\export_fig-master
 addpath ParaxialBeams\Addons\panel-2.14
+addpath ParaxialBeams\Addons\Plots_Functions
+
 mapgreen = AdvancedColormap('kgg',256,[0 100 255]/255);  %color of beam
 GenerateVideo = 'NO';
 %% indices of Hermite Gaussian Beams 
@@ -189,7 +191,7 @@ end
 
 figure(3)
 plotOpticalField(x,x,abs(g).^2,mapgreen,'','');
-plotRays(rayH11(1),'r',1,1)
+plotRaysAtZ(rayH11(1),1,1,1.5,'r')
 saveas(gcf,'HermiteBeamWithObstructionRays.png')
 %% Physical Propagation
 
@@ -225,10 +227,11 @@ for z_index = 1:length(z)
   plotOpticalField(x,x,abs(g).^2,mapgreen,'','');
   hold on
 %% Plot propagated points of hankels
-  plotRays(rayH11(z_index),'r',1,1)
-  plotRays(rayH21(z_index),'y',1,1)
-  plotRays(rayH12(z_index),'m',1,1)                                         
-  plotRays(rayH22(z_index),'c',1,1)
+  plotRaysAtZ(rayH11(z_index),1,1,1.5,'r');
+  plotRaysAtZ(rayH21(z_index),1,1,1.5,'y');
+  plotRaysAtZ(rayH12(z_index),1,1,1.5,'m');
+  plotRaysAtZ(rayH22(z_index),1,1,1.5,'c');
+  
   title(['z = ', num2str(scaleZ*z(z_index)), ' of ', num2str(scaleZ*z(end))])
   drawnow
 % Write video
@@ -325,10 +328,11 @@ plotOpticalField(x,x,abs(g).^2,mapgreen,'','');
 title(['z = ', num2str(scaleZ*z(z_index)), ' of ', num2str(scaleZ*z(end))])
 
 %% Plot propagated points of hankels at z(end)
-plotRays(rayH11(z_index+1),'r',1,1)
-plotRays(rayH21(z_index+1),'y',1,1)
-plotRays(rayH12(z_index+1),'m',1,1)
-plotRays(rayH22(z_index+1),'c',1,1)
+  plotRaysAtZ(rayH11(z_index),1,1,1.5,'r');
+  plotRaysAtZ(rayH21(z_index),1,1,1.5,'y');
+  plotRaysAtZ(rayH12(z_index),1,1,1.5,'m');
+  plotRaysAtZ(rayH22(z_index),1,1,1.5,'c');
+  
 
 if strcmp(GenerateVideo,'YES')
   writeVideo(vidObj1, getframe(gca));
