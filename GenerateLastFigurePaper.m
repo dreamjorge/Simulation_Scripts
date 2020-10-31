@@ -91,13 +91,13 @@ export_fig('SelfHealingHermite','-png','-transparent')
 close(figure(11))
 fig11 = figure(11);
 fig11.Position = [680   187   956   791];
-plot(x/InitialWaist,abs(gw1).^2,'color',orange,'LineWidth',3)
+plot(x/InitialWaist,abs(gw1).^2,'color',orange,'LineWidth',3.6)
 hold on
-plot(x/InitialWaist,abs(g1).^2,'-.','color','b','LineWidth',3)
-xline( rayH11(end).xCoordinate(1)/InitialWaist,':','LineWidth',2,'Color','m')
-xline(-rayH11(end).xCoordinate(1)/InitialWaist,':','LineWidth',2,'Color','c')
-xline( rayH22(end).xCoordinate(1)/InitialWaist,':','LineWidth',2,'Color','c')
-xline(-rayH22(end).xCoordinate(1)/InitialWaist,':','LineWidth',2,'Color','m')
+plot(x/InitialWaist,abs(g1).^2,'-.','color','b','LineWidth',3.6)
+xline( rayH11(end).xCoordinate(1)/InitialWaist,':','LineWidth',3,'Color','m')
+xline(-rayH11(end).xCoordinate(1)/InitialWaist,':','LineWidth',3,'Color','c')
+xline( rayH22(end).xCoordinate(1)/InitialWaist,':','LineWidth',3,'Color','c')
+xline(-rayH22(end).xCoordinate(1)/InitialWaist,':','LineWidth',3,'Color','m')
 pbaspect([2.5 1 1])
 hold off
 xlabel('$x$','Interpreter','latex','FontSize',22)
