@@ -145,7 +145,7 @@ end
 figure(3)
 plotOpticalField(scaleX*x,scaleY*x,abs(go).^2,mapgreen,labelX,labelY);
 axis square
-plotRays(rayH11(1),'r',scaleX,scaleY)
+% plotRays(rayH11(1),'r',scaleX,scaleY)
 saveas(gcf,'HermiteBeamWithObstructionRays.png')
 %% Physical Propagation
 
@@ -175,10 +175,10 @@ for z_index = 1:length(z)
   axis square
   hold on
 %% Plot propagated points of hankels
-  plotRays(rayH11(z_index),'r',scaleX,scaleY)
-  plotRays(rayH21(z_index),'y',scaleX,scaleY)
-  plotRays(rayH12(z_index),'m',scaleX,scaleY)                                         
-  plotRays(rayH22(z_index),'c',scaleX,scaleY)
+%   plotRays(rayH11(z_index),'r',scaleX,scaleY)
+%   plotRays(rayH21(z_index),'y',scaleX,scaleY)
+%   plotRays(rayH12(z_index),'m',scaleX,scaleY)                                         
+%   plotRays(rayH22(z_index),'c',scaleX,scaleY)
   title(['z = ', num2str(z(z_index)), ' of ', num2str(z(end)), ' microns'])
   drawnow
 % Write video
@@ -256,10 +256,10 @@ plotOpticalField(scaleX*x,scaleY*x,abs(go).^2,mapgreen,labelX,labelY);
 title(['z = ', num2str(z(z_index)), ' of ', num2str(z(end)), ' microns'])
 
 %% Plot propagated points of hankels at z(end)
-plotRays(rayH11(z_index+1),'r',scaleX,scaleY)
-plotRays(rayH21(z_index+1),'y',scaleX,scaleY)
-plotRays(rayH12(z_index+1),'m',scaleX,scaleY)
-plotRays(rayH22(z_index+1),'c',scaleX,scaleY)
+% plotRays(rayH11(z_index+1),'r',scaleX,scaleY)
+% plotRays(rayH21(z_index+1),'y',scaleX,scaleY)
+% plotRays(rayH12(z_index+1),'m',scaleX,scaleY)
+% plotRays(rayH22(z_index+1),'c',scaleX,scaleY)
 
 if strcmp(GenerateVideo,'YES')
   writeVideo(vidObj1, getframe(gca));
@@ -400,7 +400,7 @@ for jj = distances
   gg1 = reshape(gg1,[Nx,Nx]);
   figure(1000)
   plotOpticalField(x,x,abs(gg1).^1.5,mapgreen,'$x/w_o$','$y/w_o$');
-  plotRays(rayH12(index),'m',1)
+%   plotRays(rayH12(index),'m',1)
 %   title(['$z$ = ', texts{kk}],'Interpreter','latex')
 
   kk = kk+1;
