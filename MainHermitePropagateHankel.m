@@ -524,16 +524,18 @@ for jj = distances
   gg1 = Wo(:,index,:);
   gg1 = reshape(gg1,[Nx,Nx]);
   figure(1000)
-  plotOpticalField(x,x,abs(gg1).^1.5,mapgreen,'');
-  plotRaysSquare(rayH12(index),'m',1)
-  plotRaysSquare(rayH21(index),'y',1)
-  plotRaysSquare(rayH11(index),'r',1)
-  plotRaysSquare(rayH22(index),'c',1)
+  plotOpticalField(x,x,abs(gg1).^1.5,mapgreen,'','');
+  axis square
+  plotRaysSquare(rayH12(index),'m',1,1)
+  plotRaysSquare(rayH21(index),'y',1,1)
+  plotRaysSquare(rayH11(index),'r',1,1)
+  plotRaysSquare(rayH22(index),'c',1,1)
   title(['$z$ = ', texts{kk}],'Interpreter','latex')
 
   kk = kk+1 
 
-  saveas(gcf,['HermitePropagation',num2str(jj),'.png'])
+  export_fig(['HermitePropagation-gauss',num2str(jj)],'-png','-transparent')
+%   saveas(gcf,['HermitePropagation',num2str(jj),'.png'])
 
 
   
