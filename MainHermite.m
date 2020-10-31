@@ -220,21 +220,21 @@ fig2 = figure(2);
 fig2.Position = [680 273 721 705];
 ha = tight_subplot(2,2,[.01 .01],[.05 .05],[.1 .07]);
 axes(ha(1))
-plotOpticalField(x/InitialWaist,x/InitialWaist,unwrap_phase(angle(H22)),parula,'');
+plotOpticalField(x/InitialWaist,x/InitialWaist,unwrap_phase(angle(H22)),parula,'','');
 title('$\psi_{n,m}^{1,1}$','interpreter','latex','FontSize',10)
 ha(1).XAxis.Visible = 'off';
 axes(ha(2))
-plotOpticalField(x/InitialWaist,x/InitialWaist,unwrap_phase(angle(H21)),parula,'');
+plotOpticalField(x/InitialWaist,x/InitialWaist,unwrap_phase(angle(H21)),parula,'','');
 title('$\psi_{n,m}^{1,2}$','interpreter','latex','FontSize',10)
 ha(2).XAxis.Visible = 'off';
 ha(2).YAxis.Visible = 'off';
 %ha(2).YAxisLocation = 'right';
 axes(ha(3))
-plotOpticalField(x/InitialWaist,x/InitialWaist,unwrap_phase(angle(H12)),parula,'');
+plotOpticalField(x/InitialWaist,x/InitialWaist,unwrap_phase(angle(H12)),parula,'','');
 title('$\psi_{n,m}^{2,1}$','interpreter','latex','FontSize',10)
 %ha(3).YAxis.Visible = 'off';
 axes(ha(4))
-plotOpticalField(x/InitialWaist,x/InitialWaist,unwrap_phase(angle(H11)),parula,'');
+plotOpticalField(x/InitialWaist,x/InitialWaist,unwrap_phase(angle(H11)),parula,'','');
 ha(4).YAxisLocation = 'right';
 ha(4).YAxis.Visible = 'off';
 title('$\psi_{n,m}^{2,2}$','interpreter','latex','FontSize',10)
@@ -361,17 +361,17 @@ fig4.Position = [537 535 1067 443];
 ha = tight_subplot(1,3,[.01 .01],[.05 .1],[.1 .07]);
 
 axes(ha(1))
-plotOpticalField(x/InitialWaist,x/InitialWaist,abs(H22+H11),mapgreen,'');
+plotOpticalField(x/InitialWaist,x/InitialWaist,abs(H22+H11),mapgreen,'','');
 title('$|\psi_{n,m}^{1,1}+\psi_{n,m}^{2,2}|$','interpreter','latex','FontSize',18)
 ha(2).YAxisLocation = 'left';
 set(gca,'FontSize',18);
 axes(ha(2))
-plotOpticalField(x/InitialWaist,x/InitialWaist,abs(H22+H21+H11),mapgreen,'');
+plotOpticalField(x/InitialWaist,x/InitialWaist,abs(H22+H21+H11),mapgreen,'','');
 title('$|\psi_{n,m}^{1,1}+\psi_{n,m}^{2,1}+\psi_{n,m}^{2,2}|$','interpreter','latex','FontSize',18)
 set(gca,'FontSize',18);
 ha(2).YAxis.Visible = 'off';
 axes(ha(3))
-plotOpticalField(x/InitialWaist,x/InitialWaist,abs(H22+H21+H11+H12),mapgreen,'');
+plotOpticalField(x/InitialWaist,x/InitialWaist,abs(H22+H21+H11+H12),mapgreen,'','');
 title('$|\psi_{n,m}^{1,1}+\psi_{n,m}^{2,1}+\psi_{n,m}^{1,2}+\psi_{n,m}^{2,2}|$','interpreter','latex','FontSize',18)
 ha(3).YAxisLocation = 'right';
 set(gca,'FontSize',18);
@@ -403,7 +403,7 @@ g21   = H21;
 go    = g.*(1-obo);
 %Ploting Laguerre with obstruction
 figure(2)
-plotOpticalField(x/(HermiteParametersz0.Waist),x/(HermiteParametersz0.Waist),abs(g),mapgreen,'');
+plotOpticalField(x/(HermiteParametersz0.Waist),x/(HermiteParametersz0.Waist),abs(g),mapgreen,'','');
 saveas(gcf,'HermiteBeamWithObstruction.png')
 %% Parametrization of obstruction for rays
 % Total points/rays in obstruction
@@ -440,8 +440,8 @@ for ray_index = 1:TotalRays
 end
 
 figure(3)
-plotOpticalField(x,x,abs(g).^2,mapgreen,'microns');
-plotRays(rayH11(1),'r',1)
+plotOpticalField(x,x,abs(g).^2,mapgreen,'microns','');
+% plotRays(rayH11(1),'r',1)
 saveas(gcf,'HermiteBeamWithObstructionRays.png')
 %% Physical Propagation
 
@@ -474,13 +474,13 @@ for z_index = 1:length(z)
   %% plot propagate field                                      
   fig6 = figure(6);
   fig6.Position = [408 4 1037 973];
-  plotOpticalField(x,x,abs(g).^2,mapgreen,'microns');
+  plotOpticalField(x,x,abs(g).^2,mapgreen,'microns','');
   hold on
 %% Plot propagated points of hankels
-  plotRays(rayH11(z_index),'r',1)
-  plotRays(rayH21(z_index),'y',1)
-  plotRays(rayH12(z_index),'m',1)                                         
-  plotRays(rayH22(z_index),'c',1)
+%   plotRays(rayH11(z_index),'r',1)
+%   plotRays(rayH21(z_index),'y',1)
+%   plotRays(rayH12(z_index),'m',1)                                         
+%   plotRays(rayH22(z_index),'c',1)
   title(['z = ', num2str(z(z_index)), ' of ', num2str(z(end)), ' microns'])
   drawnow
 % Write video
@@ -573,14 +573,14 @@ end
 %% plot propagate field at z(end)                                    
 fig6 = figure(6);
 fig6.Position = [408 4 1037 973];
-plotOpticalField(x,x,abs(g).^2,mapgreen,'microns');
+plotOpticalField(x,x,abs(g).^2,mapgreen,'microns','');
 title(['z = ', num2str(z(z_index)), ' of ', num2str(z(end)), ' microns'])
 
 %% Plot propagated points of hankels at z(end)
-plotRays(rayH11(z_index+1),'r',1)
-plotRays(rayH21(z_index+1),'y',1)
-plotRays(rayH12(z_index+1),'m',1)
-plotRays(rayH22(z_index+1),'c',1)
+% plotRays(rayH11(z_index+1),'r',1)
+% plotRays(rayH21(z_index+1),'y',1)
+% plotRays(rayH12(z_index+1),'m',1)
+% plotRays(rayH22(z_index+1),'c',1)
 
 if strcmp(GenerateVideo,'YES')
   writeVideo(vidObj1, getframe(gca));
@@ -659,7 +659,7 @@ for jj = distances
   maxvalue = max(abs((W22(:))));
   gg = reshape(gg,[Nx,Nx]);
   axes(ha(4-kk))
-  plotOpticalField(x/InitialWaist,x/InitialWaist,abs(gg).^1.5,mapgreen,'');
+  plotOpticalField(x/InitialWaist,x/InitialWaist,abs(gg).^1.5,mapgreen,'','');
   caxis ([0 maxvalue])
   set(gca,'FontSize',12);
    title(['$z$ = ', texts{kk}],'FontSize',14,'Interpreter','latex')
@@ -667,7 +667,7 @@ for jj = distances
   gg1 = W22o(:,index,:);
   gg1 = reshape(gg1,[Nx,Nx]);
   axes(ha(7 - kk))
-  plotOpticalField(x/InitialWaist,x/InitialWaist,abs(gg1).^1.5,mapgreen,'');
+  plotOpticalField(x/InitialWaist,x/InitialWaist,abs(gg1).^1.5,mapgreen,'','');
   set(gca,'FontSize',12);
   caxis ([0 maxvalue])
 %   title(['$z$ = ', texts{kk}],'FontSize',14,'Interpreter','latex')
@@ -720,8 +720,8 @@ for jj = distances
   gg1 = W22o(:,index,:);
   gg1 = reshape(gg1,[Nx,Nx]);
   figure(1000)
-  plotOpticalField(x,x,abs(gg1).^1.5,mapgreen,'');
-  plotRays(rayH12(index),'m',1)
+  plotOpticalField(x,x,abs(gg1).^1.5,mapgreen,'','');
+%   plotRays(rayH12(index),'m',1)
 %   title(['$z$ = ', texts{kk}],'Interpreter','latex')
 
   kk = kk+1;
@@ -772,7 +772,7 @@ for jj = distances
   gg1 = Wo(:,index,:);
   gg1 = reshape(gg1,[Nx,Nx]);
   figure(1000)
-  plotOpticalField(x,x,abs(gg1).^1.5,mapgreen,'');
+  plotOpticalField(x,x,abs(gg1).^1.5,mapgreen,'','');
   plotRaysSquare(rayH12(index),'m',1)
   plotRaysSquare(rayH21(index),'y',1)
   plotRaysSquare(rayH11(index),'r',1)
