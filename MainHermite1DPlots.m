@@ -140,15 +140,15 @@ export_fig('NHermiteGaussX','-png','-transparent')
 close(figure(1))
 fig1 = figure(1);
 fig1.Position = [716, 444, 1235, 389];
-plot(x/InitialWaist,abs(Hy).^2,'LineWidth',1.6)
+plot(x/InitialWaist,abs(Hy).^2,'LineWidth',2.2)
 hold on
-plot(x/InitialWaist,abs(NHy).^2,'--','LineWidth',1.6)
+plot(x/InitialWaist,abs(NHy).^2,'--','LineWidth',2.2)
 colorp = [0,200,100]/256;
-plot(x/InitialWaist,abs(H1y).^2,'-.','LineWidth',1.6,'color',colorp)
+plot(x/InitialWaist,abs(H1y).^2,'-.','LineWidth',2.2,'color',colorp)
 hold off
 xlim([-5 5])
 ylim([0 .0003])
-xlabel('$y/w_o$','Interpreter','latex','FontSize',14)
+xlabel('$y$','Interpreter','latex','FontSize',14)
 leg1=legend('$\left|\psi_{n,m}^{(1,1)}\right|^2$','$\left|Re\left(\psi_{n,m}^{(1,1)}\right)\right|^2$','$\left|Im\left(\psi_{n,m}^{(1,1)}\right)\right|^2$','interpreter','latex','FontSize',14,'NumColumns',3);
 leg1.Position = [0.5693, 0.8203, 0.3337, 0.0967];
 % title(['Solutions of Hermite Equation with integer number equal to ',num2str(nu)])
@@ -161,15 +161,15 @@ export_fig('hankelHermiteGaussSolutionsY','-png','-transparent')
 close(figure(1))
 fig1 = figure(1);
 fig1.Position = [716, 444, 1235, 389];
-plot(x/InitialWaist,abs(Hx).^2,'LineWidth',1.6)
+plot(x/InitialWaist,abs(Hx).^2,'LineWidth',2.2)
 hold on
-plot(x/InitialWaist,abs(NHx).^2,'--','LineWidth',1.6)
+plot(x/InitialWaist,abs(NHx).^2,'--','LineWidth',2.2)
 colorp = [0,200,100]/256;
-plot(x/InitialWaist,abs(H1x).^2,'-.','LineWidth',1.6,'color',colorp)
+plot(x/InitialWaist,abs(H1x).^2,'-.','LineWidth',2.2,'color',colorp)
 hold off
 xlim([-5 5])
 ylim([0 .0003])
-xlabel('$x/w_0$','Interpreter','latex','FontSize',14)
+xlabel('$x$','Interpreter','latex','FontSize',14)
 leg1=legend('$\left|\psi_{n,m}^{(1,1)}\right|^2$','$\left|Re\left(\psi_{n,m}^{(1,1)}\right)\right|^2$','$\left|Im\left(\psi_{n,m}^{(1,1)}\right)\right|^2$','interpreter','latex','FontSize',14,'NumColumns',3);
 leg1.Position = [0.5693, 0.8203, 0.3337, 0.0967];
 % title(['Solutions of Hermite Equation with integer number equal to ',num2str(nu)])
