@@ -5,6 +5,7 @@ version: 2.1
 
 orbs:
   # Declare a dependency on the welcome-orb
+  matlab: mathworks/matlab@0.2.1
   welcome: circleci/welcome-orb@0.4.1
 # Orchestrate or schedule a set of jobs
 workflows:
@@ -13,3 +14,4 @@ workflows:
     # Run the welcome/run job in its own container
     jobs:
       - welcome/run
+      
