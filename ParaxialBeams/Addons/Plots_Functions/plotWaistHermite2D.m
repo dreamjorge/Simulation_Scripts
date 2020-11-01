@@ -1,5 +1,6 @@
-function [h] = plotWaistHermite2D(HermiteParametersZi,scale,color)
-%% Function for plot waist of Hermite Gauss Beam in 2D at z - distance given in parameters
+function [h] = plotWaistHermite2D(HermiteParametersZi,scaleX,scaleY,color)
+%% Function for plot waist of Hermite Gauss Beam in 2D 
+% at z - distance given in parameters.
 % Recives Hermite Parameters and returns plot object.
   
   % Parameters needed from Hermite Parameters
@@ -15,7 +16,6 @@ function [h] = plotWaistHermite2D(HermiteParametersZi,scale,color)
   xwaist = [-wx/2,  wx/2, wx/2, -wx/2];
   ywaist = [-wy/2, -wy/2, wy/2,  wy/2];
   % Plot Waist of Hermite Gauss Beam
-  h      = plotSquare(xwaist/scale,ywaist/scale,color);
-
-
+  h      = plotSquare(xwaist*scaleX,ywaist*scaleY,color);
+  
 end

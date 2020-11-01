@@ -173,7 +173,7 @@ title('Propagator')
 % Matrix for save transversal fields
 gx      = zeros(N,length(z)); 
 gy      = zeros(N,length(z));
-
+W       = zeros(N,Nz,N);
 % Save field in z = 0 
 gx(:,1) = g(N/2+1,:);
 gy(:,1) = g(:,N/2+1);

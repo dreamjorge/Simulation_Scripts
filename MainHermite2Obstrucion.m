@@ -22,6 +22,18 @@ HermiteParametersz0  = HermiteParameters(0,InitialWaist,Wavelength,nu,mu);
 k                    = HermiteParametersz0.k;
 RayleighDistance     = HermiteParametersz0.RayleighDistance;
 
+%% Given Initial Waist and RayleighDistance we cand do Normalizations /Scale Factors
+scaleX = 1/(InitialWaist);
+scaleY = scaleX;
+scaleZ = 1/(RayleighDistance);
+
+labelX = '$x/w_o$';
+labelY = '$x/w_o$';
+labelZ = '$z/z_R$';
+
+
+
+
 %% sampling of vectors 
 %First, we estimate samplig in z-direction with propagation distance 
 % z-direction
@@ -71,15 +83,15 @@ HPz.zCoordinate = z;
 g     = HGB.OpticalFieldHermite;
 % Plot of Function
 figure(3)
-plotOpticalField(x/(HermiteParametersz0.Waist),x/(HermiteParametersz0.Waist),abs(g),mapgreen,'$x/w_o$','$y/w_o$');
-
+plotOpticalField(scaleX*x,scaleY*x,abs(g).^2,mapgreen,labelX,labelY);
+axis square
 %% Obstruction on Hermite in z = 0
 
 % Obstruction
-lx    = HermiteParametersz0.HermiteWaist/3.9;
-ly    = HermiteParametersz0.HermiteWaist/4.4;
-xt    = HermiteParametersz0.HermiteWaist/3.1;
-yt    = 0;
+lx    = HermiteParametersz0.HermiteWaist/3.85;
+ly    = HermiteParametersz0.HermiteWaist/4.35;
+xt    = 0;
+yt    = HermiteParametersz0.HermiteWaist/3.1;
 obx   = double(abs(x-xt)<=lx/2);
 oby   = double(abs(x-yt)<=ly/2);
 obo   = (oby')*obx;
@@ -89,7 +101,8 @@ obo   = (oby')*obx;
 go    = g.*(1-obo);
 %Ploting Laguerre with obstruction
 figure(2)
-plotOpticalField(x/(HermiteParametersz0.Waist),x/(HermiteParametersz0.Waist),abs(go).^2,mapgreen,'$x/w_o$','$y/w_o$');
+plotOpticalField(scaleX*x,scaleY*x,abs(go).^2,mapgreen,labelX,labelY);
+axis square
 export_fig('HermiteBeamWithObstruction','-png','-transparent')
 % Parametrization of obstruction for rays
 % Total points/rays in obstruction
@@ -126,8 +139,11 @@ for ray_index = 1:TotalRays
 end
 
 figure(3)
-plotOpticalField(x,x,abs(go).^2,mapgreen,'$x/w_o$','$y/w_o$');
-plotRays(rayH11(1),'r',1)
+plotOpticalField(scaleX*x,scaleY*x,abs(go).^2,mapgreen,labelX,labelY);
+axis square
+plotRays(rayH11(1),'r',scaleX,scaleY);
+%pr = plotRaysSquare(rayH11(1),'r',scaleX,scaleY);
+%pr.LineStyle = ':';
 export_fig('HermiteBeamWithObstructionRays','-png','-transparent')
 %% Physical Propagation
 
@@ -153,14 +169,14 @@ for z_index = 1:length(z)
   %% plot propagate field                                      
   fig6 = figure(6);
   fig6.Position = [408 4 1037 973];
-  plotOpticalField(x,x,abs(g).^2,mapgreen,'$x/w_o$','$y/w_o$');
+  plotOpticalField(scaleX*x,scaleY*x,abs(go).^2,mapgreen,labelX,labelY);
   hold on
 %% Plot propagated points of hankels
-  plotRays(rayH11(z_index),'r',1)
-  plotRays(rayH21(z_index),'y',1)
-  plotRays(rayH12(z_index),'m',1)                                         
-  plotRays(rayH22(z_index),'c',1)
-  title(['z = ', num2str(z(z_index)), ' of ', num2str(z(end)/RayleighDistance)])
+  plotRays(rayH11(z_index),'r',scaleX,scaleY)
+  plotRays(rayH21(z_index),'y',scaleX,scaleY)
+  plotRays(rayH12(z_index),'m',scaleX,scaleY)                                         
+  plotRays(rayH22(z_index),'c',scaleX,scaleY)
+  title(['z = ', num2str(z(z_index)/RayleighDistance), ' of ', num2str(z(end)/RayleighDistance)])
   drawnow
 % Write video
   if strcmp(GenerateVideo,'YES')
@@ -233,8 +249,14 @@ end
 %% plot propagate field at z(end)                                    
 fig6 = figure(6);
 fig6.Position = [408 4 1037 973];
-plotOpticalField(x/InitialWaist,x/InitialWaist,abs(go).^2,mapgreen,'$x/w_o$','$y/w_o$');
-title(['$z/RayleighDistance = $', num2str(1)],'Interpreter','latex')
+plotOpticalField(scaleX*x,scaleY*x,abs(go).^2,mapgreen,labelX,labelY);
+  hold on
+%% Plot propagated points of hankels
+  plotRays(rayH11(z_index),'r',scaleX,scaleY)
+  plotRays(rayH21(z_index),'y',scaleX,scaleY)
+  plotRays(rayH12(z_index),'m',scaleX,scaleY)                                         
+  plotRays(rayH22(z_index),'c',scaleX,scaleY)
+  title(['z = ', num2str(z(z_index)/RayleighDistance), ' of ', num2str(z(end)/RayleighDistance)])
 export_fig('SelfHealingHermiteatZR','-png','-transparent')
 
 % plotRaysSquare(rayH11(z_index+1),'r',InitialWaist)
@@ -243,10 +265,10 @@ export_fig('SelfHealingHermiteatZR','-png','-transparent')
 % plotRaysSquare(rayH22(z_index+1),'c',InitialWaist)
 % export_fig('SelfHealingHermiteatZRSquares','-png','-transparent')
 %% Plot propagated points of hankels at z(end)
-plotRays(rayH11(z_index+1),'r',InitialWaist)
-plotRays(rayH21(z_index+1),'y',InitialWaist)
-plotRays(rayH12(z_index+1),'m',InitialWaist)
-plotRays(rayH22(z_index+1),'c',InitialWaist)
+plotRays(rayH11(z_index+1),'r',InitialWaist,InitialWaist)
+plotRays(rayH21(z_index+1),'y',InitialWaist,InitialWaist)
+plotRays(rayH12(z_index+1),'m',InitialWaist,InitialWaist)
+plotRays(rayH22(z_index+1),'c',InitialWaist,InitialWaist)
 export_fig('SelfHealingHermiteatZRRays','-png','-transparent')
 
 if strcmp(GenerateVideo,'YES')

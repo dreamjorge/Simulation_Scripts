@@ -14,18 +14,15 @@ classdef XHermiteBeam < matlab.mixin.Copyable & handle & HermiteParameters & Gau
     Normalization
   end
   
-  methods(Static) 
-    [HG,NHG] = hermiteSolutions(nu,x);
-  end
   
   methods 
 
     function XHermiteAmplitude = get.XHermiteAmplitude(obj)
-      XHermiteAmplitude = 1;
+      XHermiteAmplitude = 1./(obj.Waist);
     end
     
     function Normalization = get.Normalization(obj)
-      Normalization =  1;...sqrt(2*factorial(obj.p)/(pi*factorial(obj.p+abs(obj.l))));
+      Normalization =  1;
     end
 
     function OpticalFieldHermite  = get.OpticalFieldXHermite(obj)
