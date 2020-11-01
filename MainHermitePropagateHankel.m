@@ -14,7 +14,6 @@ GenerateVideo = 'NO';
 nu = 12;
 mu = 11;
 
-
 %% Physical parameters [microns]
 InitialWaist          = 100;
 Wavelength            = 0.6328;
@@ -25,9 +24,6 @@ HermiteParametersz0  = HermiteParameters(0,InitialWaist,Wavelength,nu,mu);
 k                    = HermiteParametersz0.k;
 RayleighDistance     = HermiteParametersz0.RayleighDistance;
 
-
-
-
 %% Given Initial Waist and RayleighDistance we cand do Normalizations /Scale Factors
 scaleX = 1/(InitialWaist);
 scaleY = scaleX;
@@ -37,12 +33,11 @@ labelX = '$x/w_o$';
 labelY = '$x/w_o$';
 labelZ = '$z/z_R$';
 
-
 %% sampling of vectors 
 %First, we estimate samplig in z-direction with propagation distance 
 % z-direction
-Dz    = 0.5*RayleighDistance;     % z-window (propagation distance)
-Nz    = 2^7;                      % number of points in z-direction
+Dz    = RayleighDistance;     % z-window (propagation distance)
+Nz    = 2^7+1;                      % number of points in z-direction
 dz    = Dz/Nz;                    % Resolution in z
 nz    = 0:Nz-1;                   % vector with N-points with resolution 1
 z     = nz*dz;                    % z-vector z of propagation 
@@ -74,6 +69,42 @@ kx    = 2*pi*u;
 %diferential
 dr    = [dx,dx,dz];
 
+%% Hankel 1D
+
+HermiteInitialWaistX  = HermiteParametersz0.HermiteWaistX;
+HermiteInitialWaistY  = HermiteParametersz0.HermiteWaistY;
+HermiteInitialWaist   = HermiteParametersz0.HermiteWaist;
+PhiPhase              = HermiteParametersz0.PhiPhase;
+% for x-direction
+InitialWaist          = HermiteParametersz0.InitialWaist;
+[Hx,NHx]              = ...
+HermiteParameters.getHermiteSolutions(nu,(sqrt(2)./InitialWaist).*x);
+
+GaussX                = GaussianBeam(x,HermiteParametersz0).OpticalField;
+Hx                    = Hx.*GaussX.*exp(1i*PhiPhase);
+NHx                   = NHx.*GaussX.*exp(1i*PhiPhase);
+
+SupGaussX             = exp(-(x./(HermiteInitialWaistX/2)).^(50)); 
+
+NHx                   = NHx.*SupGaussX;
+
+H1x                   = Hx+1j*NHx;
+H2x                   = Hx-1j*NHx;
+
+% for y-direction
+[Hy,NHy]  = ...
+HermiteParameters.getHermiteSolutions(mu,(sqrt(2)./InitialWaist).*x);
+
+% Hermite Gauss 1D and Hankel Hermite Gauss 
+PhiPhase  = HermiteParametersz0.PhiPhase;
+GaussX    = GaussianBeam(x,HermiteParametersz0).OpticalField;
+Hy        = Hy .*GaussX.*exp(1i*PhiPhase);
+NHy       = NHy.*GaussX.*exp(1i*PhiPhase);
+
+SupGaussY = exp(-(y./(HermiteInitialWaistY/2)).^50);
+NHy       = NHy.*SupGaussY;
+H1y       = Hy+1i*NHy;
+H2y       = Hy-1i*NHy;
 
 %% Hermite Gauss in z = 0
 HGB   = HermiteBeam(X,Y,HermiteParametersz0);
@@ -88,8 +119,16 @@ HPz.zCoordinate = z;
 g     = HGB.OpticalFieldHermite;
 % Plot of Function
 figure(3)
-plotOpticalField(scaleX*x,scaleY*x,abs(g),mapgreen,labelX,labelY);
-axis square
+plotOpticalField(x/(HermiteParametersz0.Waist),x/(HermiteParametersz0.Waist),abs(g),mapgreen,'','');
+title('Superposition of 4 Hankels')
+saveas(gcf,'SumAllHankels.png')
+
+
+%% Hankels 2D
+H11 = (H1y')*(H1x);
+H12 = (H2y')*(H1x);
+H21 = (H1y')*(H2x);
+H22 = (H2y')*(H2x);
 
 %% Obstruction on Hermite in z = 0
 
@@ -102,11 +141,19 @@ obx   = double(abs(x-xt)<=lx/2);
 oby   = double(abs(x-yt)<=ly/2);
 obo   = (oby')*obx;
 
+g11o  = H11.*(1-obo);
+g12o  = H12.*(1-obo);
+g21o  = H21.*(1-obo);
+g22o  = H22.*(1-obo);
+g11   = H11;
+g22   = H22;
+g21   = H21;
+
 % Applying obstruction in optic field
 go    = g.*(1-obo);
 %Ploting Laguerre with obstruction
 figure(2)
-plotOpticalField(scaleX*x,scaleY*x,abs(go).^2,mapgreen,labelX,labelY);
+plotOpticalField(x/(HermiteParametersz0.Waist),x/(HermiteParametersz0.Waist),abs(g),mapgreen,'','');
 saveas(gcf,'HermiteBeamWithObstruction.png')
 %% Parametrization of obstruction for rays
 % Total points/rays in obstruction
@@ -143,9 +190,8 @@ for ray_index = 1:TotalRays
 end
 
 figure(3)
-plotOpticalField(scaleX*x,scaleY*x,abs(go).^2,mapgreen,labelX,labelY);
-axis square
-% plotRays(rayH11(1),'r',scaleX,scaleY)
+plotOpticalField(x,x,abs(g).^2,mapgreen,'','');
+plotRaysAtZ(rayH11(1),1,1,1.5,'r')
 saveas(gcf,'HermiteBeamWithObstructionRays.png')
 %% Physical Propagation
 
@@ -158,7 +204,14 @@ title('Propagator')
 gx      = zeros(Nx,length(z)); 
 gy      = zeros(Nx,length(z));
 W       = zeros(Nx,Nz,Nx);
+W11o    = zeros(Nx,Nz,Nx);
+W22o    = zeros(Nx,Nz,Nx);
+W12o    = zeros(Nx,Nz,Nx);
+W21o    = zeros(Nx,Nz,Nx);
+W11     = zeros(Nx,Nz,Nx);
+W22     = zeros(Nx,Nz,Nx);
 Wo      = zeros(Nx,Nz,Nx);
+W21     = zeros(Nx,Nz,Nx);
 % Videos Options for generate video
 if strcmp(GenerateVideo,'YES') % this was defined 8-line
   vidObj1 = VideoWriter('HGo.avi');
@@ -171,15 +224,15 @@ for z_index = 1:length(z)
   %% plot propagate field                                      
   fig6 = figure(6);
   fig6.Position = [408 4 1037 973];
-  plotOpticalField(scaleX*x,scaleY*x,abs(go).^2,mapgreen,labelX,labelY);
-  axis square
+  plotOpticalField(x,x,abs(g).^2,mapgreen,'','');
   hold on
 %% Plot propagated points of hankels
-%   plotRays(rayH11(z_index),'r',scaleX,scaleY)
-%   plotRays(rayH21(z_index),'y',scaleX,scaleY)
-%   plotRays(rayH12(z_index),'m',scaleX,scaleY)                                         
-%   plotRays(rayH22(z_index),'c',scaleX,scaleY)
-  title(['z = ', num2str(z(z_index)), ' of ', num2str(z(end)), ' microns'])
+  plotRaysAtZ(rayH11(z_index),1,1,1.5,'r');
+  plotRaysAtZ(rayH21(z_index),1,1,1.5,'y');
+  plotRaysAtZ(rayH12(z_index),1,1,1.5,'m');
+  plotRaysAtZ(rayH22(z_index),1,1,1.5,'c');
+  
+  title(['z = ', num2str(scaleZ*z(z_index)), ' of ', num2str(scaleZ*z(end))])
   drawnow
 % Write video
   if strcmp(GenerateVideo,'YES')
@@ -192,16 +245,35 @@ for z_index = 1:length(z)
   gy(:,z_index)   = g(:,Nx/2+1);
   % saving field for slices
   W    (:,z_index,:) = g;
+  W11o (:,z_index,:) = g11o;
+  W22o (:,z_index,:) = g22o;
+  W12o (:,z_index,:) = g12o;
+  W21o (:,z_index,:) = g21o;
   Wo   (:,z_index,:) = go;
-
+  W11  (:,z_index,:) = g11;
+  W22  (:,z_index,:) = g22;
+  W21  (:,z_index,:) = g21;
   % propagating field
   G    = fftshift(fft2((g)));
   Go   = fftshift(fft2((go)));
-  
+  G11  = fftshift(fft2((g11)));
+  G22  = fftshift(fft2((g22)));
+  G21  = fftshift(fft2((g21)));
+  G11o = fftshift(fft2((g11o)));
+  G22o = fftshift(fft2((g22o)));
+  G12o = fftshift(fft2((g12o)));
+  G21o = fftshift(fft2((g21o)));
   
   % obtain new propagated field
   go   = (ifft2(ifftshift(Go.*prop)));
   g    = (ifft2(ifftshift(G.*prop)));
+  g22  = (ifft2(ifftshift(G22.*prop)));
+  g21  = (ifft2(ifftshift(G21.*prop)));
+  g11  = (ifft2(ifftshift(G11.*prop)));
+  g11o = (ifft2(ifftshift(G11o.*prop)));
+  g22o = (ifft2(ifftshift(G22o.*prop)));
+  g12o = (ifft2(ifftshift(G12o.*prop)));
+  g21o = (ifft2(ifftshift(G21o.*prop)));
   
 %%  Calculating propagation of Rays
   % propagation distance 
@@ -252,14 +324,15 @@ end
 %% plot propagate field at z(end)                                    
 fig6 = figure(6);
 fig6.Position = [408 4 1037 973];
-plotOpticalField(scaleX*x,scaleY*x,abs(go).^2,mapgreen,labelX,labelY);
-title(['z = ', num2str(z(z_index)), ' of ', num2str(z(end)), ' microns'])
+plotOpticalField(x,x,abs(g).^2,mapgreen,'','');
+title(['z = ', num2str(scaleZ*z(z_index)), ' of ', num2str(scaleZ*z(end))])
 
 %% Plot propagated points of hankels at z(end)
-% plotRays(rayH11(z_index+1),'r',scaleX,scaleY)
-% plotRays(rayH21(z_index+1),'y',scaleX,scaleY)
-% plotRays(rayH12(z_index+1),'m',scaleX,scaleY)
-% plotRays(rayH22(z_index+1),'c',scaleX,scaleY)
+  plotRaysAtZ(rayH11(z_index),1,1,1.5,'r');
+  plotRaysAtZ(rayH21(z_index),1,1,1.5,'y');
+  plotRaysAtZ(rayH12(z_index),1,1,1.5,'m');
+  plotRaysAtZ(rayH22(z_index),1,1,1.5,'c');
+  
 
 if strcmp(GenerateVideo,'YES')
   writeVideo(vidObj1, getframe(gca));
@@ -338,7 +411,7 @@ for jj = distances
   maxvalue = max(abs((W22(:))));
   gg = reshape(gg,[Nx,Nx]);
   axes(ha(4-kk))
-  plotOpticalField(x/InitialWaist,x/InitialWaist,abs(gg).^1.5,mapgreen,'$x/w_o$','$y/w_o$');
+  plotOpticalField(x/InitialWaist,x/InitialWaist,abs(gg).^1.5,mapgreen,'');
   caxis ([0 maxvalue])
   set(gca,'FontSize',12);
    title(['$z$ = ', texts{kk}],'FontSize',14,'Interpreter','latex')
@@ -346,7 +419,7 @@ for jj = distances
   gg1 = W22o(:,index,:);
   gg1 = reshape(gg1,[Nx,Nx]);
   axes(ha(7 - kk))
-  plotOpticalField(x/InitialWaist,x/InitialWaist,abs(gg1).^1.5,mapgreen,'$x/w_o$','$y/w_o$');
+  plotOpticalField(x/InitialWaist,x/InitialWaist,abs(gg1).^1.5,mapgreen,'');
   set(gca,'FontSize',12);
   caxis ([0 maxvalue])
 %   title(['$z$ = ', texts{kk}],'FontSize',14,'Interpreter','latex')
@@ -399,8 +472,8 @@ for jj = distances
   gg1 = W22o(:,index,:);
   gg1 = reshape(gg1,[Nx,Nx]);
   figure(1000)
-  plotOpticalField(x,x,abs(gg1).^1.5,mapgreen,'$x/w_o$','$y/w_o$');
-%   plotRays(rayH12(index),'m',1)
+  plotOpticalField(x,x,abs(gg1).^1.5,mapgreen,'');
+  plotRays(rayH12(index),'m',1)
 %   title(['$z$ = ', texts{kk}],'Interpreter','latex')
 
   kk = kk+1;
@@ -451,16 +524,18 @@ for jj = distances
   gg1 = Wo(:,index,:);
   gg1 = reshape(gg1,[Nx,Nx]);
   figure(1000)
-  plotOpticalField(x,x,abs(gg1).^1.5,mapgreen,'$x/w_o$','$y/w_o$');
-  plotRaysSquare(rayH12(index),'m',1)
-  plotRaysSquare(rayH21(index),'y',1)
-  plotRaysSquare(rayH11(index),'r',1)
-  plotRaysSquare(rayH22(index),'c',1)
+  plotOpticalField(x,x,abs(gg1).^1.5,mapgreen,'','');
+  axis square
+  plotRaysSquare(rayH12(index),'m',1,1)
+  plotRaysSquare(rayH21(index),'y',1,1)
+  plotRaysSquare(rayH11(index),'r',1,1)
+  plotRaysSquare(rayH22(index),'c',1,1)
   title(['$z$ = ', texts{kk}],'Interpreter','latex')
 
   kk = kk+1 
 
-  saveas(gcf,['HermitePropagation',num2str(jj),'.png'])
+  export_fig(['HermitePropagation-gauss',num2str(jj)],'-png','-transparent')
+%   saveas(gcf,['HermitePropagation',num2str(jj),'.png'])
 
 
   

@@ -4,6 +4,10 @@
 
 addpath ParaxialBeams
 addpath ParaxialBeams\Addons
+addpath ParaxialBeams\Addons\export_fig-master
+addpath ParaxialBeams\Addons\panel-2.14
+addpath ParaxialBeams\Addons\Plots_Functions
+
 mapgreen = AdvancedColormap('kgg',256,[0 100 255]/255);  %color of beam
 
 % Physical parameters [microns]
@@ -40,7 +44,7 @@ export_fig('GaussianParametersWaistAngle','-png','-transparent')
 % After sampling z vector, Estimate sampling in x,y-direction in terms of
 % of max waist Gauss Beam until max z-propagation
 
-MaxWaist = GaussianParameters.waistFunction(z(end),InitialWaist,GaussianBeamParameters.RayleighDistance);
+MaxWaist = GaussianParameters.getWaist(z(end),InitialWaist,GaussianBeamParameters.RayleighDistance);
 
 N     = 2^10;               % Number of points in x,y axis
 n     = -N/2+.05:N/2-1+.05; % vector with N-points with resolution 1
@@ -70,6 +74,33 @@ GB                     = GaussianBeam(R,GaussianBeamParameters);
 figure(2)
 plotOpticalField(x, x, abs(GB.OpticalField).^2,mapgreen,'microns');
 plotCircle(0,0,GaussianBeamParameters.InitialWaist);
+
+%% Analitic trasversal
+
+[Zm,Xm]         = meshgrid(z,x);
+GPz             = copy(GaussianBeamParameters);
+GPz.zCoordinate = Zm;
+
+GB              = GaussianBeam(Xm,GPz);
+figure(3)
+imagesc(z,x,abs(GB.OpticalField).^2)
+hold on
+GPzc             = copy(GaussianBeamParameters);
+GPzc.zCoordinate  =  z;
+plot(z,GPzc.Waist)
+plot(z,-GPzc.Waist)
+hold off
+%%
+
+
+
+
+
+
+
+
+%%numeric method 
+
 
 % Optic Field to propagate 
 g   = GB.OpticalField;

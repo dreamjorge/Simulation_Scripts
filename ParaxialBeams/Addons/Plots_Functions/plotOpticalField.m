@@ -15,7 +15,6 @@ function h = plotOpticalField(xAxis,yAxis,OpticalField,ColorMap,xLabelInput,yLab
 
   h = imagesc(xAxis, yAxis,OpticalField);
   colormap(ColorMap)
-  axis square
   xlabel(xLabelInput,'Interpreter','latex','FontSize',18)
   ylabel(yLabelInput,'Interpreter','latex','FontSize',18)
   set(gca,'YDir','normal')

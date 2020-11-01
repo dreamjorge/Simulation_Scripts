@@ -14,14 +14,11 @@ classdef XeHermiteBeam < matlab.mixin.Copyable & handle & HermiteParameters & Ga
     Normalization
   end
   
-  methods(Static) 
-    [HG,NHG] = hermiteSolutions(nu,x);
-  end
   
   methods 
 
     function XHermiteAmplitude = get.XHermiteAmplitude(obj)
-      XHermiteAmplitude = 1;
+      XHermiteAmplitude = 1./(obj.Waist);
     end
     
     function Normalization = get.Normalization(obj)
