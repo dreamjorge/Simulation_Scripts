@@ -123,7 +123,7 @@ u    = n*du;           <span class="comment">% Vector with dimentions</span>
 <span class="comment">%kx,ky vectors</span>
 kx   = 2*pi*u;
 [Kx] = meshgrid(kx);
-</pre><img vspace="5" hspace="5" src="MainGauss_01.png" alt=""> <h2 id="3">------------------------ Gaussian Beam in z = 0 ---------------------- %%</h2><pre class="codeinput">GaussianBeamParameters = GaussianParameters(0,InitialWaist,Wavelength);
+</pre><img vspace="5" hspace="5" src="\MainGauss_01.png" alt=""> <h2 id="3">------------------------ Gaussian Beam in z = 0 ---------------------- %%</h2><pre class="codeinput">GaussianBeamParameters = GaussianParameters(0,InitialWaist,Wavelength);
 GB                     = GaussianBeam(R,GaussianBeamParameters);
 
 <span class="comment">% Plot of Field</span>
