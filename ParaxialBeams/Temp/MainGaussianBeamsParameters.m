@@ -67,7 +67,7 @@ for jj =1:nrticksy
         yticklabelsv{jj} = [num2str(rats(yticksv(jj))),' $s_0$'];           % Else It takes value of times so in Radius.
     end
 end
-set(gca,'ytick',yticksv);                                                   % Set values of ticks. 
+% set(gca,'ytick',yticksv);                                                   % Set values of ticks. 
 set(gca,'yticklabel',yticklabelsv)                                          % Set labels in ticks. 
 ylim([1.05*radiusGaussianBeam(-(timesso/2)*so,wo) ...                       % Limit axes
      ,1.05*radiusGaussianBeam( (timesso/2)*so,wo)])

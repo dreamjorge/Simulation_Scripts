@@ -65,15 +65,15 @@ u     = n*du;           % Vector with dimentions
 %kx,ky vectors
 kx    = 2*pi*u;
 [Kx]  = meshgrid(kx);
-%% ------------------------ Gaussian Beam in z = 0 ---------------------- %%
+%%                       Gaussian Beam in z = 0 
 
 GaussianBeamParameters = GaussianParameters(0,InitialWaist,Wavelength);
 GB                     = GaussianBeam(R,GaussianBeamParameters);
 
 % Plot of Field
 figure(2)
-plotOpticalField(x, x, abs(GB.OpticalField).^2,mapgreen,'microns');
-plotCircle(0,0,GaussianBeamParameters.InitialWaist);
+plotOpticalField(x, x, abs(GB.OpticalField).^2,mapgreen,'microns','microns');
+plotCircle(0,0,GaussianBeamParameters.InitialWaist,'r',2);
 
 %% Analitic trasversal
 
@@ -90,17 +90,8 @@ GPzc.zCoordinate  =  z;
 plot(z,GPzc.Waist)
 plot(z,-GPzc.Waist)
 hold off
-%%
 
-
-
-
-
-
-
-
-%%numeric method 
-
+%% numeric method 
 
 % Optic Field to propagate 
 g   = GB.OpticalField;
@@ -108,7 +99,6 @@ g   = GB.OpticalField;
 % Matrix for save transversal fields
 gx  = zeros(N,length(z)); 
 gy  = zeros(N,length(z));
-
 
 for ii = 1:length(z) % propagation with respect to z
     
@@ -119,7 +109,7 @@ for ii = 1:length(z) % propagation with respect to z
     fig = figure(3);
     fig.Position = [460,74,1111,798];
    
-    plotOpticalField(x, x, abs(GB.OpticalField).^2,mapgreen,'microns');
+    plotOpticalField(x, x, abs(GB.OpticalField).^2,mapgreen,'microns','microns');
     drawnow 
     plotCircle(0,0,GB.Waist);
     title(['z = ',num2str(z(ii)),' microns, waist = ' num2str(GB.Waist),' microns'])
