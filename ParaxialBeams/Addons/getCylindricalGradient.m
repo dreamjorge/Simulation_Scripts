@@ -19,7 +19,7 @@ function [rayObject] = getCylindricalGradient(fr,...
   gz     = gradient(fz)/dz+k;
   N      = size(gr,2);
 
-  rayObject.zrSlope  = gz(floor(z/dz+1))/gr(floor(r/dr)+1);
+  rayObject.zrSlope  = gz(floor(z/dz+1))/gr(N/2+1+floor(r/dr));
   rayObject.zthSlope = gz(floor(z/dz+1))/gtheta(N/2+1+floor(theta/dtheta));
   rayObject.rthSlope = gr(floor(r/dr+1))/gtheta(N/2+1+floor(theta/dtheta));
 

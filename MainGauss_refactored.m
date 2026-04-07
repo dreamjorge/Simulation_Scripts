@@ -8,11 +8,11 @@
 %   - FFTUtils for normalized FFT operations
 
 %% Add paths
-addpath ParaxialBeams
-addpath ParaxialBeams\Addons
-addpath ParaxialBeams\Addons\export_fig-master
-addpath ParaxialBeams\Addons\panel-2.14
-addpath ParaxialBeams\Addons\Plots_Functions
+addpath(fullfile('ParaxialBeams'))
+addpath(fullfile('ParaxialBeams', 'Addons'))
+addpath(fullfile('ParaxialBeams', 'Addons', 'export_fig-master'))
+addpath(fullfile('ParaxialBeams', 'Addons', 'panel-2.14'))
+addpath(fullfile('ParaxialBeams', 'Addons', 'Plots_Functions'))
 
 %% Physical parameters [microns -> meters]
 InitialWaist = 100e-6;      % 100 microns
