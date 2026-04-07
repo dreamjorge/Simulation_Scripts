@@ -56,6 +56,9 @@ fprintf('  dx = %g m\n', grid.dx);
 %% FFT utilities
 fftOps = FFTUtils(true, true);  % normalize=true, shift=true
 
+% Colormap for visualization
+mapgreen = AdvancedColormap('kgg',256,[0 100 255]/255);
+
 %% Gaussian Beam at z = 0
 GaussianBeamParameters = GaussianParameters(0, InitialWaist, Wavelength);
 [R, ~] = cart2pol(X, Y);
