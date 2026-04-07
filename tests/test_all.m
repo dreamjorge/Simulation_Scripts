@@ -404,6 +404,28 @@ else
     failed = failed + 1;
 end
 
+% testElegantLaguerre
+elp = ElegantLaguerreParameters(0, w0, lambda, 1, 0);
+elb = ElegantLaguerreBeam(R, Theta, elp);
+if (size(elb.OpticalField) == [64, 64])
+    fprintf('  PASS: ElegantLaguerreBeam field generation\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: ElegantLaguerreBeam field generation\n');
+    failed = failed + 1;
+end
+
+% testElegantHermite
+ehp = ElegantHermiteParameters(0, w0, lambda, 1, 1);
+ehb = ElegantHermiteBeam(X, Y, ehp);
+if (size(ehb.OpticalField) == [64, 64])
+    fprintf('  PASS: ElegantHermiteBeam field generation\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: ElegantHermiteBeam field generation\n');
+    failed = failed + 1;
+end
+
 %% Summary
 fprintf('\n=== Summary ===\n');
 fprintf('Passed: %d\n', passed);
