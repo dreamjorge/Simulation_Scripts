@@ -2,19 +2,27 @@ classdef PhysicalConstants
 %PHYSICALCONSTANTS Physical constants for optical simulations
 %   This class provides fundamental and derived constants for beam
 %   propagation simulations.
+%
+%   Example:
+%       c = PhysicalConstants;
+%       k = c.hbar * c.k; % Planck-reduced wave number
     
     properties (Constant)
-        c           speed_of_light
-        h           planck
-        hbar        planck_reduced
-        e           elementary_charge
-        eps0        vacuum_permittivity
-        mu0         vacuum_permeability
-        Z0          impedance_vacuum
+        %% Fundamental constants (SI units)
+        c           speed_of_light         % Speed of light in vacuum (m/s)
+        h           planck                  % Planck constant (J·s)
+        hbar        planck_reduced          % Reduced Planck constant (J·s)
+        e           elementary_charge       % Elementary charge (C)
+        eps0        vacuum_permittivity     % Vacuum permittivity (F/m)
+        mu0         vacuum_permeability     % Vacuum permeability (H/m)
+        
+        %% Derived optical constants
+        Z0          impedance_vacuum        % Vacuum impedance (Ω)
     end
     
     methods (Static)
         function self = PhysicalConstants()
+            % Constructor - constants only, no instance needed
             if nargin > 0
                 error('PhysicalConstants is a static class');
             end
@@ -45,18 +53,21 @@ classdef PhysicalConstants
         end
         
         function val = impedance_vacuum()
-            val = 376.730313668;
+            val = 376.730313668; % sqrt(mu0/eps0)
         end
         
         function k = waveNumber(wavelength)
+            %WAVENUMBER Calculate wave number k = 2*pi/lambda
             k = 2*pi ./ wavelength;
         end
         
         function zr = rayleighDistance(w0, wavelength)
+            %RAYLEIGH Distance Calculate Rayleigh distance
             zr = pi * w0.^2 ./ wavelength;
         end
         
         function w = waistAtZ(w0, z, wavelength, zr)
+            %WAISTATZ Calculate beam waist at propagation distance
             if nargin < 4
                 zr = PhysicalConstants.rayleighDistance(w0, wavelength);
             end
@@ -64,10 +75,12 @@ classdef PhysicalConstants
         end
         
         function R = radiusOfCurvature(z, zr)
+            %RADIUSOFCURVATURE Calculate radius of curvature
             R = z .* (1 + (zr ./ z).^2);
         end
         
         function gouy = gouyPhase(z, zr)
+            %GOUYPHASE Calculate Gouy phase
             gouy = atan(z ./ zr);
         end
     end
