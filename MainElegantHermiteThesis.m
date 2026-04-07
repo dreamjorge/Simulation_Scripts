@@ -3,7 +3,8 @@
 % Ugalde-Ontiveros J.A.
 
 clear all;
-addpath ParaxialBeams;
+addpath(fullfile('ParaxialBeams'));
+addpath(fullfile('ParaxialBeams', 'Addons'));
 
 %% Beam indices (Hermite-Gaussian modes)
 nu = 12;
@@ -39,7 +40,7 @@ g0 = EHB.OpticalField;
 
 %% Visualization at z=0
 figure(1);
-imagesc(grid.x/InitialWaist, grid.y/InitialWaist, abs(g0).^2);
+imagesc(X/InitialWaist, Y/InitialWaist, abs(g0).^2);
 colormap('hot'); axis square;
 xlabel('$x/w_o$','Interpreter','latex');
 ylabel('$y/w_o$','Interpreter','latex');
@@ -67,6 +68,6 @@ end
 
 %% Final Result
 figure(2);
-imagesc(grid.x/InitialWaist, grid.y/InitialWaist, abs(g).^2);
+imagesc(X/InitialWaist, Y/InitialWaist, abs(g).^2);
 colormap('hot'); axis square;
 title(sprintf('Elegant Hermite at z=%g zR', Dz/zr));

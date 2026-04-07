@@ -42,20 +42,15 @@ classdef AnalysisUtils
         end
         
         function HH = combinedHankelWave(nu, mu, params, X, Y)
-            % combinedHankelWave - Assemble complex wave from Hermite solutions
-            % Replaces legacy hankelH2 with modern class-based approach.
-            % params: HermiteParameters object
-            
-            % In legacy code, a and b were flags for +/- i*NHG
-            % Here we implement the primary case (a=1, b=1)
-            % Combined = (HGy + i*NHGy) * (HGx + i*NHGx)
-            
-            hb = HermiteBeam(X, Y, params);
-            % Note: Legacy NHG term was the Hilbert transform or a 90 phase shift.
-            % Here we assume hb.OpticalField represents the full complex analytic signal
-            % if the carrier includes the axial phase.
-            
-            HH = hb.OpticalField; % Simplified for now, keeping current class logic
+            % combinedHankelWave - Assemble complex Hankel wave from Hermite solutions
+            % Legacy formula: Combined = (HGy + i*NHGy) * (HGx + i*NHGx)
+            % where NHG is the pi/2-phase-shifted (Hilbert-transformed) counterpart.
+            %
+            % NOT_IMPLEMENTED: The NHG (Hilbert-transform) term is not yet ported
+            % from legacy code. Calling this function will produce incorrect results.
+            % Port the NHG computation from the legacy HankelHermiteSlices.m before use.
+            error('AnalysisUtils:combinedHankelWave:NotImplemented', ...
+                'combinedHankelWave requires the NHG Hilbert-transform term which is not yet implemented. See HankelHermiteSlices.m for the legacy implementation.');
         end
     end
 end

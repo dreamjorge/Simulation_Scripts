@@ -22,8 +22,8 @@ classdef ElegantHermiteBeam
                 argY = sqrt_alpha .* Y;
                 
                 % Hermite polynomials: H_n(sqrt(alpha)*x)
-                Hn = HermiteParameters.getHermitePolynomial(params.n, argX);
-                Hm = HermiteParameters.getHermitePolynomial(params.m, argY);
+                Hn = HermiteBeam.hermitePoly(params.n, argX);
+                Hm = HermiteBeam.hermitePoly(params.m, argY);
                 
                 % Physical Gaussian Beam (Carrier)
                 [R, ~] = cart2pol(X, Y);

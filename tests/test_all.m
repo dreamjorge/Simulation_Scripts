@@ -426,6 +426,35 @@ else
     failed = failed + 1;
 end
 
+% testElegantHermiteIsComplex: field must be complex (uses Hermite poly + Gaussian carrier)
+if (any(any(imag(ehb.OpticalField) ~= 0)))
+    fprintf('  PASS: ElegantHermiteBeam field is complex\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: ElegantHermiteBeam field is real (expected complex)\n');
+    failed = failed + 1;
+end
+
+% testLaguerreBeamIsComplex: l=1 introduces exp(i*theta) so field must be complex
+lp1 = LaguerreParameters(0, w0, lambda, 1, 0);
+lb1 = LaguerreBeam(R, Theta, lp1);
+if (any(any(imag(lb1.OpticalField) ~= 0)))
+    fprintf('  PASS: LaguerreBeam (l=1) field is complex\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: LaguerreBeam (l=1) field is real (i vs 1i bug?)\n');
+    failed = failed + 1;
+end
+
+% testLaguerreBeamNonZero: field must have non-zero values
+if (any(any(abs(lb1.OpticalField) > 0)))
+    fprintf('  PASS: LaguerreBeam field has non-zero values\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: LaguerreBeam field is all zeros\n');
+    failed = failed + 1;
+end
+
 %% Summary
 fprintf('\n=== Summary ===\n');
 fprintf('Passed: %d\n', passed);
