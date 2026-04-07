@@ -45,23 +45,24 @@ Generación de grids computacionales:
 grid = GridUtils(Nx, Ny, Dx, Dy);
 [X, Y] = grid.create2DGrid();
 [Kx, Ky] = grid.createFreqGrid();
+[r, theta] = grid.createPolarGrid();
 ```
 
 ### FFTUtils
 Operaciones FFT normalizadas:
 ```matlab
 fftOps = FFTUtils(true, true);  % normalize, shift
-G = fftOps.fft2(g);
-g = fftOps.ifft2(G);
-H = fftOps.transferFunction(kx, ky, z, lambda);
-gProp = fftOps.propagate(g, kx, ky, z, lambda);
+G = fftOps.fft2(g);              % FFT hacia adelante
+g = fftOps.ifft2(G);              % FFT inversa
+H = fftOps.transferFunction(kx, ky, z, lambda);  % Función de transferencia
+gProp = fftOps.propagate(g, kx, ky, z, lambda);  % Propagación angular
 ```
 
 ### BeamSimulation
 Clase base para simulaciones:
 ```matlab
 sim = BeamSimulation();
-sim.setPhysicalParameters('w0', 100e-6, 'lambda', 632.8e-9);
+sim.setPhysicalParameters('w0', 100e-6, 'lambda', 632.e-9);
 sim.createGrid();
 ```
 
@@ -70,6 +71,7 @@ sim.createGrid();
 ### MATLAB
 ```matlab
 addpath ParaxialBeams
+addpath ParaxialBeams\Addons
 
 % Usar constantes físicas
 PC = PhysicalConstants;
