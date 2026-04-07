@@ -20,7 +20,7 @@ fprintf('--- PhysicalConstants ---\n');
 
 % testWaveNumber
 lambda = 632.8e-9;
-k = PhysicalConstants('waveNumber', lambda);
+k = PhysicalConstants.waveNumber(lambda);
 expected = 2*pi / lambda;
 if (abs(k - expected) < 1e-5)
     fprintf('  PASS: waveNumber\n');
@@ -33,7 +33,7 @@ end
 % testRayleighDistance
 w0 = 100e-6;
 lambda = 632.8e-9;
-zr = PhysicalConstants('rayleighDistance', w0, lambda);
+zr = PhysicalConstants.rayleighDistance(w0, lambda);
 expected_zr = pi * w0^2 / lambda;
 if (abs(zr - expected_zr) / expected_zr < 1e-5)
     fprintf('  PASS: rayleighDistance\n');
@@ -45,7 +45,7 @@ end
 
 % testWaistAtZ
 z = 0.05;
-w = PhysicalConstants('waistAtZ', w0, z, lambda, zr);
+w = PhysicalConstants.waistAtZ(w0, z, lambda, zr);
 expected_w = w0 * sqrt(1 + (z/zr)^2);
 if (abs(w - expected_w) / expected_w < 1e-5)
     fprintf('  PASS: waistAtZ\n');
@@ -56,7 +56,7 @@ else
 end
 
 % testWaistAtZEqualsW0AtOrigin
-w = PhysicalConstants('waistAtZ', w0, 0, lambda);
+w = PhysicalConstants.waistAtZ(w0, 0, lambda);
 if (abs(w - w0) / w0 < 1e-5)
     fprintf('  PASS: waistAtZ equals w0 at origin\n');
     passed = passed + 1;
@@ -67,7 +67,7 @@ end
 
 % testRadiusOfCurvature
 z = 0.1;
-R = PhysicalConstants('radiusOfCurvature', z, zr);
+R = PhysicalConstants.radiusOfCurvature(z, zr);
 expected_R = z * (1 + (zr/z)^2);
 if (abs(R - expected_R) / expected_R < 1e-5)
     fprintf('  PASS: radiusOfCurvature\n');
@@ -78,7 +78,7 @@ else
 end
 
 % testGouyPhase
-gouy = PhysicalConstants('gouyPhase', z, zr);
+gouy = PhysicalConstants.gouyPhase(z, zr);
 expected_gouy = atan(z/zr);
 if (abs(gouy - expected_gouy) < 1e-10)
     fprintf('  PASS: gouyPhase\n');
@@ -89,7 +89,7 @@ else
 end
 
 % testGouyPhaseZeroAtOrigin
-gouy = PhysicalConstants('gouyPhase', 0, zr);
+gouy = PhysicalConstants.gouyPhase(0, zr);
 if (abs(gouy) < 1e-10)
     fprintf('  PASS: gouyPhase zero at origin\n');
     passed = passed + 1;
@@ -104,7 +104,8 @@ fprintf('\n--- GridUtils ---\n');
 % testCreate2DGridSize
 Nx = 256; Ny = 128;
 Dx = 1e-3; Dy = 0.5e-3;
-[X, Y] = GridUtils('create2DGrid', Nx, Ny, Dx, Dy);
+grid = GridUtils(Nx, Ny, Dx, Dy);
+[X, Y] = grid.create2DGrid();
 if (size(X,1) == Ny && size(X,2) == Nx)
     fprintf('  PASS: create2DGrid size\n');
     passed = passed + 1;
@@ -114,7 +115,8 @@ else
 end
 
 % testCreate2DGridCenter
-[X, Y] = GridUtils('create2DGrid', Nx, Nx, Dx, Dx);
+grid = GridUtils(Nx, Nx, Dx, Dx);
+[X, Y] = grid.create2DGrid();
 if (abs(X(Nx/2+1, Nx/2+1)) < 1e-10 && abs(Y(Nx/2+1, Nx/2+1)) < 1e-10)
     fprintf('  PASS: create2DGrid center at zero\n');
     passed = passed + 1;
@@ -126,7 +128,8 @@ end
 % testCreate2DGridNonSquare
 Nx = 128; Ny = 64;
 Dx = 1e-3; Dy = 0.5e-3;
-[X, Y] = GridUtils('create2DGrid', Nx, Ny, Dx, Dy);
+grid = GridUtils(Nx, Ny, Dx, Dy);
+[X, Y] = grid.create2DGrid();
 dx = Dx / Nx;
 dy = Dy / Ny;
 if (max(max(abs(X))) > max(max(abs(Y))) + dx/2)
@@ -139,7 +142,8 @@ end
 
 % testCreateFreqGrid
 Nx = 256; Dx = 1e-3;
-[Kx, Ky] = GridUtils('createFreqGrid', Nx, Nx, Dx, Dx);
+grid = GridUtils(Nx, Nx, Dx, Dx);
+[Kx, Ky] = grid.createFreqGrid();
 if (size(Kx) == [Nx, Nx] && abs(Kx(Nx/2+1, Nx/2+1)) < 1e-10)
     fprintf('  PASS: createFreqGrid\n');
     passed = passed + 1;
@@ -149,7 +153,7 @@ else
 end
 
 % testStaticMeshgrid2D
-[X, Y] = GridUtils('meshgrid2D', 128, 1e-3);
+[X, Y] = GridUtils.meshgrid2D(128, 1e-3);
 if (size(X) == [128, 128])
     fprintf('  PASS: meshgrid2D static\n');
     passed = passed + 1;
@@ -159,7 +163,7 @@ else
 end
 
 % testStaticFreqGrid
-[Kx, Ky] = GridUtils('freqGrid', 128, 1e-3);
+[Kx, Ky] = GridUtils.freqGrid(128, 1e-3);
 if (size(Kx) == [128, 128])
     fprintf('  PASS: freqGrid static\n');
     passed = passed + 1;
@@ -175,7 +179,8 @@ fprintf('\n--- FFTUtils ---\n');
 [X, Y] = meshgrid(linspace(-1,1,64), linspace(-1,1,64));
 R = sqrt(X.^2 + Y.^2);
 g = exp(-R.^2);
-g_rec = FFTUtils('ifft2', FFTUtils('fft2', g, 1, 1), 1, 1);
+fftOps = FFTUtils(true, true);
+g_rec = fftOps.ifft2(fftOps.fft2(g));
 if (max(max(abs(g - g_rec))) < 1e-10)
     fprintf('  PASS: fft2 roundtrip\n');
     passed = passed + 1;
@@ -191,7 +196,7 @@ passed = passed + 1;  % count as passed for now
 
 % testTransferFunctionAtZero
 [Kx, Ky] = meshgrid(linspace(-1e6,1e6,32));
-H = FFTUtils('transferFunction', Kx, Ky, 0, 632.8e-9);
+H = FFTUtils.transferFunction(Kx, Ky, 0, 632.8e-9);
 if (max(max(abs(H - 1))) < 1e-10)
     fprintf('  PASS: transferFunction at z=0\n');
     passed = passed + 1;
@@ -204,7 +209,7 @@ end
 kx = 0; ky = 0;
 z = 0.1;
 lambda = 632.8e-9;
-H = FFTUtils('transferFunction', kx, ky, z, lambda);
+H = FFTUtils.transferFunction(kx, ky, z, lambda);
 k = 2*pi/lambda;
 expected = exp(1i*k*z);
 if (abs(H - expected) < 1e-10)
@@ -217,7 +222,8 @@ end
 
 % testPropagateRoundtrip
 g = exp(-R.^2);
-g_rec = FFTUtils('propagate', g, zeros(64), zeros(64), 0, 632.8e-9);
+fftOps = FFTUtils(true, true);
+g_rec = fftOps.propagate(g, zeros(64), zeros(64), 0, 632.8e-9);
 if (max(max(abs(g - g_rec))) < 1e-10)
     fprintf('  PASS: propagate roundtrip\n');
     passed = passed + 1;
@@ -235,7 +241,7 @@ w0 = 100e-6;
 lambda = 632.8e-9;
 params = GaussianParameters(z, w0, lambda);
 expected_zr = pi * w0^2 / lambda;
-if (abs(params.RayleighDistance() - expected_zr) / expected_zr < 1e-5)
+if (abs(params.RayleighDistance - expected_zr) / expected_zr < 1e-5)
     fprintf('  PASS: GaussianParameters zr\n');
     passed = passed + 1;
 else
@@ -244,7 +250,7 @@ else
 end
 
 % testWaistAtOrigin
-if (abs(params.Waist() - w0) / w0 < 1e-5)
+if (abs(params.Waist - w0) / w0 < 1e-5)
     fprintf('  PASS: GaussianParameters waist at origin\n');
     passed = passed + 1;
 else
@@ -254,7 +260,7 @@ end
 
 % testWaveNumber
 expected_k = 2*pi / lambda;
-if (abs(params.k() - expected_k) / expected_k < 1e-5)
+if (abs(params.k - expected_k) / expected_k < 1e-5)
     fprintf('  PASS: GaussianParameters k\n');
     passed = passed + 1;
 else
@@ -277,7 +283,7 @@ end
 z1 = 0; z2 = 0.1;
 params1 = GaussianParameters(z1, w0, lambda);
 params2 = GaussianParameters(z2, w0, lambda);
-if (params2.Waist() > params1.Waist())
+if (params2.Waist > params1.Waist)
     fprintf('  PASS: GaussianParameters waist increases with z\n');
     passed = passed + 1;
 else
@@ -288,9 +294,9 @@ end
 % testGouyPhase
 z = 0.05;
 params = GaussianParameters(z, w0, lambda);
-zr = params.RayleighDistance();
+zr = params.RayleighDistance;
 expected_gouy = atan(z/zr);
-if (abs(params.GouyPhase() - expected_gouy) < 1e-10)
+if (abs(params.GouyPhase - expected_gouy) < 1e-10)
     fprintf('  PASS: GaussianParameters Gouy phase\n');
     passed = passed + 1;
 else
@@ -300,7 +306,7 @@ end
 
 % testGouyPhaseZeroAtWaist
 params = GaussianParameters(0, w0, lambda);
-if (abs(params.GouyPhase()) < 1e-10)
+if (abs(params.GouyPhase) < 1e-10)
     fprintf('  PASS: GaussianParameters Gouy phase zero at waist\n');
     passed = passed + 1;
 else
@@ -309,9 +315,9 @@ else
 end
 
 % testDivergenceAngle
-zr = params.RayleighDistance();
+zr = params.RayleighDistance;
 expected_theta = atan(w0/zr);
-if (abs(params.DivergenceAngle() - expected_theta) < 1e-10)
+if (abs(params.DivergenceAngle - expected_theta) < 1e-10)
     fprintf('  PASS: GaussianParameters divergence angle\n');
     passed = passed + 1;
 else
@@ -337,6 +343,64 @@ if (params1.isEqual(params2))
     passed = passed + 1;
 else
     fprintf('  FAIL: GaussianParameters isEqual\n');
+    failed = failed + 1;
+end
+
+%% Test Hermite and Laguerre Models
+fprintf('\n--- Hermite and Laguerre Models ---\n');
+
+% testHermiteParameters
+hp = HermiteParameters(0, w0, lambda, 1, 1);
+if (hp.n == 1 && hp.m == 1 && abs(hp.InitialWaist - w0) < 1e-12)
+    fprintf('  PASS: HermiteParameters init\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: HermiteParameters init\n');
+    failed = failed + 1;
+end
+
+% testLaguerreParameters
+lp = LaguerreParameters(0, w0, lambda, 1, 0);
+if (lp.l == 1 && lp.p == 0 && abs(lp.InitialWaist - w0) < 1e-12)
+    fprintf('  PASS: LaguerreParameters init\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: LaguerreParameters init\n');
+    failed = failed + 1;
+end
+
+% testGaussianBeamField
+grid = GridUtils(64, 64, 1e-3, 1e-3);
+[X, Y] = grid.create2DGrid();
+[R, ~] = cart2pol(X, Y);
+params = GaussianParameters(0.01, w0, lambda);
+gb = GaussianBeam(R, params);
+if (size(gb.OpticalField) == [64, 64])
+    fprintf('  PASS: GaussianBeam field generation\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: GaussianBeam field generation\n');
+    failed = failed + 1;
+end
+
+% testHermiteBeamField
+hb = HermiteBeam(X, Y, hp);
+if (size(hb.OpticalField) == [64, 64])
+    fprintf('  PASS: HermiteBeam field generation\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: HermiteBeam field generation\n');
+    failed = failed + 1;
+end
+
+% testLaguerreBeamField
+[~, Theta] = cart2pol(X, Y);
+lb = LaguerreBeam(R, Theta, lp);
+if (size(lb.OpticalField) == [64, 64])
+    fprintf('  PASS: LaguerreBeam field generation\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: LaguerreBeam field generation\n');
     failed = failed + 1;
 end
 
