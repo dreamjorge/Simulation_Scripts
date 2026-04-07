@@ -28,7 +28,9 @@ classdef PhysicalConstants
         end
         
         function R = radiusOfCurvature(z, zr)
+            % At z=0 the wavefront is flat: R -> Inf (avoids 0*Inf = NaN)
             R = z .* (1 + (zr ./ z).^2);
+            R(z == 0) = Inf;
         end
         
         function gouy = gouyPhase(z, zr)
