@@ -17,17 +17,17 @@ classdef GaussianParameters <  handle & matlab.mixin.Copyable
 % Example: Parameters = GaussianParameters(zCoordinate,InitialWaist,Wavelength)
 
   properties
-    %% Independent properties 
+    %% Independent properties
     zCoordinate      % z-coordinate (or distance of propagation)
     InitialWaist     % initial wasit of Gaussian Beam
     Wavelength       % wavelength of Gaussian Beam
   end
-  
+
   properties(Access = private)
 
   end
-  
-  
+
+
   properties (Dependent)
     %% Properties dependent of Gaussian Beam
     RayleighDistance % RayleighDistance.
@@ -40,7 +40,7 @@ classdef GaussianParameters <  handle & matlab.mixin.Copyable
   end
 
   methods(Static)
-    %% functions for obtain parameters of Gaussian Beam     
+    %% functions for obtain parameters of Gaussian Beam
     Waist  = getWaist(zCoordinate,...
                       InitialWaist,...
                       RayleighDistance);
@@ -52,7 +52,7 @@ classdef GaussianParameters <  handle & matlab.mixin.Copyable
                        RayleighDistance);
 
   end
-  methods 
+  methods
     
     function output = copyObject(obj, output)
       %% copying object
@@ -70,6 +70,11 @@ classdef GaussianParameters <  handle & matlab.mixin.Copyable
     function Parameters = GaussianParameters(zCoordinate,InitialWaist,Wavelength)
      %% Constructor of Gaussian Beam   
       if nargin == 3 
+        % Input validation
+        validateattributes(zCoordinate, {'numeric'}, {'scalar'}, 'GaussianParameters', 'zCoordinate');
+        validateattributes(InitialWaist, {'numeric'}, {'positive', 'scalar'}, 'GaussianParameters', 'InitialWaist');
+        validateattributes(Wavelength, {'numeric'}, {'positive', 'scalar'}, 'GaussianParameters', 'Wavelength');
+        
         Parameters.zCoordinate         = zCoordinate;
         Parameters.InitialWaist        = InitialWaist;
         Parameters.Wavelength          = Wavelength;
@@ -77,77 +82,116 @@ classdef GaussianParameters <  handle & matlab.mixin.Copyable
          error('You need introduce zCoordinate, InitialWaist and Wavelength inputs')
       end
     end
-    %% Error for dependent properties
     
+    function str = toString(obj)
+      %TOSTRING Return string representation of parameters
+      %   str = toString() returns formatted string with all parameters
+      %
+      %   Example:
+      %       params = GaussianParameters(0, 100e-6, 632.8e-9);
+      %       disp(toString(params));
+      
+      str = sprintf([...
+          'GaussianParameters:\n', ...
+          '  zCoordinate:      %g\n', ...
+          '  InitialWaist:     %g\n', ...
+          '  Wavelength:       %g\n', ...
+          '  RayleighDistance: %g\n', ...
+          '  k:                %g\n', ...
+          '  Waist:            %g\n', ...
+          '  Radius:           %g\n', ...
+          '  GouyPhase:        %g\n', ...
+          '  DivergenceAngle:  %g\n'], ...
+          obj.zCoordinate, obj.InitialWaist, obj.Wavelength, ...
+          obj.RayleighDistance, obj.k, obj.Waist, ...
+          obj.Radius, obj.GouyPhase, obj.DivergenceAngle);
+    end
+    
+    function bool = isEqual(obj, other)
+      %ISEQUAL Compare two GaussianParameters objects
+      %   bool = isEqual(other) returns true if all properties match
+      
+      if ~isa(other, 'GaussianParameters')
+        bool = false;
+        return;
+      end
+      
+      tolerance = 1e-12;
+      bool = abs(obj.zCoordinate - other.zCoordinate) < tolerance && ...
+             abs(obj.InitialWaist - other.InitialWaist) < tolerance && ...
+             abs(obj.Wavelength - other.Wavelength) < tolerance;
+    end
+    %% Error for dependent properties
+
     function [] = set.RayleighDistance(obj,~)
       fprintf('%s%d\n','RayleighDistance is: ',obj.RayleighDistance)
-      error('You cannot set RayleighDistance property'); 
-    end 
-   
+      error('You cannot set RayleighDistance property');
+    end
+
     function [] = set.k(obj,~)
       fprintf('%s%d\n','k is: ',obj.k)
-      error('You cannot set k property'); 
-    end 
-    
+      error('You cannot set k property');
+    end
+
     function [] = set.Waist(obj,~)
       fprintf('%s%d\n','waist is: ',obj.Waist)
-      error('You cannot set Waist property'); 
-    end 
-        
+      error('You cannot set Waist property');
+    end
+
     function [] = set.Radius(obj,~)
       fprintf('%s%d\n','radius is: ',obj.Radius)
-      error('You cannot set Waist property'); 
-    end 
-       
+      error('You cannot set Waist property');
+    end
+
     function [] = set.GouyPhase(obj,~)
       fprintf('%s%d\n','phase is: ',obj.PhiPhase)
-      error('You cannot set PhiPhase property'); 
-    end 
-    
+      error('You cannot set PhiPhase property');
+    end
+
     function [] = set.Amplitude(obj,~)
       fprintf('%s%d\n','amplitude is: ',obj.Amplitude)
-      error('You cannot set Amplitude property'); 
+      error('You cannot set Amplitude property');
 
-    end 
-    
-    
+    end
+
+
     %% Get dependent properties
-    
+
     function k = get.k(obj)
-       k  = (2*pi)/obj.Wavelength;    
+       k  = (2*pi)/obj.Wavelength;
     end
-    
-    function rayleighDistance = get.RayleighDistance(obj) 
-      rayleighDistance  = ((obj.InitialWaist).^2).*(obj.k)/2;    
+
+    function rayleighDistance = get.RayleighDistance(obj)
+      rayleighDistance  = ((obj.InitialWaist).^2).*(obj.k)/2;
     end
-    
+
     function Waist = get.Waist(obj)
       Waist = GaussianParameters.getWaist(obj.zCoordinate,...
                                           obj.InitialWaist,...
                                           obj.RayleighDistance);
     end
-    
+
     function Phase = get.GouyPhase(obj)
       Phase = GaussianParameters.getPhase(obj.zCoordinate,...
                                           obj.RayleighDistance);
     end
-    
+
     function Radius = get.Radius(obj)
       Radius = GaussianParameters.getRadius(obj.zCoordinate,...
                                             obj.RayleighDistance);
     end
-    
+
     function Amplitude = get.Amplitude(obj)
       Amplitude = 1./obj.Waist;
     end
-    
+
     function DivergenceAngle = get.DivergenceAngle(obj)
       DivergenceAngle = atan((obj.InitialWaist)./(obj.RayleighDistance));
     end
 
-    
-    
+
+
   end
-  
+
 
 end
