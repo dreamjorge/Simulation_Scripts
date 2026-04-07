@@ -70,12 +70,30 @@ classdef GaussianParameters <  handle & matlab.mixin.Copyable
     function Parameters = GaussianParameters(zCoordinate,InitialWaist,Wavelength)
      %% Constructor of Gaussian Beam   
       if nargin == 3 
+        % Input validation
+        validateattributes(zCoordinate, {'numeric'}, {'scalar'}, 'GaussianParameters', 'zCoordinate');
+        validateattributes(InitialWaist, {'numeric'}, {'positive', 'scalar'}, 'GaussianParameters', 'InitialWaist');
+        validateattributes(Wavelength, {'numeric'}, {'positive', 'scalar'}, 'GaussianParameters', 'Wavelength');
+        
         Parameters.zCoordinate         = zCoordinate;
         Parameters.InitialWaist        = InitialWaist;
         Parameters.Wavelength          = Wavelength;
       else
          error('You need introduce zCoordinate, InitialWaist and Wavelength inputs')
       end
+    end
+    
+    function str = toString(obj)
+      str = sprintf([...
+          'GaussianParameters:\n', ...
+          '  zCoordinate:      %g\n', ...
+          '  InitialWaist:     %g\n', ...
+          '  Wavelength:       %g\n', ...
+          '  RayleighDistance: %g\n', ...
+          '  k:                %g\n', ...
+          '  Waist:            %g\n'], ...
+          obj.zCoordinate, obj.InitialWaist, obj.Wavelength, ...
+          obj.RayleighDistance, obj.k, obj.Waist);
     end
     %% Error for dependent properties
     
