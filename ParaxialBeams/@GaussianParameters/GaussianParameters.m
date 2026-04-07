@@ -70,8 +70,8 @@ classdef GaussianParameters <  handle & matlab.mixin.Copyable
     function Parameters = GaussianParameters(zCoordinate,InitialWaist,Wavelength)
      %% Constructor of Gaussian Beam   
       if nargin == 3 
-        % Input validation
-        validateattributes(zCoordinate, {'numeric'}, {'scalar'}, 'GaussianParameters', 'zCoordinate');
+        % Input validation - allow scalar or vector
+        validateattributes(zCoordinate, {'numeric'}, {'finite'}, 'GaussianParameters', 'zCoordinate');
         validateattributes(InitialWaist, {'numeric'}, {'positive', 'scalar'}, 'GaussianParameters', 'InitialWaist');
         validateattributes(Wavelength, {'numeric'}, {'positive', 'scalar'}, 'GaussianParameters', 'Wavelength');
         

@@ -45,9 +45,10 @@ classdef GridUtils
             %CREATE2DGRID Create 2D spatial grid
             %   [X, Y] = create2DGrid returns meshgrid arrays
             
-            n = -self.Nx/2:self.Nx/2-1;
-            x = n * self.dx;
-            y = x;
+            nx = -self.Nx/2:self.Nx/2-1;
+            ny = -self.Ny/2:self.Ny/2-1;
+            x = nx * self.dx;
+            y = ny * self.dy;
             [X, Y] = meshgrid(x, y);
         end
         
@@ -66,10 +67,13 @@ classdef GridUtils
             %CREATEFREQGRID Create frequency (k-space) grid
             %   [Kx, Ky] = createFreqGrid returns k-space vectors
             
-            n = -self.Nx/2:self.Nx/2-1;
-            du = 1 / self.Dx;
-            u = n * du;
-            [Kx, Ky] = meshgrid(2*pi*u);
+            nx = -self.Nx/2:self.Nx/2-1;
+            ny = -self.Ny/2:self.Ny/2-1;
+            dux = 1 / self.Dx;
+            u = nx * dux;
+            duy = 1 / self.Dy;
+            v = ny * duy;
+            [Kx, Ky] = meshgrid(2*pi*u, 2*pi*v);
         end
         
         function [U, V] = createNormFreqGrid(self)
@@ -102,8 +106,8 @@ classdef GridUtils
             
             self.Dx = safetyFactor * 2 * maxWaist;
             self.dx = self.Dx / self.Nx;
-            self.Dy = self.Dx;
-            self.dy = self.Dx / self.Nx;
+            self.Dy = safetyFactor * 2 * maxWaist;
+            self.dy = self.Dy / self.Ny;
         end
         
         function info = getGridInfo(self)
