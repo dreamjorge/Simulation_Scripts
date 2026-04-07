@@ -446,12 +446,12 @@ else
     failed = failed + 1;
 end
 
-% testLaguerreBeamNonZero: field must have non-zero values
-if (any(any(abs(lb1.OpticalField) > 0)))
-    fprintf('  PASS: LaguerreBeam field has non-zero values\n');
+% testLaguerreBeamNonZero: field must have finite non-zero values (no NaN from R(z=0))
+if (any(any(isfinite(lb1.OpticalField) & abs(lb1.OpticalField) > 0)))
+    fprintf('  PASS: LaguerreBeam field has finite non-zero values\n');
     passed = passed + 1;
 else
-    fprintf('  FAIL: LaguerreBeam field is all zeros\n');
+    fprintf('  FAIL: LaguerreBeam field is all zeros or NaN (check radiusOfCurvature at z=0)\n');
     failed = failed + 1;
 end
 
