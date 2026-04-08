@@ -1095,6 +1095,165 @@ else
     failed = failed + 1;
 end
 
+% testElegantHermiteBeamAlphaProperty
+ehp_alpha = ElegantHermiteParameters(0.1, w0, lambda, 1, 1);
+ehb_alpha = ElegantHermiteBeam(X, Y, ehp_alpha);
+alpha_from_beam = ehb_alpha.Parameters.alpha;
+if (abs(ehp_alpha.alpha - alpha_from_beam) < 1e-10)
+    fprintf('  PASS: ElegantHermiteBeam stores alpha parameter\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: ElegantHermiteBeam alpha parameter\n');
+    failed = failed + 1;
+end
+
+% testElegantHermiteBeamCoordinates
+if (isequal(size(ehb_test.X), [64, 64]) && isequal(size(ehb_test.Y), [64, 64]))
+    fprintf('  PASS: ElegantHermiteBeam stores coordinates\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: ElegantHermiteBeam coordinates\n');
+    failed = failed + 1;
+end
+
+% testElegantLaguerreBeamAlphaProperty
+elp_alpha = ElegantLaguerreParameters(0.1, w0, lambda, 1, 1);
+elb_alpha = ElegantLaguerreBeam(R, Theta, elp_alpha);
+alpha_from_lag = elb_alpha.Parameters.alpha;
+if (abs(elp_alpha.alpha - alpha_from_lag) < 1e-10)
+    fprintf('  PASS: ElegantLaguerreBeam stores alpha parameter\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: ElegantLaguerreBeam alpha parameter\n');
+    failed = failed + 1;
+end
+
+% testTransferFunctionEvanescent
+kx = 1e7; ky = 1e7; z = 0.1; lambda = 632.8e-9;
+H_evan = FFTUtils.transferFunction(kx, ky, z, lambda);
+if (abs(H_evan) < 1)
+    fprintf('  PASS: transferFunction evanescent waves attenuated\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: transferFunction evanescent\n');
+    failed = failed + 1;
+end
+
+% testTransferFunctionNearZero
+kx_small = 0; ky_small = 0;
+H_small = FFTUtils.transferFunction(kx_small, ky_small, z, lambda);
+k = 2*pi/lambda;
+expected_phase = exp(1i*k*z);
+if (abs(H_small - expected_phase) < 1e-6)
+    fprintf('  PASS: transferFunction small kx ky\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: transferFunction small kx ky\n');
+    failed = failed + 1;
+end
+
+% testGaussianParametersVectorInput
+z_vec = [0, 0.01, 0.02, 0.05, 0.1];
+params_vec = GaussianParameters(z_vec, w0, lambda);
+if (numel(params_vec.Waist) == 5 && all(params_vec.Waist >= w0))
+    fprintf('  PASS: GaussianParameters vector waist calculation\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: GaussianParameters vector waist\n');
+    failed = failed + 1;
+end
+
+% testGaussianParametersRadiusAtWaist
+params_waist = GaussianParameters(0, w0, lambda);
+if (isinf(params_waist.Radius))
+    fprintf('  PASS: GaussianParameters Radius is Inf at waist\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: GaussianParameters Radius at waist\n');
+    failed = failed + 1;
+end
+
+% testGridUtils3DGridSpacing
+grid3d_test = GridUtils(32, 32, 1e-3, 1e-3, 16, 2e-3);
+[X3, Y3, Z3] = grid3d_test.create3DGrid();
+dx_test = X3(1,2,1) - X3(1,1,1);
+dz_test = Z3(1,1,2) - Z3(1,1,1);
+expected_dx = 1e-3/32;
+expected_dz = 2e-3/16;
+if (abs(dx_test - expected_dx) < 1e-15 && abs(dz_test - expected_dz) < 1e-15)
+    fprintf('  PASS: GridUtils 3D spacing correct\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: GridUtils 3D spacing\n');
+    failed = failed + 1;
+end
+
+% testFFTUtilsPropagateNonZero
+[Kx_test, Ky_test] = meshgrid(linspace(-1e6,1e6,64), linspace(-1e6,1e6,64));
+g_propagated = fftOps.propagate(g, Kx_test, Ky_test, 0.05, 632.8e-9);
+if (size(g_propagated) == size(g) && all(all(isfinite(g_propagated))))
+    fprintf('  PASS: propagate with non-zero z\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: propagate non-zero z\n');
+    failed = failed + 1;
+end
+
+% testHermiteParametersNegativeOrders
+hp_neg = HermiteParameters(0.1, w0, lambda, 0, 0);
+if (hp_neg.n == 0 && hp_neg.m == 0)
+    fprintf('  PASS: HermiteParameters zero order\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: HermiteParameters zero order\n');
+    failed = failed + 1;
+end
+
+% testLaguerreParametersNegativeL
+lp_neg = LaguerreParameters(0.1, w0, lambda, -1, 1);
+expected_phi_neg = (abs(-1) + 2*1) * atan(0.1/lp_neg.RayleighDistance);
+if (abs(lp_neg.PhiPhase - expected_phi_neg) < 1e-10)
+    fprintf('  PASS: LaguerreParameters negative l uses abs(l)\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: LaguerreParameters negative l\n');
+    failed = failed + 1;
+end
+
+% testPhysicalConstantsNaNHandling
+zr_nan = PhysicalConstants.rayleighDistance(0, lambda);
+if (zr_nan == 0)
+    fprintf('  PASS: rayleighDistance handles w0=0\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: rayleighDistance w0=0\n');
+    failed = failed + 1;
+end
+
+% testPhysicalConstantsZeroWaistAtInfinity
+w_inf = PhysicalConstants.waistAtZ(0, 0, lambda);
+if (isnan(w_inf))
+    fprintf('  PASS: waistAtZ handles w0=0 (NaN expected)\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: waistAtZ w0=0\n');
+    failed = failed + 1;
+end
+
+% testAnalysisUtilsGradientRZNonZeroFields
+N_test = 20; dx_test = 1e-4; dz_test = 1e-4; k_test = 1e7;
+x_test = 1e-5; z_test = 1e-5;
+fr_test = exp(-((1:N_test)*dx_test - 1e-4).^2);
+fz_test = exp(-((1:N_test)*dz_test - 1e-4).^2);
+mzr_test = AnalysisUtils.gradientRZ(fr_test, fz_test, k_test, dx_test, dz_test, x_test, z_test);
+if (isfinite(mzr_test))
+    fprintf('  PASS: gradientRZ with non-uniform fields\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: gradientRZ non-uniform\n');
+    failed = failed + 1;
+end
+
 %% Summary
 fprintf('\n=== Summary ===\n');
 fprintf('Passed: %d\n', passed);
