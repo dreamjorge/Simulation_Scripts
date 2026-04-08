@@ -2259,6 +2259,154 @@ catch
     failed = failed + 1;
 end
 
+% testPhysicalConstantsMultipleWavelengths
+lambdas = [400e-9, 500e-9, 600e-9, 700e-9, 800e-9];
+ks = PhysicalConstants.waveNumber(lambdas);
+if (all(ks(1:end-1) > ks(2:end)))
+    fprintf('  PASS: waveNumber decreases with increasing lambda\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: waveNumber monotonic\n');
+    failed = failed + 1;
+end
+
+% testPhysicalConstantsRayleighMultipleW0
+w0s = [20e-6, 50e-6, 100e-6, 200e-6];
+zrs = PhysicalConstants.rayleighDistance(w0s, lambda);
+if (all(zrs(1:end-1) < zrs(2:end)))
+    fprintf('  PASS: rayleighDistance increases with w0\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: rayleighDistance w0\n');
+    failed = failed + 1;
+end
+
+% testGaussianParametersWaveNumberPropertyMatchesStatic
+params_kn = GaussianParameters(0, w0, lambda);
+k_static = PhysicalConstants.waveNumber(lambda);
+if (abs(params_kn.k - k_static) < 1e-10)
+    fprintf('  PASS: GaussianParameters k matches PhysicalConstants\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: k property match\n');
+    failed = failed + 1;
+end
+
+% testGaussianParametersRayleighPropertyMatchesStatic
+params_zrn = GaussianParameters(0, w0, lambda);
+zr_static = PhysicalConstants.rayleighDistance(w0, lambda);
+if (abs(params_zrn.RayleighDistance - zr_static) < 1e-10)
+    fprintf('  PASS: GaussianParameters Rayleigh matches PhysicalConstants\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: Rayleigh property match\n');
+    failed = failed + 1;
+end
+
+% testHermiteParametersWaistProperty
+hp_w = HermiteParameters(0.05, w0, lambda, 2, 2);
+expected_w = GaussianParameters(0.05, w0, lambda).Waist * sqrt(5);
+if (abs(hp_w.HermiteWaist - expected_w) / expected_w < 1e-10)
+    fprintf('  PASS: HermiteParameters HermiteWaist correct\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: HermiteWaist correct\n');
+    failed = failed + 1;
+end
+
+% testLaguerreParametersWaistProperty
+lp_w = LaguerreParameters(0.05, w0, lambda, 2, 1);
+expected_lw = GaussianParameters(0.05, w0, lambda).Waist * sqrt(2*1 + abs(2) + 1);
+if (abs(lp_w.LaguerreWaist - expected_lw) / expected_lw < 1e-10)
+    fprintf('  PASS: LaguerreParameters LaguerreWaist correct\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: LaguerreWaist correct\n');
+    failed = failed + 1;
+end
+
+% testFFTUtilsFFTShiftCentered
+signal_c = zeros(8, 8); signal_c(5,5) = 1;
+shifted_c = FFTUtils.fft2_centered(signal_c);
+if (max(max(abs(shifted_c))) > 0)
+    fprintf('  PASS: fft2_centered produces output\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: fft2_centered\n');
+    failed = failed + 1;
+end
+
+% testFFTUtilsIFFTShiftCentered
+signal_ic = rand(8, 8);
+unshifted_ic = FFTUtils.ifft2_centered(signal_ic);
+if (size(unshifted_ic) == size(signal_ic))
+    fprintf('  PASS: ifft2_centered output size\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: ifft2_centered size\n');
+    failed = failed + 1;
+end
+
+% testGridUtilsCreate2DGridRange
+grid_r = GridUtils(64, 64, 1e-3, 1e-3);
+[Xr, Yr] = grid_r.create2DGrid();
+x_range = max(Xr(:)) - min(Xr(:));
+y_range = max(Yr(:)) - min(Yr(:));
+if (x_range > 0.0009 && x_range < 0.0011 && y_range > 0.0009 && y_range < 0.0011)
+    fprintf('  PASS: create2DGrid spans full domain\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: create2DGrid range\n');
+    failed = failed + 1;
+end
+
+% testAnalysisUtilsGradientRZOutputIsScalar
+fr_s = ones(1, 100); fz_s = ones(1, 100);
+mzr_s = AnalysisUtils.gradientRZ(fr_s, fz_s, 1e7, 1e-4, 1e-4, 1e-5, 1e-5);
+if (isscalar(mzr_s))
+    fprintf('  PASS: gradientRZ returns scalar\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: gradientRZ scalar\n');
+    failed = failed + 1;
+end
+
+% testAnalysisUtilsGradientXYZOutputSizes
+fyz_t = rand(20, 20); fxz_t = rand(20, 20); fxy_t = rand(20, 20);
+[mzx_t, mzy_t, mxy_t] = AnalysisUtils.gradientXYZ(fyz_t, fxz_t, fxy_t, 1e6, 1e-4, 1e-4, 1e-4, 1e-5, 1e-5, 1e-5);
+if (isscalar(mzx_t) && isscalar(mzy_t) && isscalar(mxy_t))
+    fprintf('  PASS: gradientXYZ returns scalars\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: gradientXYZ scalar\n');
+    failed = failed + 1;
+end
+
+% testElegantHermiteBeamAlphaMatchesFormula
+ehp_af = ElegantHermiteParameters(0.1, w0, lambda, 1, 1);
+k_af = 2*pi/lambda;
+zr_af = pi*w0^2/lambda;
+q_af = 0.1 + 1i*zr_af;
+expected_alpha = 1i * k_af / (2 * q_af);
+if (abs(ehp_af.alpha - expected_alpha) < 1e-10)
+    fprintf('  PASS: ElegantHermiteParameters alpha matches formula\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: alpha formula\n');
+    failed = failed + 1;
+end
+
+% testElegantLaguerreBeamAlphaMatchesFormula
+elp_af = ElegantLaguerreParameters(0.1, w0, lambda, 1, 1);
+expected_alpha_l = 1i * k_af / (2 * q_af);
+if (abs(elp_af.alpha - expected_alpha_l) < 1e-10)
+    fprintf('  PASS: ElegantLaguerreParameters alpha matches formula\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: alpha formula lag\n');
+    failed = failed + 1;
+end
+
 %% Summary
 fprintf('\n=== Summary ===\n');
 fprintf('Passed: %d\n', passed);
