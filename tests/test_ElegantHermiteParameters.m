@@ -113,6 +113,69 @@ else
     failed = failed + 1;
 end
 
+% testVectorZInput
+z_vec = linspace(0, 0.1, 5);
+ehp_vec = ElegantHermiteParameters(z_vec, w0, lambda, 1, 1);
+if (numel(ehp_vec.zCoordinate) == 5)
+    fprintf('  PASS: vector z input\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: vector z\n');
+    failed = failed + 1;
+end
+
+% testAlphaPurelyImaginaryAtWaist
+ehp_waist = ElegantHermiteParameters(0, w0, lambda, 1, 1);
+if (ehp_waist.alpha > 0)
+    fprintf('  PASS: alpha purely imaginary at waist\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: alpha at waist\n');
+    failed = failed + 1;
+end
+
+% testDifferentNM
+ehp_n = ElegantHermiteParameters(0.05, w0, lambda, 2, 0);
+ehp_m = ElegantHermiteParameters(0.05, w0, lambda, 0, 2);
+if (ehp_n.n == 2 && ehp_m.m == 2)
+    fprintf('  PASS: different n m values\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: different n m\n');
+    failed = failed + 1;
+end
+
+% testAlphaNegativeZ
+ehp_neg_z = ElegantHermiteParameters(-0.05, w0, lambda, 1, 1);
+if (isfinite(ehp_neg_z.alpha))
+    fprintf('  PASS: alpha at negative z\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: alpha at negative z\n');
+    failed = failed + 1;
+end
+
+% testHigherOrderAlpha
+ehp_ho = ElegantHermiteParameters(0.05, w0, lambda, 3, 3);
+if (ehp_ho.n == 3 && ehp_ho.m == 3)
+    fprintf('  PASS: higher order modes\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: higher order\n');
+    failed = failed + 1;
+end
+
+% testInheritedWaistCalculation
+ehp_wc = ElegantHermiteParameters(0.1, w0, lambda, 1, 1);
+expected_w = w0 * sqrt(1 + (0.1/ehp_wc.RayleighDistance)^2);
+if (abs(ehp_wc.Waist - expected_w) / expected_w < 1e-10)
+    fprintf('  PASS: inherited waist calculation\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: waist calc\n');
+    failed = failed + 1;
+end
+
 fprintf('\n=== ElegantHermiteParameters: %d/%d passed ===\n', passed, passed + failed);
 
 if (failed == 0)

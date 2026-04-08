@@ -99,6 +99,105 @@ else
     failed = failed + 1;
 end
 
+% testFieldSymmetry
+gb_sym = GaussianBeam(R, GaussianParameters(0, w0, lambda));
+field_center = abs(gb_sym.OpticalField(33,33));
+field_edge = abs(gb_sym.OpticalField(1,1));
+if (field_edge < field_center)
+    fprintf('  PASS: field symmetry\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: field symmetry\n');
+    failed = failed + 1;
+end
+
+% testWaistPropagates
+params_w1 = GaussianParameters(0, w0, lambda);
+params_w2 = GaussianParameters(0.1, w0, lambda);
+gb_w1 = GaussianBeam(R, params_w1);
+gb_w2 = GaussianBeam(R, params_w2);
+if (params_w2.Waist > params_w1.Waist)
+    fprintf('  PASS: waist propagates\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: waist propagates\n');
+    failed = failed + 1;
+end
+
+% testDifferentWavelength
+lambda2 = 1064e-9;
+gb_l2 = GaussianBeam(R, GaussianParameters(0, w0, lambda2));
+if (all(all(isfinite(gb_l2.OpticalField))))
+    fprintf('  PASS: different wavelength\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: different wavelength\n');
+    failed = failed + 1;
+end
+
+% testDifferentWaist
+w02 = 50e-6;
+gb_w02 = GaussianBeam(R, GaussianParameters(0, w02, lambda));
+amp_ratio = abs(gb_w02.OpticalField(33,33)) / abs(gb.OpticalField(33,33));
+if (amp_ratio > 1)
+    fprintf('  PASS: different waist\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: different waist\n');
+    failed = failed + 1;
+end
+
+% testFieldWithPositiveZ
+gb_pos_z = GaussianBeam(R, GaussianParameters(0.05, w0, lambda));
+if (all(all(isfinite(gb_pos_z.OpticalField))))
+    fprintf('  PASS: field with positive z\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: positive z\n');
+    failed = failed + 1;
+end
+
+% testFieldWithNegativeZ
+gb_neg_z = GaussianBeam(R, GaussianParameters(-0.05, w0, lambda));
+if (all(all(isfinite(gb_neg_z.OpticalField))))
+    fprintf('  PASS: field with negative z\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: negative z\n');
+    failed = failed + 1;
+end
+
+% testConstructorEmpty
+try
+    gb_empty = GaussianBeam();
+    fprintf('  PASS: constructor empty\n');
+    passed = passed + 1;
+catch
+    fprintf('  FAIL: constructor empty\n');
+    failed = failed + 1;
+end
+
+% testBeamDivergence
+gb_div = GaussianBeam(5*w0*ones(64,64), GaussianParameters(0, w0, lambda));
+if (abs(gb_div.OpticalField(1,1)) < 0.1)
+    fprintf('  PASS: beam divergence\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: beam divergence\n');
+    failed = failed + 1;
+end
+
+% testFieldNormalized
+gb_norm = GaussianBeam(zeros(64,64), GaussianParameters(0, w0, lambda));
+max_amp = max(max(abs(gb_norm.OpticalField)));
+if (abs(max_amp - 1) < 1e-10)
+    fprintf('  PASS: field normalized\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: field normalized\n');
+    failed = failed + 1;
+end
+
 fprintf('\n=== GaussianBeam: %d/%d passed ===\n', passed, passed + failed);
 
 if (failed == 0)

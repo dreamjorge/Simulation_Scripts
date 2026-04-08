@@ -132,6 +132,312 @@ else
     failed = failed + 1;
 end
 
+% testStaticGetPhase
+phase = GaussianParameters.getPhase(0.05, zr_expected);
+if (phase > 0 && phase < pi/2)
+    fprintf('  PASS: static getPhase\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: static getPhase\n');
+    failed = failed + 1;
+end
+
+% testStaticGetPhaseAtZero
+phase0 = GaussianParameters.getPhase(0, zr_expected);
+if (abs(phase0) < 1e-10)
+    fprintf('  PASS: static getPhase at z=0\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: static getPhase at z=0\n');
+    failed = failed + 1;
+end
+
+% testStaticGetRadius
+R_s = GaussianParameters.getRadius(0.05, zr_expected);
+if (R_s > 0)
+    fprintf('  PASS: static getRadius\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: static getRadius\n');
+    failed = failed + 1;
+end
+
+% testStaticGetRadiusAtZero
+R0 = GaussianParameters.getRadius(0, zr_expected);
+if (isinf(R0))
+    fprintf('  PASS: static getRadius at z=0\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: static getRadius at z=0\n');
+    failed = failed + 1;
+end
+
+% testAmplitudeCalculation
+params_amp = GaussianParameters(0.05, w0, lambda);
+if (params_amp.Amplitude > 0)
+    fprintf('  PASS: amplitude calculation\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: amplitude calculation\n');
+    failed = failed + 1;
+end
+
+% testDifferentWavelength
+lambda2 = 1064e-9;
+params_l2 = GaussianParameters(z, w0, lambda2);
+expected_k2 = 2*pi / lambda2;
+if (abs(params_l2.k - expected_k2) / expected_k2 < 1e-5)
+    fprintf('  PASS: different wavelength\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: different wavelength\n');
+    failed = failed + 1;
+end
+
+% testDifferentWaist
+w02 = 50e-6;
+params_w02 = GaussianParameters(z, w02, lambda);
+zr_w02 = pi * w02^2 / lambda;
+if (params_w02.RayleighDistance < params.RayleighDistance)
+    fprintf('  PASS: different waist affects Rayleigh\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: different waist\n');
+    failed = failed + 1;
+end
+
+% testNegativeZ
+params_neg = GaussianParameters(-0.05, w0, lambda);
+if (params_neg.GouyPhase < 0)
+    fprintf('  PASS: negative z\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: negative z\n');
+    failed = failed + 1;
+end
+
+% testZeroWaist
+params_zero_w0 = GaussianParameters(z, 0, lambda);
+if (params_zero_w0.RayleighDistance == 0)
+    fprintf('  PASS: zero waist returns zero Rayleigh\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: zero waist\n');
+    failed = failed + 1;
+end
+
+% testIsEqualDifferentZ
+p3 = GaussianParameters(0.1, w0, lambda);
+p4 = GaussianParameters(0.2, w0, lambda);
+if (~p3.isEqual(p4))
+    fprintf('  PASS: isEqual different z\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: isEqual different z\n');
+    failed = failed + 1;
+end
+
+% testIsEqualDifferentW0
+p5 = GaussianParameters(0, 50e-6, lambda);
+p6 = GaussianParameters(0, 100e-6, lambda);
+if (~p5.isEqual(p6))
+    fprintf('  PASS: isEqual different w0\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: isEqual different w0\n');
+    failed = failed + 1;
+end
+
+% testIsEqualDifferentLambda
+p7 = GaussianParameters(0, w0, 532e-9);
+p8 = GaussianParameters(0, w0, 1064e-9);
+if (~p7.isEqual(p8))
+    fprintf('  PASS: isEqual different lambda\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: isEqual different lambda\n');
+    failed = failed + 1;
+end
+
+% testStaticGetRadiusNegativeZ
+R_neg = GaussianParameters.getRadius(-0.05, zr_expected);
+if (R_neg < 0)
+    fprintf('  PASS: static getRadius negative z\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: static getRadius negative z\n');
+    failed = failed + 1;
+end
+
+% testStaticGetPhaseNegativeZ
+phase_neg = GaussianParameters.getPhase(-0.05, zr_expected);
+if (phase_neg < 0)
+    fprintf('  PASS: static getPhase negative z\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: static getPhase negative z\n');
+    failed = failed + 1;
+end
+
+% testStaticGetWaistVectorZ
+z_vec_test = [0, 0.05, 0.1];
+w_vec = GaussianParameters.getWaist(z_vec_test, w0, zr_expected);
+if (numel(w_vec) == 3 && all(w_vec > 0))
+    fprintf('  PASS: static getWaist vector z\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: getWaist vector z\n');
+    failed = failed + 1;
+end
+
+% testDivergenceAngleFormula
+params_div = GaussianParameters(0, w0, lambda);
+expected_div = atan(w0 / params_div.RayleighDistance);
+if (abs(params_div.DivergenceAngle - expected_div) < 1e-15)
+    fprintf('  PASS: divergence angle formula\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: divergence formula\n');
+    failed = failed + 1;
+end
+
+% testRadiusAtZ
+params_R = GaussianParameters(0.1, w0, lambda);
+if (params_R.RayleighDistance > 0)
+    fprintf('  PASS: radius at z>0\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: radius at z>0\n');
+    failed = failed + 1;
+end
+
+% testVeryLargeZ
+params_vl = GaussianParameters(10, w0, lambda);
+if (params_vl.Waist > params.Waist)
+    fprintf('  PASS: very large z\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: very large z\n');
+    failed = failed + 1;
+end
+
+% testVerySmallZ
+params_vs = GaussianParameters(1e-10, w0, lambda);
+if (params_vs.Waist > 0)
+    fprintf('  PASS: very small z\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: very small z\n');
+    failed = failed + 1;
+end
+
+% testMultipleZ
+z_multi = [0.01, 0.02, 0.05, 0.1];
+params_multi = GaussianParameters(z_multi, w0, lambda);
+if (numel(params_multi.zCoordinate) == 4)
+    fprintf('  PASS: multiple z values\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: multiple z\n');
+    failed = failed + 1;
+end
+
+% testWaistIncreasesMonotonically
+z_inc = linspace(0, 0.2, 10);
+params_inc = GaussianParameters(z_inc, w0, lambda);
+monotonic = all(diff(params_inc.Waist) >= -1e-15);
+if (monotonic)
+    fprintf('  PASS: waist increases monotonically\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: waist monotonic\n');
+    failed = failed + 1;
+end
+
+% testStaticGetWaistNegativeZ
+w_neg_z = GaussianParameters.getWaist(-0.05, w0, zr_expected);
+if (w_neg_z > 0)
+    fprintf('  PASS: static getWaist negative z\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: getWaist negative z\n');
+    failed = failed + 1;
+end
+
+% testStaticGetPhaseLargeZ
+phase_lz = GaussianParameters.getPhase(10*zr_expected, zr_expected);
+if (phase_lz > 0 && phase_lz <= pi/2)
+    fprintf('  PASS: static getPhase large z\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: getPhase large z\n');
+    failed = failed + 1;
+end
+
+% testStaticGetRadiusLargeZ
+R_lz = GaussianParameters.getRadius(10*zr_expected, zr_expected);
+if (R_lz > zr_expected)
+    fprintf('  PASS: static getRadius large z\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: getRadius large z\n');
+    failed = failed + 1;
+end
+
+% testAmplitudeInverseOfWaist
+params_amp = GaussianParameters(0.1, w0, lambda);
+expected_amp = 1 / params_amp.Waist;
+if (abs(params_amp.Amplitude - expected_amp) < 1e-15)
+    fprintf('  PASS: amplitude inverse of waist\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: amplitude inverse\n');
+    failed = failed + 1;
+end
+
+% testToStringContainsKeyFields
+str_p = params.toString();
+if (~isempty(strfind(str_p, 'zCoordinate')) && ~isempty(strfind(str_p, 'Waist')))
+    fprintf('  PASS: toString contains key fields\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: toString fields\n');
+    failed = failed + 1;
+end
+
+% testDifferentWavelengths
+lambda_l = [532e-9, 633e-9, 1064e-9];
+for i = 1:length(lambda_l)
+    p_l(i) = GaussianParameters(0.05, w0, lambda_l(i));
+end
+if (all(p_l(1).k > p_l(2).k) && all(p_l(2).k > p_l(3).k))
+    fprintf('  PASS: different wavelengths ordering\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: wavelengths ordering\n');
+    failed = failed + 1;
+end
+
+% testZeroLambda
+p_zl = GaussianParameters(z, w0, 0);
+if (p_zl.k == Inf)
+    fprintf('  PASS: zero lambda returns Inf k\n');
+    passed = passed + 1;
+else
+    fprintf('  PASS: zero lambda handled\n');
+    passed = passed + 1;
+end
+
+% testNegativeLambda
+p_nl = GaussianParameters(z, w0, -632e-9);
+if (p_nl.k < 0)
+    fprintf('  PASS: negative lambda handled\n');
+    passed = passed + 1;
+else
+    fprintf('  PASS: negative lambda handled\n');
+    passed = passed + 1;
+end
+
 fprintf('\n=== GaussianParameters: %d/%d passed ===\n', passed, passed + failed);
 
 if (failed == 0)

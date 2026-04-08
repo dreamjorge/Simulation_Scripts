@@ -126,6 +126,92 @@ else
     failed = failed + 1;
 end
 
+% testVectorZInput
+z_vec = linspace(0, 0.1, 5);
+lp_vec = LaguerreParameters(z_vec, w0, lambda, 1, 1);
+if (numel(lp_vec.zCoordinate) == 5)
+    fprintf('  PASS: vector z input\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: vector z\n');
+    failed = failed + 1;
+end
+
+% testStaticGetWaistAtWaist
+wL_at_waist = LaguerreParameters.getWaist(0, w0, zr_s, 1, 1);
+expected_lw = w0 * sqrt(2*1 + abs(1) + 1);
+if (abs(wL_at_waist - expected_lw) / expected_lw < 1e-10)
+    fprintf('  PASS: static getWaist at waist\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: getWaist at waist\n');
+    failed = failed + 1;
+end
+
+% testInheritedProperties
+lp_inherit = LaguerreParameters(z, w0, lambda, 1, 1);
+if (lp_inherit.k > 0 && lp_inherit.RayleighDistance > 0 && lp_inherit.Waist > 0)
+    fprintf('  PASS: inherited properties\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: inherited properties\n');
+    failed = failed + 1;
+end
+
+% testHigherPLargerWaist
+lp_p0 = LaguerreParameters(z, w0, lambda, 0, 0);
+lp_p2 = LaguerreParameters(z, w0, lambda, 0, 2);
+if (lp_p2.LaguerreWaist > lp_p0.LaguerreWaist)
+    fprintf('  PASS: higher p larger waist\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: higher p\n');
+    failed = failed + 1;
+end
+
+% testPhiPhaseWithNegativeL
+lp_neg_phi = LaguerreParameters(z, w0, lambda, -2, 1);
+expected_phi_neg = (abs(-2) + 2*1) * atan(z/zr);
+if (abs(lp_neg_phi.PhiPhase - expected_phi_neg) < 1e-10)
+    fprintf('  PASS: PhiPhase with negative l\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: PhiPhase negative l\n');
+    failed = failed + 1;
+end
+
+% testLaguerreWaistFormula
+lp_formula = LaguerreParameters(z, w0, lambda, 2, 3);
+expected_formula = lp_formula.Waist * sqrt(2*3 + abs(2) + 1);
+if (abs(lp_formula.LaguerreWaist - expected_formula) / expected_formula < 1e-10)
+    fprintf('  PASS: LaguerreWaist formula\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: LaguerreWaist formula\n');
+    failed = failed + 1;
+end
+
+% testAssociatedLaguerrePolynomialL0
+L_l0 = LaguerreParameters.getAssociatedLaguerrePolynomial(1, 0, [0 1 2]);
+if (all(isfinite(L_l0)))
+    fprintf('  PASS: Laguerre polynomial L=0\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: L=0 polynomial\n');
+    failed = failed + 1;
+end
+
+% testCombinedLandP
+lp_comb = LaguerreParameters(z, w0, lambda, 3, 2);
+expected_comb = lp_comb.Waist * sqrt(2*2 + abs(3) + 1);
+if (abs(lp_comb.LaguerreWaist - expected_comb) / expected_comb < 1e-10)
+    fprintf('  PASS: combined l p waist\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: combined l p\n');
+    failed = failed + 1;
+end
+
 fprintf('\n=== LaguerreParameters: %d/%d passed ===\n', passed, passed + failed);
 
 if (failed == 0)
