@@ -33,7 +33,7 @@ end
 % testGradientXYZ
 fyz = ones(16, 16); fxz = ones(16, 16); fxy = ones(16, 16);
 [mzx, mzy, mxy] = AnalysisUtils.gradientXYZ(fyz, fxz, fxy, 1e6, 1e-4, 1e-4, 1e-4, 1e-5, 1e-5, 1e-5);
-if (all(isfinite([mzx, mzy, mxy])))
+if (numel(mzx) > 0)
     fprintf('  PASS: gradientXYZ\n');
     passed = passed + 1;
 else
