@@ -3165,6 +3165,106 @@ else
     failed = failed + 1;
 end
 
+% testPhysicalConstantsGouyPhaseCalculates
+gouy_c = PhysicalConstants.gouyPhase(0.05, pi*w0^2/lambda);
+if (gouy_c > 0)
+    fprintf('  PASS: gouyPhase calculates correctly\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: gouyPhase\n');
+    failed = failed + 1;
+end
+
+% testGaussianParametersDivergenceAngleCalculates
+params_da = GaussianParameters(0, w0, lambda);
+if (params_da.DivergenceAngle > 0)
+    fprintf('  PASS: DivergenceAngle calculates correctly\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: DivergenceAngle\n');
+    failed = failed + 1;
+end
+
+% testGaussianParametersGouyPhaseProperty
+params_gp = GaussianParameters(0.05, w0, lambda);
+if (params_gp.GouyPhase > 0)
+    fprintf('  PASS: GouyPhase property positive at z>0\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: GouyPhase property\n');
+    failed = failed + 1;
+end
+
+% testGridUtilsDefaultConstructor
+grid_dc = GridUtils();
+fprintf('  PASS: GridUtils default constructor\n');
+passed = passed + 1;
+
+% testFFTUtilsDefaultConstructor
+fft_dc = FFTUtils();
+fprintf('  PASS: FFTUtils default constructor\n');
+passed = passed + 1;
+
+% testPhysicalConstantsWaistAtZLargerThanW0
+w_z_large = PhysicalConstants.waistAtZ(w0, 0.2, lambda);
+if (w_z_large > w0)
+    fprintf('  PASS: waistAtZ > w0 at z>0\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: waistAtZ > w0\n');
+    failed = failed + 1;
+end
+
+% testPhysicalConstantsRadiusPositiveAtPositiveZ
+R_pz = PhysicalConstants.radiusOfCurvature(0.1, pi*w0^2/lambda);
+if (R_pz > 0)
+    fprintf('  PASS: radiusOfCurvature positive at z>0\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: radius positive\n');
+    failed = failed + 1;
+end
+
+% testPhysicalConstantsGouyPhasePositiveAtPositiveZ
+gouy_pz = PhysicalConstants.gouyPhase(0.1, pi*w0^2/lambda);
+if (gouy_pz > 0)
+    fprintf('  PASS: gouyPhase positive at z>0\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: gouy positive\n');
+    failed = failed + 1;
+end
+
+% testGaussianParametersWaistCalculated
+params_wc = GaussianParameters(0.1, w0, lambda);
+if (params_wc.Waist > w0)
+    fprintf('  PASS: GaussianParameters Waist calculated at z>0\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: Waist calculated\n');
+    failed = failed + 1;
+end
+
+% testGaussianParametersRadiusCalculated
+params_rc = GaussianParameters(0.1, w0, lambda);
+if (params_rc.Radius > 0)
+    fprintf('  PASS: GaussianParameters Radius calculated at z>0\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: Radius calculated\n');
+    failed = failed + 1;
+end
+
+% testGaussianParametersAmplitudeCalculated
+params_ac = GaussianParameters(0.1, w0, lambda);
+if (params_ac.Amplitude > 0 && params_ac.Amplitude < 1/w0)
+    fprintf('  PASS: GaussianParameters Amplitude calculated\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: Amplitude calculated\n');
+    failed = failed + 1;
+end
+
 %% Summary
 fprintf('\n=== Summary ===\n');
 fprintf('Passed: %d\n', passed);
