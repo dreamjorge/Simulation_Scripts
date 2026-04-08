@@ -57,15 +57,8 @@ classdef LaguerreParameters < GaussianParameters
         end
         
         function L = getAssociatedLaguerrePolynomial(p, l, x)
-            % Calculates the associated Laguerre polynomial L_p^|l|(x)
-            % Using the explicit summation formula
-            n = p;
-            k = abs(l);
-            L = zeros(size(x));
-            for m = 0:n
-                term = ((-1)^m * nchoosek(n + k, n - m) .* x.^m) ./ factorial(m);
-                L = L + term;
-            end
+            % Kept for backwards compatibility. Delegates to PolynomialUtils.
+            L = PolynomialUtils.associatedLaguerre(p, l, x);
         end
     end
 end

@@ -22,18 +22,15 @@ classdef ElegantHermiteBeam
                 argY = sqrt_alpha .* Y;
                 
                 % Hermite polynomials: H_n(sqrt(alpha)*x)
-                Hn = HermiteBeam.hermitePoly(params.n, argX);
-                Hm = HermiteBeam.hermitePoly(params.m, argY);
+                Hn = PolynomialUtils.hermitePoly(params.n, argX);
+                Hm = PolynomialUtils.hermitePoly(params.m, argY);
                 
                 % Physical Gaussian Beam (Carrier)
                 [R, ~] = cart2pol(X, Y);
                 GB = GaussianBeam(R, params);
                 GField = GB.OpticalField;
                 
-                % Normalization constant
-                normConst = 1.0;
-                
-                obj.OpticalField = normConst .* Hn .* Hm .* GField;
+                obj.OpticalField = Hn .* Hm .* exp(1i * params.PhiPhase) .* GField;
             end
         end
     end

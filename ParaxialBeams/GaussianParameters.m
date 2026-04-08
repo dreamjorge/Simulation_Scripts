@@ -49,23 +49,32 @@ classdef GaussianParameters
         end
     end
     
-    methods (Static)
-        function zr = rayleighDistance(w0, lambda)
-            zr = PhysicalConstants.rayleighDistance(w0, lambda);
+    methods
+        function a = computeAlpha(obj)
+            % Complex beam parameter: alpha = i*k / (2*q(z))
+            % where q(z) = z + i*zR (complex beam parameter)
+            % Used by ElegantHermiteParameters and ElegantLaguerreParameters.
+            q = obj.zCoordinate + 1i * obj.RayleighDistance;
+            a = 1i * obj.k / (2 * q);
         end
-        
+    end
+
+    methods (Static)
         function w = getWaist(z, w0, zr)
             w = w0 .* sqrt(1 + (z./zr).^2);
         end
-        
-        function phase = getPhase(z, zr)
-            phase = atan(z./zr);
+
+        % These delegate to PhysicalConstants for backward compatibility.
+        function zr = rayleighDistance(w0, lambda)
+            zr = PhysicalConstants.rayleighDistance(w0, lambda);
         end
-        
+
+        function phase = getPhase(z, zr)
+            phase = PhysicalConstants.gouyPhase(z, zr);
+        end
+
         function R = getRadius(z, zr)
-            % At z=0 the wavefront is flat: R -> Inf (avoids 0*Inf = NaN)
-            R = z .* (1 + (zr ./ z).^2);
-            R(z == 0) = Inf;
+            R = PhysicalConstants.radiusOfCurvature(z, zr);
         end
     end
 end

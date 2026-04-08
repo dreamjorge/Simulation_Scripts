@@ -12,6 +12,16 @@ testFiles = {
     'test_GridUtils.m'
     'test_FFTUtils.m'
     'test_GaussianParameters.m'
+    'test_HermiteParameters.m'
+    'test_LaguerreParameters.m'
+    'test_ElegantHermiteParameters.m'
+    'test_ElegantLaguerreParameters.m'
+    'test_GaussianBeam.m'
+    'test_HermiteBeam.m'
+    'test_LaguerreBeam.m'
+    'test_ElegantHermiteBeam.m'
+    'test_ElegantLaguerreBeam.m'
+    'test_AnalysisUtils.m'
 };
 
 total_passed = 0;

@@ -28,7 +28,7 @@ classdef ElegantLaguerreBeam
                 % Laguerre polynomial: L_p^l(alpha * r^2)
                 l = params.l;
                 p = params.p;
-                Lpl = LaguerreParameters.getAssociatedLaguerrePolynomial(p, l, xArg);
+                Lpl = PolynomialUtils.associatedLaguerre(p, l, xArg);
                 
                 % Physical Gaussian Beam (Carrier)
                 % We use the standard GaussianBeam as reference
@@ -40,12 +40,8 @@ classdef ElegantLaguerreBeam
                 % Note: alpha is complex
                 amplitudeTerm = (sqrt(alpha_val) .* r).^abs(l);
                 
-                % Phase and Mode assembly
-                % Normalization constant (Simplified for now, as in previous legacy code)
-                normConst = 1.0; 
-                
-                % The final field combines the Gaussian carrier with the elegant polynomial
-                obj.OpticalField = normConst .* amplitudeTerm .* Lpl .* exp(1i * l * theta) .* GField;
+                % Phase and mode assembly (Gouy shift consistent with standard LG beam)
+                obj.OpticalField = amplitudeTerm .* Lpl .* exp(1i * l * theta) .* exp(1i * params.PhiPhase) .* GField;
             end
         end
     end

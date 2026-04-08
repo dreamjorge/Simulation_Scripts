@@ -32,8 +32,8 @@ classdef HermiteBeam
                 n = params.n;
                 m = params.m;
                 
-                Hn = HermiteBeam.hermitePoly(n, sqrt(2) * x ./ w);
-                Hm = HermiteBeam.hermitePoly(m, sqrt(2) * y ./ w);
+                Hn = PolynomialUtils.hermitePoly(n, sqrt(2) * x ./ w);
+                Hm = PolynomialUtils.hermitePoly(m, sqrt(2) * y ./ w);
                 
                 % Phase shift (n+m)*psi is handled in Parameters.PhiPhase
                 % We multiply by the phase term and the polynomials
@@ -44,21 +44,8 @@ classdef HermiteBeam
     
     methods (Static)
         function H = hermitePoly(n, x)
-            % Calculates the Hermite polynomial H_n(x) using recurrence relation
-            % H_0 = 1, H_1 = 2x, H_{n+1} = 2xH_n - 2nH_{n-1}
-            if n == 0
-                H = ones(size(x));
-            elseif n == 1
-                H = 2 * x;
-            else
-                H_prev2 = ones(size(x));
-                H_prev1 = 2 * x;
-                for i = 1:n-1
-                    H = 2 * x .* H_prev1 - 2 * i * H_prev2;
-                    H_prev2 = H_prev1;
-                    H_prev1 = H;
-                end
-            end
+            % Kept for backwards compatibility. Delegates to PolynomialUtils.
+            H = PolynomialUtils.hermitePoly(n, x);
         end
     end
 end

@@ -7,9 +7,10 @@ classdef ElegantHermiteParameters < GaussianParameters
     end
     
     properties (Dependent)
-        alpha % Complex parameter
+        alpha    % Complex beam parameter: i*k/(2*q(z)), q=z+i*zR
+        PhiPhase % Mode Gouy phase: (n+m)*psi(z)
     end
-    
+
     methods
         function obj = ElegantHermiteParameters(z, w0, lambda, n, m)
             % Constructor
@@ -19,18 +20,18 @@ classdef ElegantHermiteParameters < GaussianParameters
             if nargin < 4
                 n = 0;
             end
-            
+
             obj@GaussianParameters(z, w0, lambda);
             obj.n = n;
             obj.m = m;
         end
-        
+
         function a = get.alpha(obj)
-            k_val = obj.k;
-            zr = obj.RayleighDistance;
-            z_val = obj.zCoordinate;
-            q = z_val + 1i * zr;
-            a = 1i * k_val / (2 * q);
+            a = obj.computeAlpha();
+        end
+
+        function phi = get.PhiPhase(obj)
+            phi = (obj.n + obj.m) .* obj.GouyPhase;
         end
     end
 end
