@@ -2816,6 +2816,118 @@ else
     failed = failed + 1;
 end
 
+% testGaussianParametersNegativeW0
+try
+    gp_nw0 = GaussianParameters(0, -w0, lambda);
+    fprintf('  PASS: GaussianParameters handles negative w0\n');
+    passed = passed + 1;
+catch
+    fprintf('  FAIL: GaussianParameters negative w0\n');
+    failed = failed + 1;
+end
+
+% testPhysicalConstantsZeroLambda
+try
+    k_zl = PhysicalConstants.waveNumber(0);
+    fprintf('  PASS: waveNumber handles zero input\n');
+    passed = passed + 1;
+catch
+    fprintf('  FAIL: waveNumber zero lambda\n');
+    failed = failed + 1;
+end
+
+% testFFTUtilsNoNormalizeProperty
+fft_nn = FFTUtils(false, true);
+if (fft_nn.normalize == false && fft_nn.shiftFlag == true)
+    fprintf('  PASS: FFTUtils normalize property\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: FFTUtils properties\n');
+    failed = failed + 1;
+end
+
+% testFFTUtilsNoShiftProperty
+fft_ns = FFTUtils(true, false);
+if (fft_ns.shiftFlag == false)
+    fprintf('  PASS: FFTUtils shiftFlag property\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: FFTUtils shiftFlag\n');
+    failed = failed + 1;
+end
+
+% testGridUtilsDxDy
+grid_dx = GridUtils(64, 64, 1e-3, 1e-3);
+if (grid_dx.dx == 1e-3/64 && grid_dx.dy == 1e-3/64)
+    fprintf('  PASS: GridUtils dx dy calculated\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: GridUtils dx dy\n');
+    failed = failed + 1;
+end
+
+% testGridUtilsDz
+grid_dz = GridUtils(32, 32, 1e-3, 1e-3, 16, 2e-3);
+if (grid_dz.dz == 2e-3/16)
+    fprintf('  PASS: GridUtils dz calculated\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: GridUtils dz\n');
+    failed = failed + 1;
+end
+
+% testGaussianBeamComplexField
+gb_cf = GaussianBeam(R, GaussianParameters(0.05, w0, lambda));
+if (~isreal(gb_cf.OpticalField))
+    fprintf('  PASS: GaussianBeam produces complex field\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: GaussianBeam complex\n');
+    failed = failed + 1;
+end
+
+% testHermiteBeamComplexField
+hb_cf = HermiteBeam(X, Y, HermiteParameters(0.05, w0, lambda, 1, 1));
+if (size(hb_cf.OpticalField) == [64, 64] && all(all(isfinite(hb_cf.OpticalField))))
+    fprintf('  PASS: HermiteBeam produces valid field\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: HermiteBeam complex\n');
+    failed = failed + 1;
+end
+
+% testLaguerreBeamComplexField
+lb_cf = LaguerreBeam(R, Theta, LaguerreParameters(0.05, w0, lambda, 1, 0));
+if (size(lb_cf.OpticalField) == [64, 64] && all(all(isfinite(lb_cf.OpticalField))))
+    fprintf('  PASS: LaguerreBeam produces valid field\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: LaguerreBeam complex\n');
+    failed = failed + 1;
+end
+
+% testGaussianParametersIsEqualFalse
+params_if1 = GaussianParameters(0, 100e-6, 532e-9);
+params_if2 = GaussianParameters(0, 100e-6, 633e-9);
+if (~params_if1.isEqual(params_if2))
+    fprintf('  PASS: GaussianParameters isEqual returns false for different lambda\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: isEqual false\n');
+    failed = failed + 1;
+end
+
+% testGaussianParametersIsEqualTrue
+params_it1 = GaussianParameters(0.05, 100e-6, 632.8e-9);
+params_it2 = GaussianParameters(0.05, 100e-6, 632.8e-9);
+if (params_it1.isEqual(params_it2))
+    fprintf('  PASS: GaussianParameters isEqual returns true for same params\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: isEqual true\n');
+    failed = failed + 1;
+end
+
 %% Summary
 fprintf('\n=== Summary ===\n');
 fprintf('Passed: %d\n', passed);
