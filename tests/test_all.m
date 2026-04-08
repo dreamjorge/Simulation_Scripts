@@ -2547,6 +2547,147 @@ else
     failed = failed + 1;
 end
 
+% testPhysicalConstantsWaveNumberPrecision
+lambda_prec = 632.8e-9;
+k_prec = PhysicalConstants.waveNumber(lambda_prec);
+expected_k = 2*pi/lambda_prec;
+if (abs(k_prec - expected_k) / expected_k < 1e-14)
+    fprintf('  PASS: waveNumber precision high\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: waveNumber precision\n');
+    failed = failed + 1;
+end
+
+% testPhysicalConstantsRayleighPrecision
+zr_prec = PhysicalConstants.rayleighDistance(100e-6, 632.8e-9);
+expected_zr = pi*(100e-6)^2/632.8e-9;
+if (abs(zr_prec - expected_zr) / expected_zr < 1e-14)
+    fprintf('  PASS: rayleighDistance precision high\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: rayleighDistance precision\n');
+    failed = failed + 1;
+end
+
+% testGaussianParametersVectorizedWaist
+z_vw = [0, 0.02, 0.05, 0.1];
+params_vw = GaussianParameters(z_vw, w0, lambda);
+if (params_vw.Waist(1) == w0 && all(params_vw.Waist(2:end) > w0))
+    fprintf('  PASS: GaussianParameters vectorized Waist\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: vectorized Waist\n');
+    failed = failed + 1;
+end
+
+% testGaussianParametersVectorizedRadius
+params_vr = GaussianParameters(z_vw, w0, lambda);
+if (isinf(params_vr.Radius(1)) && all(params_vr.Radius(2:end) < Inf))
+    fprintf('  PASS: GaussianParameters vectorized Radius\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: vectorized Radius\n');
+    failed = failed + 1;
+end
+
+% testGaussianParametersVectorizedAmplitude
+params_va = GaussianParameters(z_vw, w0, lambda);
+if (params_va.Amplitude(1) == 1/w0 && all(params_va.Amplitude(2:end) < 1/w0))
+    fprintf('  PASS: GaussianParameters vectorized Amplitude\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: vectorized Amplitude\n');
+    failed = failed + 1;
+end
+
+% testFFTUtilsTransferFunctionVectorizedK
+kx_v = [0, 1e4, 1e5, 1e6];
+ky_v = 0;
+H_v = FFTUtils.transferFunction(kx_v, ky_v, 0.01, lambda);
+if (numel(H_v) == 4 && all(isfinite(H_v)))
+    fprintf('  PASS: transferFunction vectorized k\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: transferFunction vectorized\n');
+    failed = failed + 1;
+end
+
+% testGridUtilsCreate2DGridNonSquare
+grid_ns2 = GridUtils(128, 64, 2e-3, 1e-3);
+[Xns, Yns] = grid_ns2.create2DGrid();
+if (size(Xns,1) == 64 && size(Xns,2) == 128)
+    fprintf('  PASS: create2DGrid non-square works\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: create2DGrid non-square\n');
+    failed = failed + 1;
+end
+
+% testGridUtilsCreate3DGridNonSquare
+grid_3dns = GridUtils(32, 64, 1e-3, 2e-3, 16, 4e-3);
+[X3d, Y3d, Z3d] = grid_3dns.create3DGrid();
+if (ndims(X3d) == 3 && all(size(X3d) > 1))
+    fprintf('  PASS: create3DGrid produces 3D output\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: create3DGrid non-square\n');
+    failed = failed + 1;
+end
+
+% testHermiteBeamMultipleOrders
+hp_mo1 = HermiteParameters(0, w0, lambda, 1, 0);
+hp_mo2 = HermiteParameters(0, w0, lambda, 0, 1);
+hb_mo1 = HermiteBeam(X, Y, hp_mo1);
+hb_mo2 = HermiteBeam(X, Y, hp_mo2);
+if (size(hb_mo1.OpticalField) == size(hb_mo2.OpticalField) && all(all(isfinite(hb_mo1.OpticalField))))
+    fprintf('  PASS: HermiteBeam different orders produce valid fields\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: HermiteBeam order difference\n');
+    failed = failed + 1;
+end
+
+% testLaguerreBeamMultipleOrders
+lp_mo1 = LaguerreParameters(0, w0, lambda, 1, 0);
+lp_mo2 = LaguerreParameters(0, w0, lambda, 2, 0);
+lb_mo1 = LaguerreBeam(R, Theta, lp_mo1);
+lb_mo2 = LaguerreBeam(R, Theta, lp_mo2);
+if (size(lb_mo1.OpticalField) == size(lb_mo2.OpticalField) && all(all(isfinite(lb_mo1.OpticalField))))
+    fprintf('  PASS: LaguerreBeam different orders produce valid fields\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: LaguerreBeam order difference\n');
+    failed = failed + 1;
+end
+
+% testElegantHermiteBeamDifferentAlpha
+ehp_d1 = ElegantHermiteParameters(0.01, w0, lambda, 1, 1);
+ehp_d2 = ElegantHermiteParameters(0.05, w0, lambda, 1, 1);
+if (ehp_d1.alpha ~= ehp_d2.alpha)
+    fprintf('  PASS: ElegantHermiteParameters alpha changes with z\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: ElegantHermite alpha change\n');
+    failed = failed + 1;
+end
+
+% testAnalysisUtilsGradientRZVectorized
+fr_v = ones(1, 100); fz_v = ones(1, 100);
+x_v = linspace(1e-6, 1e-4, 10);
+z_v = linspace(1e-6, 1e-4, 10);
+mzr_v = zeros(1, 10);
+for i = 1:10
+    mzr_v(i) = AnalysisUtils.gradientRZ(fr_v, fz_v, 1e7, 1e-4, 1e-4, x_v(i), z_v(i));
+end
+if (all(isfinite(mzr_v)))
+    fprintf('  PASS: gradientRZ multiple points\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: gradientRZ multiple\n');
+    failed = failed + 1;
+end
+
 %% Summary
 fprintf('\n=== Summary ===\n');
 fprintf('Passed: %d\n', passed);
