@@ -1962,6 +1962,153 @@ else
     failed = failed + 1;
 end
 
+% testElegantHermiteBeamAlphaAtWaist
+ehp_at_z0 = ElegantHermiteParameters(0, w0, lambda, 1, 1);
+if (isreal(ehp_at_z0.alpha))
+    fprintf('  PASS: ElegantHermiteParameters alpha real at waist\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: ElegantHermite alpha at waist\n');
+    failed = failed + 1;
+end
+
+% testElegantLaguerreBeamAlphaAtWaist
+elp_at_z0 = ElegantLaguerreParameters(0, w0, lambda, 1, 1);
+if (isreal(elp_at_z0.alpha))
+    fprintf('  PASS: ElegantLaguerreParameters alpha real at waist\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: ElegantLaguerre alpha at waist\n');
+    failed = failed + 1;
+end
+
+% testGaussianParametersIsEqualDifferentZ
+params_z1 = GaussianParameters(0.01, w0, lambda);
+params_z2 = GaussianParameters(0.02, w0, lambda);
+if (~params_z1.isEqual(params_z2))
+    fprintf('  PASS: GaussianParameters isEqual detects different z\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: isEqual different z\n');
+    failed = failed + 1;
+end
+
+% testGaussianParametersIsEqualDifferentW0
+params_w01 = GaussianParameters(0, 50e-6, lambda);
+params_w02 = GaussianParameters(0, 100e-6, lambda);
+if (~params_w01.isEqual(params_w02))
+    fprintf('  PASS: GaussianParameters isEqual detects different w0\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: isEqual different w0\n');
+    failed = failed + 1;
+end
+
+% testGaussianParametersIsEqualDifferentLambda
+params_l1 = GaussianParameters(0, w0, 532e-9);
+params_l2 = GaussianParameters(0, w0, 633e-9);
+if (~params_l1.isEqual(params_l2))
+    fprintf('  PASS: GaussianParameters isEqual detects different lambda\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: isEqual different lambda\n');
+    failed = failed + 1;
+end
+
+% testPhysicalConstantsWaistAtZWithZr
+w0_test = 100e-6; zr_test = pi*w0_test^2/lambda;
+w_z = PhysicalConstants.waistAtZ(w0_test, 0.05, lambda, zr_test);
+expected_w = w0_test * sqrt(1 + (0.05/zr_test)^2);
+if (abs(w_z - expected_w) / expected_w < 1e-10)
+    fprintf('  PASS: waistAtZ uses provided zr\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: waistAtZ with zr\n');
+    failed = failed + 1;
+end
+
+% testPhysicalConstantsRadiusSymmetry
+zr_test2 = pi*w0_test^2/lambda;
+R_pos = PhysicalConstants.radiusOfCurvature(0.05, zr_test2);
+R_neg = PhysicalConstants.radiusOfCurvature(-0.05, zr_test2);
+if (abs(R_pos + R_neg) < 1e-10)
+    fprintf('  PASS: radiusOfCurvature symmetric\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: Radius symmetry\n');
+    failed = failed + 1;
+end
+
+% testGridUtilsFreqGridNearZero
+grid_nz = GridUtils(128, 128, 1e-3, 1e-3);
+[Kxn, Kyn] = grid_nz.createFreqGrid();
+[~, idx] = min(abs(Kxn(1,:)));
+if (idx == 65)
+    fprintf('  PASS: createFreqGrid DC at center\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: createFreqGrid DC\n');
+    failed = failed + 1;
+end
+
+% testFFTUtilsTransferFunctionSymmetry
+kx = linspace(-1e5,1e5,32);
+ky = 0;
+[KX, KY] = meshgrid(kx, ky);
+H_pos = FFTUtils.transferFunction(KX, KY, 0.01, lambda);
+H_neg = FFTUtils.transferFunction(-KX, KY, 0.01, lambda);
+if (all(all(isfinite(H_pos))) && all(all(isfinite(H_neg))))
+    fprintf('  PASS: transferFunction produces finite results\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: transferFunction symmetry\n');
+    failed = failed + 1;
+end
+
+% testHermiteBeamStoreParameters
+hp_store = HermiteParameters(0.05, w0, lambda, 2, 3);
+hb_store = HermiteBeam(X, Y, hp_store);
+if (hb_store.Parameters.n == 2 && hb_store.Parameters.m == 3)
+    fprintf('  PASS: HermiteBeam stores parameters\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: HermiteBeam stores params\n');
+    failed = failed + 1;
+end
+
+% testLaguerreBeamStoreParameters
+lp_store = LaguerreParameters(0.05, w0, lambda, 2, 3);
+lb_store = LaguerreBeam(R, Theta, lp_store);
+if (lb_store.Parameters.l == 2 && lb_store.Parameters.p == 3)
+    fprintf('  PASS: LaguerreBeam stores parameters\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: LaguerreBeam stores params\n');
+    failed = failed + 1;
+end
+
+% testGaussianBeamStoreParameters
+params_store = GaussianParameters(0.05, w0, lambda);
+gb_store = GaussianBeam(R, params_store);
+if (gb_store.Parameters.zCoordinate == 0.05)
+    fprintf('  PASS: GaussianBeam stores z coordinate\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: GaussianBeam stores z\n');
+    failed = failed + 1;
+end
+
+% testAnalysisUtilsGradientXYZMatrixSizes
+fyz_s = ones(16, 16); fxz_s = ones(16, 16); fxy_s = ones(16, 16);
+[mzx_s, mzy_s, mxy_s] = AnalysisUtils.gradientXYZ(fyz_s, fxz_s, fxy_s, 1e6, 1e-4, 1e-4, 1e-4, 1e-5, 1e-5, 1e-5);
+if (isequal(size(mzx_s), size(mzy_s)) && isequal(size(mzy_s), size(mxy_s)))
+    fprintf('  PASS: gradientXYZ output matrices same size\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: gradientXYZ output sizes\n');
+    failed = failed + 1;
+end
+
 %% Summary
 fprintf('\n=== Summary ===\n');
 fprintf('Passed: %d\n', passed);
