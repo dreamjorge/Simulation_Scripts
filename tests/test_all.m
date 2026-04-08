@@ -460,6 +460,175 @@ else
     failed = failed + 1;
 end
 
+%% Test AnalysisUtils.gradientRZ
+fprintf('\n--- AnalysisUtils.gradientRZ ---\n');
+
+% testGradientRZInteriorPoint: 10x10 field slices, k=1e7, dx=dz=1e-4, x=z=0
+% Verify returns finite value
+Nx = 10; Nz = 10;
+dx = 1e-4; dz = 1e-4;
+k = 1e7;
+x = 0; z = 0;
+fr = ones(1, Nx);  % field at fixed r
+fz = ones(1, Nz);  % field at fixed z
+mzr = AnalysisUtils.gradientRZ(fr, fz, k, dx, dz, x, z);
+if (isfinite(mzr))
+    fprintf('  PASS: gradientRZ interior point returns finite value\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: gradientRZ interior point returned NaN/Inf\n');
+    failed = failed + 1;
+end
+
+% testGradientRZZeroGradient: uniform fields, verify handles division gracefully
+% With uniform fields, gradient is zero, so gr(idxR)=k (from formula: gr = gradient(fz)/dz + k)
+% This tests that the function handles the case gracefully
+fr_uniform = ones(1, Nx) * 2;
+fz_uniform = ones(1, Nz) * 3;
+mzr_uniform = AnalysisUtils.gradientRZ(fr_uniform, fz_uniform, k, dx, dz, x, z);
+if (isfinite(mzr_uniform) && abs(mzr_uniform) < 1e-10)
+    fprintf('  PASS: gradientRZ zero gradient handles division gracefully\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: gradientRZ zero gradient case failed\n');
+    failed = failed + 1;
+end
+
+%% Test AnalysisUtils.gradientXYZ
+fprintf('\n--- AnalysisUtils.gradientXYZ ---\n');
+
+% testGradientXYZReturnsThreeValues: 10x10 slices, k=1e7, dx=dy=dz=1e-4
+% Use non-constant fields so gradient() is non-zero
+Nx = 10; Ny = 10; Nz = 10;
+dx = 1e-4; dy = 1e-4; dz = 1e-4;
+k = 1e7;
+x = 5e-5; y = 5e-5; z = 5e-5;
+[X, Y] = meshgrid(linspace(-1,1,Nx), linspace(-1,1,Ny));
+fyz = exp(-(X.^2 + Y.^2));
+fxz = exp(-(X.^2 + Y.^2));
+fxy = exp(-(X.^2 + Y.^2));
+[mzx, mzy, mxy] = AnalysisUtils.gradientXYZ(fyz, fxz, fxy, k, dx, dy, dz, x, y, z);
+if (isfinite(mzx) && isfinite(mzy) && isfinite(mxy))
+    fprintf('  PASS: gradientXYZ returns three finite values\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: gradientXYZ returned NaN/Inf values\n');
+    failed = failed + 1;
+end
+
+% testGradientXYZBounds: 64x64 slices, coordinates at 5e-5, verify no index error
+Nx = 64; Ny = 64; Nz = 64;
+dx = 1e-4; dy = 1e-4; dz = 1e-4;
+x = 5e-5; y = 5e-5; z = 5e-5;
+try
+    [X, Y] = meshgrid(linspace(-1,1,Nx), linspace(-1,1,Ny));
+    fyz = exp(-(X.^2 + Y.^2));
+    fxz = exp(-(X.^2 + Y.^2));
+    fxy = exp(-(X.^2 + Y.^2));
+    [mzx, mzy, mxy] = AnalysisUtils.gradientXYZ(fyz, fxz, fxy, k, dx, dy, dz, x, y, z);
+    if (isfinite(mzx) && isfinite(mzy) && isfinite(mxy))
+        fprintf('  PASS: gradientXYZ bounds check (no index error)\n');
+        passed = passed + 1;
+    else
+        fprintf('  FAIL: gradientXYZ produced NaN at boundary\n');
+        failed = failed + 1;
+    end
+catch ME
+    fprintf('  FAIL: gradientXYZ bounds check threw error: %s\n', ME.message);
+    failed = failed + 1;
+end
+
+%% Test ElegantHermiteParameters
+fprintf('\n--- ElegantHermiteParameters ---\n');
+
+% testConstructorStoresNandM: z=0, w0=100e-6, lambda=632.8e-9, n=1, m=2
+z = 0; w0 = 100e-6; lambda = 632.8e-9; n = 1; m = 2;
+ehp = ElegantHermiteParameters(z, w0, lambda, n, m);
+if (ehp.n == n && ehp.m == m)
+    fprintf('  PASS: ElegantHermiteParameters stores n and m\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: ElegantHermiteParameters n or m not stored correctly\n');
+    failed = failed + 1;
+end
+
+% testAlphaIsComplexAtZgt0: z=0.1, verify alpha = i*k/(2*(z+i*zr)) is complex
+% At z>0: q = z + i*zr has both real and imag parts, so alpha is complex
+z = 0.1;
+ehp_z = ElegantHermiteParameters(z, w0, lambda, 1, 1);
+k_val = 2*pi/lambda;
+zr = pi*w0^2/lambda;
+q = z + 1i*zr;
+expected_alpha = 1i * k_val / (2 * q);
+if (abs(ehp_z.alpha - expected_alpha) < 1e-10)
+    fprintf('  PASS: ElegantHermiteParameters alpha is complex at z>0\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: ElegantHermiteParameters alpha should be complex at z>0\n');
+    failed = failed + 1;
+end
+
+% testAlphaAtWaist: z=0, verify alpha formula matches k/(2*zr)
+% At z=0: q = z + i*zr = i*zr, so alpha = i*k/(2*i*zr) = k/(2*zr) which is REAL
+z = 0;
+ehp_waist = ElegantHermiteParameters(z, w0, lambda, 1, 1);
+k_val = 2*pi/lambda;
+zr = pi*w0^2/lambda;
+expected_alpha = k_val / (2 * zr);  % real at waist
+if (abs(ehp_waist.alpha - expected_alpha) < 1e-10 && isreal(expected_alpha))
+    fprintf('  PASS: ElegantHermiteParameters alpha at waist matches k/(2*zr)\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: ElegantHermiteParameters alpha at waist formula mismatch\n');
+    failed = failed + 1;
+end
+
+% testDefaultIndices: no n,m provided, verify obj.n==0, obj.m==0
+ehp_default = ElegantHermiteParameters(z, w0, lambda);
+if (ehp_default.n == 0 && ehp_default.m == 0)
+    fprintf('  PASS: ElegantHermiteParameters default indices are 0\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: ElegantHermiteParameters default indices should be 0\n');
+    failed = failed + 1;
+end
+
+%% Test ElegantLaguerreParameters
+fprintf('\n--- ElegantLaguerreParameters ---\n');
+
+% testConstructorStoresLandP: z=0, w0=100e-6, lambda=632.8e-9, l=3, p=2
+z = 0; w0 = 100e-6; lambda = 632.8e-9; l = 3; p = 2;
+elp = ElegantLaguerreParameters(z, w0, lambda, l, p);
+if (elp.l == l && elp.p == p)
+    fprintf('  PASS: ElegantLaguerreParameters stores l and p\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: ElegantLaguerreParameters l or p not stored correctly\n');
+    failed = failed + 1;
+end
+
+% testAlphaMatchesElegantHermite: z=0.05, create both classes, verify identical alpha
+z = 0.05;
+ehp_test = ElegantHermiteParameters(z, w0, lambda, 1, 1);
+elp_test = ElegantLaguerreParameters(z, w0, lambda, 1, 0);
+if (abs(ehp_test.alpha - elp_test.alpha) < 1e-10)
+    fprintf('  PASS: ElegantLaguerreParameters alpha matches ElegantHermiteParameters\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: ElegantLaguerreParameters alpha differs from ElegantHermiteParameters\n');
+    failed = failed + 1;
+end
+
+% testDefaultLandP: no l,p provided, verify obj.l==0, obj.p==0
+elp_default = ElegantLaguerreParameters(z, w0, lambda);
+if (elp_default.l == 0 && elp_default.p == 0)
+    fprintf('  PASS: ElegantLaguerreParameters default l and p are 0\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: ElegantLaguerreParameters default l and p should be 0\n');
+    failed = failed + 1;
+end
+
 %% Summary
 fprintf('\n=== Summary ===\n');
 fprintf('Passed: %d\n', passed);
