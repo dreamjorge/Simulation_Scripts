@@ -3054,6 +3054,117 @@ else
     failed = failed + 1;
 end
 
+% testLaguerreBeamParametersClass
+lb_pcl = LaguerreBeam(R, Theta, LaguerreParameters(0, w0, lambda, 1, 0));
+if (isa(lb_pcl.Parameters, 'LaguerreParameters'))
+    fprintf('  PASS: LaguerreBeam Parameters is LaguerreParameters\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: LaguerreBeam Parameters class\n');
+    failed = failed + 1;
+end
+
+% testElegantHermiteBeamParametersClass
+ehb_pcl = ElegantHermiteBeam(X, Y, ElegantHermiteParameters(0, w0, lambda, 1, 1));
+if (isa(ehb_pcl.Parameters, 'ElegantHermiteParameters'))
+    fprintf('  PASS: ElegantHermiteBeam Parameters is ElegantHermiteParameters\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: ElegantHermiteBeam Parameters class\n');
+    failed = failed + 1;
+end
+
+% testElegantLaguerreBeamParametersClass
+elb_pcl = ElegantLaguerreBeam(R, Theta, ElegantLaguerreParameters(0, w0, lambda, 1, 0));
+if (isa(elb_pcl.Parameters, 'ElegantLaguerreParameters'))
+    fprintf('  PASS: ElegantLaguerreBeam Parameters is ElegantLaguerreParameters\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: ElegantLaguerreBeam Parameters class\n');
+    failed = failed + 1;
+end
+
+% testPhysicalConstantsWaveNumberInfLambda
+try
+    k_inf = PhysicalConstants.waveNumber(Inf);
+    fprintf('  PASS: waveNumber Inf lambda gives 0\n');
+    passed = passed + 1;
+catch
+    fprintf('  FAIL: waveNumber Inf\n');
+    failed = failed + 1;
+end
+
+% testGaussianParametersToString
+params_ts = GaussianParameters(0.05, w0, lambda);
+str_ts = params_ts.toString();
+if (ischar(str_ts) && ~isempty(str_ts))
+    fprintf('  PASS: GaussianParameters toString returns string\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: toString\n');
+    failed = failed + 1;
+end
+
+% testGridUtilsNxNyProperties
+grid_np = GridUtils(128, 64, 1e-3, 0.5e-3);
+if (grid_np.Nx == 128 && grid_np.Ny == 64)
+    fprintf('  PASS: GridUtils Nx Ny stored\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: Nx Ny\n');
+    failed = failed + 1;
+end
+
+% testGridUtilsDxDyProperties
+grid_dp = GridUtils(64, 64, 1e-3, 1e-3);
+if (grid_dp.Dx == 1e-3 && grid_dp.Dy == 1e-3)
+    fprintf('  PASS: GridUtils Dx Dy stored\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: Dx Dy\n');
+    failed = failed + 1;
+end
+
+% testGaussianParametersStaticGetRadius
+R_s = GaussianParameters.getRadius(0.05, pi*w0^2/lambda);
+if (isfinite(R_s))
+    fprintf('  PASS: GaussianParameters static getRadius\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: static getRadius\n');
+    failed = failed + 1;
+end
+
+% testGaussianParametersStaticGetPhase
+phase_s = GaussianParameters.getPhase(0.05, pi*w0^2/lambda);
+if (isfinite(phase_s))
+    fprintf('  PASS: GaussianParameters static getPhase\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: static getPhase\n');
+    failed = failed + 1;
+end
+
+% testPhysicalConstantsWaistAtZCalculates
+w_z = PhysicalConstants.waistAtZ(w0, 0.1, lambda);
+if (w_z > w0)
+    fprintf('  PASS: waistAtZ calculates correctly\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: waistAtZ\n');
+    failed = failed + 1;
+end
+
+% testPhysicalConstantsRadiusOfCurvatureCalculates
+R_c = PhysicalConstants.radiusOfCurvature(0.1, pi*w0^2/lambda);
+if (isfinite(R_c))
+    fprintf('  PASS: radiusOfCurvature calculates correctly\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: radiusOfCurvature\n');
+    failed = failed + 1;
+end
+
 %% Summary
 fprintf('\n=== Summary ===\n');
 fprintf('Passed: %d\n', passed);
