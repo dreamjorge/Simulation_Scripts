@@ -1,6 +1,6 @@
 %% add path for classes and functions
-addpath ParaxialBeams
-addpath ParaxialBeams\Addons
+addpath(fullfile('ParaxialBeams'))
+addpath(fullfile('ParaxialBeams', 'Addons'))
 mapgreen = AdvancedColormap('kgg',256,[0 100 255]/255);  %color of beam
 %% elegant normalization 
 %principal 2 parameters of paraxial beams
@@ -35,31 +35,31 @@ wo=sqrt(2*(sqrt(csph^2+1)-1))/k;
 zl=k*wo^2/2;
 % El zls(elegante) es zl/2
 %------------------------muestreo de vectores-----------------------------%
-N=2^9;                     % Número de puntos para x, y
+N=2^9;                     % Nï¿½mero de puntos para x, y
 n=-N/2+.05:N/2-1+.05;     % Vector indicial igualmente espaciado
 
 % Muestreo de vector z
-Dz=zl/2;%1.105*zl; % Tamaño de la ventana en z (distancia a la cual propagar)
-Nz=2^6;%2^9;          % Número de puntos en z
+Dz=zl/2;%1.105*zl; % Tamaï¿½o de la ventana en z (distancia a la cual propagar)
+Nz=2^6;%2^9;          % Nï¿½mero de puntos en z
 dz=Dz/Nz;        % Resolucion en z
 z=0:dz:Dz;       % Vector z de propagacion
 
-% Cintura de gaussiana a la distancia del tamaño de la ventana en z
+% Cintura de gaussiana a la distancia del tamaï¿½o de la ventana en z
 ws=wo*sqrt(1+Dz.^2/zl^2);
-% Cintura de Laguerre a la distancia del tamaño de la ventana en z
+% Cintura de Laguerre a la distancia del tamaï¿½o de la ventana en z
 sigmaL=ws*sqrt((2*nu+mu+1));
 
 % Muestreo de los vectores espaciales x,y
-% Calculamos el tamaño de ventana en x,y en terminos de la cintura a la
+% Calculamos el tamaï¿½o de ventana en x,y en terminos de la cintura a la
 % distancia z que se propaga (esto para que no se salga de la ventana)
-Dx=(2*sigmaL)*1.37;  % Tamaño de la ventana
-Dx=3*(2*sigmaL)*1.37;  % Tamaño de la ventana
-dx=Dx/N;            % Resolución
+Dx=(2*sigmaL)*1.37;  % Tamaï¿½o de la ventana
+Dx=3*(2*sigmaL)*1.37;  % Tamaï¿½o de la ventana
+dx=Dx/N;            % Resoluciï¿½n
 x=n*dx;             % Vector x (plano de campo a propapar)
 [X]=meshgrid(x);
 % Muestreo del vector de frecuencia
-Du=1/dx;        % Tamaño de la ventana de Fourier
-du=1/Dx;        % Resolución
+Du=1/dx;        % Tamaï¿½o de la ventana de Fourier
+du=1/Dx;        % Resoluciï¿½n
 u=n*du;         % Vector
 [U]=meshgrid(u);
 % Vectores kx,ky
@@ -68,7 +68,7 @@ kx=2*pi*u;
 % Coordenadas polares para el Laguerre
 [TH,R]=cart2pol(X,X');
 
-%-----------------Laguerre Gauss sin ostrucción en z=0--------------------%
+%-----------------Laguerre Gauss sin ostrucciï¿½n en z=0--------------------%
 
 % Las dos soluciones del Laguerre Gauss
 Ln=exp(1i*mu*TH).*laguerregz(nu,mu,wo,zl,R,0); 
@@ -79,8 +79,8 @@ Xn=exp(1i*mu*TH).*xlaguerregz(nu,mu,wo,zl,R,0);
 H1=Ln+1i*Xn;
 H2=Ln-1i*Xn;
 
-% Función a propagar (Recuerde normalizar respecto al máximo de la función
-% en cuestión)
+% Funciï¿½n a propagar (Recuerde normalizar respecto al mï¿½ximo de la funciï¿½n
+% en cuestiï¿½n)
 g=Ln;
 % Graficando Laguerre
 figure(1)
@@ -92,16 +92,16 @@ xlabel('x')
 ylabel('y') 
 pxy=max(max(g));
 
-%---------------Funcion a propagar con obstrucción en z=0-----------------%
+%---------------Funcion a propagar con obstrucciï¿½n en z=0-----------------%
 sigmaLo=2*wo*sqrt((2*nu+mu+1));   %cintura de Laguerre en z=0
-lo=sigmaLo/7;%sigmaLo/4;%sigmaLo/8;                   %tamaño de la obstrucción (radio de la obstruccion)
+lo=sigmaLo/7;%sigmaLo/4;%sigmaLo/8;                   %tamaï¿½o de la obstrucciï¿½n (radio de la obstruccion)
 %traslado
 xt=sigmaLo/15;%sigmaLo/6;%sigmaLo/15;%.15*sigmaLo;sigmaLo/2.5;
  yt=0;   %xt=0;
-[~,ro]=cart2pol(X-xt,X'-yt);    %aplicando la traslación a coordendas xy
-obo=double(ro<=lo);             %creando la obstrucción   
+[~,ro]=cart2pol(X-xt,X'-yt);    %aplicando la traslaciï¿½n a coordendas xy
+obo=double(ro<=lo);             %creando la obstrucciï¿½n   
 clear ro                        %limpiando coordenadas trasladadas
-% Función a propagar con obstrucción
+% Funciï¿½n a propagar con obstrucciï¿½n
 g=g.*(1-obo);
 
 figure(2)
@@ -184,7 +184,7 @@ for jj=1:pn
 end
 %-----------------------------fin de rayos--------------------------------%
 
-%-------------------------Propagagación física----------------------------%
+%-------------------------Propagagaciï¿½n fï¿½sica----------------------------%
 % Propagador paraxial
 prop=exp(-1i*lamb*dz*(Kx.^2+(Kx').^2)/(4*pi));
 % prop=exp(1i*lamb*dz*(Kx.^2+(Kx').^2)/(2*k));
@@ -230,7 +230,7 @@ for ii=2:length(z) %corriendo todos los valores de sp
     g(1,1)=pxyz;
 %     writeVideo(vidObj1, getframe(gca));
     %-------------------------Calculo de Rayos----------------------------%   
-    % Dado z encontramos z+dz y la posición de r que le corresponde a este
+    % Dado z encontramos z+dz y la posiciï¿½n de r que le corresponde a este
     % punto z+dz con la pendiente del frente de onda que hay entre estos 
     % dos puntos
     H1r=laguerregz(nu,mu,wo,zl,x,z(ii))+1i*xlaguerregz(nu,mu,wo,zl,x,z(ii));
@@ -249,7 +249,7 @@ for ii=2:length(z) %corriendo todos los valores de sp
         %calculo de la pendiente en (r,z(ii)) de Hankel 2
         %Aqui el rayo que entra debido a Hankel 1 despues se rige por Hankel 2
         %cuando pasa por el origen, para ello calculamos el angulo con
-        %atan2 para saber en que cuadrante estamos y si así paso por el
+        %atan2 para saber en que cuadrante estamos y si asï¿½ paso por el
         %origen
         rayo(jj).rH2=((1/rayo(jj).mH2)*(z(ii)-z(ii-1))+rayo(jj).rH2);
         rayo(jj).xH2(ii)=rayo(jj).rH2*cos(rayo(jj).th);
@@ -302,7 +302,7 @@ g(1,1)=pxyz;
 
 figure(1)
 % set(gca,'un','n','pos',[0,0,1,1])
-% pxy=gy(1,1); gy(1,1)=1; % Para H2 (Recuerde normalizar respecto al máximo de la función en cuestión)
+% pxy=gy(1,1); gy(1,1)=1; % Para H2 (Recuerde normalizar respecto al mï¿½ximo de la funciï¿½n en cuestiï¿½n)
 pcolor(z/(zl/2),x/(sqrt(2)*wo),abs(gx).^1)
 shading interp
 colormap(mapgreen)

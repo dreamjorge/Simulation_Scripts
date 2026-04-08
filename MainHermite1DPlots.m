@@ -3,10 +3,10 @@
 % This script generate plots 1D of Hermite
 %% add path for classes and functions
 clear all
-addpath ParaxialBeams
-addpath ParaxialBeams\Addons
-addpath ParaxialBeams\Addons\export_fig-master
-addpath ParaxialBeams\Addons\panel-2.14
+addpath(fullfile('ParaxialBeams'))
+addpath(fullfile('ParaxialBeams', 'Addons'))
+addpath(fullfile('ParaxialBeams', 'Addons', 'export_fig-master'))
+addpath(fullfile('ParaxialBeams', 'Addons', 'panel-2.14'))
 mapgreen = AdvancedColormap('kgg',256,[0 100 255]/255);  %color of beam
 GenerateVideo = 'NO';
 %% indices of Hermite Gaussian Beams 

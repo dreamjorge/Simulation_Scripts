@@ -2,11 +2,11 @@
 % Ugalde-Ontiveros J.A. 
 %% add path for classes and functions
 clear all
-addpath ParaxialBeams
-addpath ParaxialBeams\Addons
-addpath ParaxialBeams\Addons\export_fig-master
-addpath ParaxialBeams\Addons\panel-2.14
-addpath ParaxialBeams\Addons\Plots_Functions
+addpath(fullfile('ParaxialBeams'))
+addpath(fullfile('ParaxialBeams', 'Addons'))
+addpath(fullfile('ParaxialBeams', 'Addons', 'export_fig-master'))
+addpath(fullfile('ParaxialBeams', 'Addons', 'panel-2.14'))
+addpath(fullfile('ParaxialBeams', 'Addons', 'Plots_Functions'))
 
 mapgreen = AdvancedColormap('kg',256,[0 255]/255);  %color of beam
 GenerateVideo = 'NO';

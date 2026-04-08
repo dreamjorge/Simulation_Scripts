@@ -2,7 +2,7 @@
 % Using refactored class architecture
 % Ugalde-Ontiveros J.A.
 
-addpath ParaxialBeams
+addpath(fullfile('ParaxialBeams'))
 
 %% Parameters
 w0 = 100e-6;
