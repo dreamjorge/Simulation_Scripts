@@ -35,7 +35,7 @@ classdef LaguerreBeam
 
                 % Laguerre polynomial: L_p^|l|(2*r^2 / w^2)
                 xArg = 2 * r.^2 ./ w.^2;
-                Lpl = LaguerreParameters.getAssociatedLaguerrePolynomial(p, l, xArg);
+                Lpl = PolynomialUtils.associatedLaguerre(p, l, xArg);
 
                 % GField = (w0/w)*exp(-r^2/w^2)*exp(i*phase). Gouy for LG adds (2p+|l|)*psi via PhiPhase.
                 obj.OpticalField = amplitudeTerm .* Lpl .* exp(1i * l * theta) .* exp(1i * params.PhiPhase) .* GField;

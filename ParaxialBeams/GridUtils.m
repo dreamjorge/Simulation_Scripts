@@ -3,11 +3,14 @@ classdef GridUtils
     % Compatible with GNU Octave and MATLAB
     
     properties
-        Nx, Ny, Nz
-        Dx, Dy, Dz
+        Nx, Ny, Nz = 0
+        Dx, Dy, Dz = 0
+    end
+
+    properties (Dependent)
         dx, dy, dz
     end
-    
+
     methods
         function obj = GridUtils(Nx, Ny, Dx, Dy, Nz, Dz)
             if nargin > 0
@@ -18,33 +21,39 @@ classdef GridUtils
                 if nargin >= 6
                     obj.Nz = Nz;
                     obj.Dz = Dz;
-                    obj.dz = Dz / Nz;
                 end
-                obj.dx = Dx / Nx;
-                obj.dy = Dy / Ny;
             end
         end
-        
+
+        function val = get.dx(obj)
+            val = obj.Dx / obj.Nx;
+        end
+
+        function val = get.dy(obj)
+            val = obj.Dy / obj.Ny;
+        end
+
+        function val = get.dz(obj)
+            if isempty(obj.Nz) || obj.Nz == 0
+                val = 0;
+            else
+                val = obj.Dz / obj.Nz;
+            end
+        end
+
         function [X, Y] = create2DGrid(obj)
             nx = -obj.Nx/2:obj.Nx/2-1;
             ny = -obj.Ny/2:obj.Ny/2-1;
-            x = nx * (obj.Dx / obj.Nx);
-            y = ny * (obj.Dy / obj.Ny);
+            x = nx * obj.dx;
+            y = ny * obj.dy;
             [X, Y] = meshgrid(x, y);
         end
-        
+
         function [Kx, Ky] = createFreqGrid(obj)
-            % Ensure properties are updated before grid generation
-            % as they might have been changed manually in the script
-            obj.dx = obj.Dx / obj.Nx;
-            obj.dy = obj.Dy / obj.Ny;
-            
             nx = -obj.Nx/2:obj.Nx/2-1;
             ny = -obj.Ny/2:obj.Ny/2-1;
-            dux = 1 / obj.Dx;
-            duy = 1 / obj.Dy;
-            u = nx * dux;
-            v = ny * duy;
+            u = nx * (1 / obj.Dx);
+            v = ny * (1 / obj.Dy);
             [Kx, Ky] = meshgrid(2*pi*u, 2*pi*v);
         end
         
@@ -69,7 +78,7 @@ classdef GridUtils
         function [Kx, Ky] = freqGrid(N, D)
             n = -N/2:N/2-1;
             u = n * (1 / D);
-            [Kx, Ky] = meshgrid(2*pi*u);
+            [Kx, Ky] = meshgrid(2*pi*u, 2*pi*u);
         end
         
         function [r, theta] = polarGrid(N, D)
