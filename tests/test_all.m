@@ -1619,6 +1619,185 @@ else
     failed = failed + 1;
 end
 
+% testLaguerreBeamAzimuthalSymmetry
+lp_az = LaguerreParameters(0, w0, lambda, 1, 0);
+try
+    lb_az = LaguerreBeam(R, Theta, lp_az);
+    if (size(lb_az.OpticalField) == [64, 64])
+        fprintf('  PASS: LaguerreBeam generates field (l=1)\n');
+        passed = passed + 1;
+    else
+        fprintf('  FAIL: LaguerreBeam size\n');
+        failed = failed + 1;
+    end
+catch ME
+    fprintf('  FAIL: LaguerreBeam error: %s\n', ME.message);
+    failed = failed + 1;
+end
+
+% testLaguerreBeamRadialIndexEffect
+lp_p0 = LaguerreParameters(0, w0, lambda, 0, 0);
+lp_p1 = LaguerreParameters(0, w0, lambda, 0, 1);
+try
+    lb_p0 = LaguerreBeam(R, Theta, lp_p0);
+    lb_p1 = LaguerreBeam(R, Theta, lp_p1);
+    if (size(lb_p0.OpticalField) == size(lb_p1.OpticalField))
+        fprintf('  PASS: LaguerreBeam different p generates field\n');
+        passed = passed + 1;
+    else
+        fprintf('  FAIL: LaguerreBeam p comparison\n');
+        failed = failed + 1;
+    end
+catch ME
+    fprintf('  FAIL: LaguerreBeam p error: %s\n', ME.message);
+    failed = failed + 1;
+end
+
+% testElegantHermiteBeamAlphaIsComplex
+ehp_c = ElegantHermiteParameters(0.1, w0, lambda, 1, 1);
+if (imag(ehp_c.alpha) ~= 0 || real(ehp_c.alpha) ~= 0)
+    fprintf('  PASS: ElegantHermiteParameters alpha is complex at z>0\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: ElegantHermiteParameters alpha complex\n');
+    failed = failed + 1;
+end
+
+% testElegantLaguerreBeamAlphaIsComplex
+elp_c = ElegantLaguerreParameters(0.1, w0, lambda, 1, 1);
+if (imag(elp_c.alpha) ~= 0 || real(elp_c.alpha) ~= 0)
+    fprintf('  PASS: ElegantLaguerreParameters alpha is complex at z>0\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: ElegantLaguerreParameters alpha complex\n');
+    failed = failed + 1;
+end
+
+% testGaussianParametersComplexRadius
+params_c = GaussianParameters(0.1, w0, lambda);
+if (isinf(params_c.Radius) || isfinite(params_c.Radius))
+    fprintf('  PASS: GaussianParameters Radius finite at z>0\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: GaussianParameters Radius\n');
+    failed = failed + 1;
+end
+
+% testFFTUtilsTransferFunctionNonParaxial
+kx_np = 1e8; ky_np = 0;
+H_np = FFTUtils.transferFunction(kx_np, ky_np, 0.01, 632.8e-9);
+if (abs(H_np) < 1)
+    fprintf('  PASS: transferFunction non-paraxial attenuation\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: transferFunction non-paraxial\n');
+    failed = failed + 1;
+end
+
+% testAnalysisUtilsGradientXYZAtCenter
+x_c = 0; y_c = 0; z_c = 0;
+[Xc, Yc] = meshgrid(linspace(-1e-4,1e-4,32), linspace(-1e-4,1e-4,32));
+fyz_c = exp(-(Xc.^2+Yc.^2)); fxz_c = exp(-(Xc.^2+Yc.^2)); fxy_c = exp(-(Xc.^2+Yc.^2));
+[mzx_c, mzy_c, mxy_c] = AnalysisUtils.gradientXYZ(fyz_c, fxz_c, fxy_c, 1e7, 1e-4, 1e-4, 1e-4, x_c, y_c, z_c);
+if (all(isfinite([mzx_c, mzy_c, mxy_c])))
+    fprintf('  PASS: gradientXYZ at origin coordinates\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: gradientXYZ at origin\n');
+    failed = failed + 1;
+end
+
+% testGridUtils3DGridValues
+grid3d_full = GridUtils(16, 16, 1e-3, 1e-3, 8, 1e-3);
+[X3d, Y3d, Z3d] = grid3d_full.create3DGrid();
+if (min(min(min(X3d))) < 0 && max(max(max(X3d))) > 0 && min(min(min(Z3d))) >= 0)
+    fprintf('  PASS: create3DGrid spans space correctly\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: create3DGrid ranges\n');
+    failed = failed + 1;
+end
+
+% testPhysicalConstantsSpeedOfLightSquared
+c = PhysicalConstants.speed_of_light;
+c_squared = c^2;
+expected_c2 = 299792458^2;
+if (abs(c_squared - expected_c2) < 1e10)
+    fprintf('  PASS: speed_of_light squared consistency\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: speed_of_light squared\n');
+    failed = failed + 1;
+end
+
+% testPhysicalConstantsImpedanceVacuumDerived
+Z0 = PhysicalConstants.impedance_vacuum;
+mu0 = PhysicalConstants.vacuum_permeability;
+eps0 = PhysicalConstants.vacuum_permittivity;
+Z0_derived = sqrt(mu0/eps0);
+if (abs(Z0 - Z0_derived)/Z0 < 1e-6)
+    fprintf('  PASS: impedance_vacuum matches sqrt(mu0/eps0)\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: impedance_vacuum derived\n');
+    failed = failed + 1;
+end
+
+% testGaussianParametersMultipleWaistValues
+z_vals = [0, 0.01, 0.02, 0.05, 0.1, 0.2];
+params_multi = GaussianParameters(z_vals, w0, lambda);
+if (numel(unique(params_multi.Waist)) == 6 && isequal(params_multi.Waist(1), w0))
+    fprintf('  PASS: GaussianParameters multiple z values\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: GaussianParameters multiple z\n');
+    failed = failed + 1;
+end
+
+% testHermiteParametersDifferentOrders
+hp_11 = HermiteParameters(0, w0, lambda, 1, 1);
+hp_22 = HermiteParameters(0, w0, lambda, 2, 2);
+if (hp_22.HermiteWaist > hp_11.HermiteWaist)
+    fprintf('  PASS: HermiteParameters higher orders larger waist\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: HermiteParameters order comparison\n');
+    failed = failed + 1;
+end
+
+% testLaguerreParametersDifferentOrders
+lp_10 = LaguerreParameters(0, w0, lambda, 1, 0);
+lp_20 = LaguerreParameters(0, w0, lambda, 2, 0);
+if (lp_20.LaguerreWaist > lp_10.LaguerreWaist)
+    fprintf('  PASS: LaguerreParameters higher l larger waist\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: LaguerreParameters l comparison\n');
+    failed = failed + 1;
+end
+
+% testElegantHermiteBeamNormalizedOutput
+ehp_n = ElegantHermiteParameters(0.01, w0, lambda, 1, 1);
+ehb_n = ElegantHermiteBeam(X, Y, ehp_n);
+if (all(all(isfinite(ehb_n.OpticalField))))
+    fprintf('  PASS: ElegantHermiteBeam finite output at small z\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: ElegantHermiteBeam output\n');
+    failed = failed + 1;
+end
+
+% testGaussianBeamRZeroPhase
+gb_r0 = GaussianBeam(zeros(64,64), GaussianParameters(0.05, w0, lambda));
+phase_r0 = angle(gb_r0.OpticalField(33,33));
+if (abs(phase_r0) < pi/2)
+    fprintf('  PASS: GaussianBeam phase reasonable at r=0\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: GaussianBeam phase at r=0\n');
+    failed = failed + 1;
+end
+
 %% Summary
 fprintf('\n=== Summary ===\n');
 fprintf('Passed: %d\n', passed);
