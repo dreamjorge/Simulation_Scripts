@@ -1254,6 +1254,190 @@ else
     failed = failed + 1;
 end
 
+% testHermiteBeamStaticHermitePoly
+H0 = HermiteBeam.hermitePoly(0, [0, 1, 2]);
+if (isequal(H0, [1, 1, 1]))
+    fprintf('  PASS: HermiteBeam hermitePoly n=0\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: HermiteBeam hermitePoly n=0\n');
+    failed = failed + 1;
+end
+
+% testHermiteBeamStaticHermitePolyN1
+H1 = HermiteBeam.hermitePoly(1, [0, 1, 2]);
+expected_H1 = [0, 2, 4];
+if (max(abs(H1 - expected_H1)) < 1e-10)
+    fprintf('  PASS: HermiteBeam hermitePoly n=1\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: HermiteBeam hermitePoly n=1\n');
+    failed = failed + 1;
+end
+
+% testHermiteBeamStaticHermitePolyN2
+H2 = HermiteBeam.hermitePoly(2, [0, 1, 2]);
+expected_H2 = [4*0^2 - 2, 4*1^2 - 2, 4*2^2 - 2];
+if (max(abs(H2 - expected_H2)) < 1e-10)
+    fprintf('  PASS: HermiteBeam hermitePoly n=2\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: HermiteBeam hermitePoly n=2\n');
+    failed = failed + 1;
+end
+
+% testHermiteBeamStaticHermitePolyN3
+H3 = HermiteBeam.hermitePoly(3, [0, 1, 2]);
+expected_H3 = [8*0^3 - 12*0, 8*1^3 - 12*1, 8*2^3 - 12*2];
+if (max(abs(H3 - expected_H3)) < 1e-10)
+    fprintf('  PASS: HermiteBeam hermitePoly n=3\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: HermiteBeam hermitePoly n=3\n');
+    failed = failed + 1;
+end
+
+% testHermiteBeamStoresCoordinates
+hb_coords = HermiteBeam(X, Y, hp);
+if (isequal(size(hb_coords.x), [64, 64]) && isequal(size(hb_coords.y), [64, 64]))
+    fprintf('  PASS: HermiteBeam stores coordinates\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: HermiteBeam coordinates\n');
+    failed = failed + 1;
+end
+
+% testHermiteBeamPhaseIncluded
+hp_phase = HermiteParameters(0.1, w0, lambda, 2, 1);
+hb_phase = HermiteBeam(X, Y, hp_phase);
+if (all(all(isfinite(hb_phase.OpticalField))))
+    fprintf('  PASS: HermiteBeam includes phase factor\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: HermiteBeam phase\n');
+    failed = failed + 1;
+end
+
+% testLaguerreBeamStoresTheta
+lb_theta = LaguerreBeam(R, Theta, lp);
+if (size(lb_theta.OpticalField) == [64, 64])
+    fprintf('  PASS: LaguerreBeam generates field\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: LaguerreBeam field\n');
+    failed = failed + 1;
+end
+
+% testElegantHermiteBeamSymmetry
+ehp_sym = ElegantHermiteParameters(0, w0, lambda, 1, 1);
+ehb_sym = ElegantHermiteBeam(X, Y, ehp_sym);
+if (all(all(isfinite(ehb_sym.OpticalField))))
+    fprintf('  PASS: ElegantHermiteBeam finite field\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: ElegantHermiteBeam field\n');
+    failed = failed + 1;
+end
+
+% testFFTUtilsTransferFunctionMatrixInput
+kx_mat = ones(32,32) * 1e5;
+ky_mat = ones(32,32) * 1e5;
+H_mat = FFTUtils.transferFunction(kx_mat, ky_mat, 0.01, 632.8e-9);
+if (size(H_mat) == [32, 32] && all(all(isfinite(H_mat))))
+    fprintf('  PASS: transferFunction matrix input\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: transferFunction matrix\n');
+    failed = failed + 1;
+end
+
+% testGaussianParametersNegativeZ
+params_neg_z = GaussianParameters(-0.1, w0, lambda);
+if (params_neg_z.zCoordinate == -0.1 && params_neg_z.Waist > w0)
+    fprintf('  PASS: GaussianParameters handles negative z\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: GaussianParameters negative z\n');
+    failed = failed + 1;
+end
+
+% testPhysicalConstantsVectorizedWaveNumber
+lambda_vec = [532e-9, 632.8e-9, 1064e-9];
+k_vec = PhysicalConstants.waveNumber(lambda_vec);
+expected_k_vec = 2*pi ./ lambda_vec;
+if (max(abs(k_vec - expected_k_vec)./expected_k_vec) < 1e-10)
+    fprintf('  PASS: waveNumber vectorized\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: waveNumber vectorized\n');
+    failed = failed + 1;
+end
+
+% testPhysicalConstantsVectorizedRayleigh
+w0_vec = [50e-6, 100e-6, 200e-6];
+lambda_single = 632.8e-9;
+zr_vec = PhysicalConstants.rayleighDistance(w0_vec, lambda_single);
+expected_zr_vec = pi * w0_vec.^2 / lambda_single;
+if (max(abs(zr_vec - expected_zr_vec)./expected_zr_vec) < 1e-10)
+    fprintf('  PASS: rayleighDistance vectorized w0\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: rayleighDistance vectorized\n');
+    failed = failed + 1;
+end
+
+% testGridUtilsNonSquare
+grid_ns = GridUtils(128, 64, 2e-3, 1e-3);
+[X_ns, Y_ns] = grid_ns.create2DGrid();
+if (size(X_ns,1) == 64 && size(X_ns,2) == 128 && abs(X_ns(1,128) - X_ns(1,1)) > abs(Y_ns(64,1) - Y_ns(1,1)))
+    fprintf('  PASS: GridUtils non-square dimensions\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: GridUtils non-square\n');
+    failed = failed + 1;
+end
+
+% testGridUtilsFreqGridAtOrigin
+grid_freq = GridUtils(64, 64, 1e-3, 1e-3);
+[Kxf, Kyf] = grid_freq.createFreqGrid();
+if (abs(Kxf(33,33)) < 1e-10 && abs(Kyf(33,33)) < 1e-10)
+    fprintf('  PASS: createFreqGrid at origin zero\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: createFreqGrid origin\n');
+    failed = failed + 1;
+end
+
+% testGaussianParametersDiffWaists
+w0_a = 50e-6; w0_b = 150e-6;
+params_a = GaussianParameters(0.05, w0_a, lambda);
+params_b = GaussianParameters(0.05, w0_b, lambda);
+if (params_b.RayleighDistance > params_a.RayleighDistance && params_b.InitialWaist > params_a.InitialWaist)
+    fprintf('  PASS: GaussianParameters larger w0 gives larger initial waist and zr\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: GaussianParameters w0 comparison\n');
+    failed = failed + 1;
+end
+
+% testAnalysisUtilsGradientXYZNonZeroFields
+Nx = 32; Ny = 32; Nz = 32;
+dx = 1e-4; dy = 1e-4; dz = 1e-4;
+k = 1e7;
+x = 1e-5; y = 1e-5; z = 1e-5;
+[Xg, Yg] = meshgrid(linspace(-1,1,Nx), linspace(-1,1,Ny));
+fyz = exp(-(Xg.^2 + Yg.^2));
+fxz = exp(-(Xg.^2 + Yg.^2));
+fxy = exp(-(Xg.^2 + Yg.^2));
+[mzx2, mzy2, mxy2] = AnalysisUtils.gradientXYZ(fyz, fxz, fxy, k, dx, dy, dz, x, y, z);
+if (all(isfinite([mzx2, mzy2, mxy2])))
+    fprintf('  PASS: gradientXYZ with Gaussian fields\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: gradientXYZ Gaussian fields\n');
+    failed = failed + 1;
+end
+
 %% Summary
 fprintf('\n=== Summary ===\n');
 fprintf('Passed: %d\n', passed);
