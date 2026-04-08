@@ -1438,6 +1438,187 @@ else
     failed = failed + 1;
 end
 
+% testElegantLaguerreBeamField
+elp_elg = ElegantLaguerreParameters(0.05, w0, lambda, 1, 1);
+elb_elg = ElegantLaguerreBeam(R, Theta, elp_elg);
+if (size(elb_elg.OpticalField) == [64, 64] && all(all(isfinite(elb_elg.OpticalField))))
+    fprintf('  PASS: ElegantLaguerreBeam field at z>0\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: ElegantLaguerreBeam z>0\n');
+    failed = failed + 1;
+end
+
+% testElegantLaguerreBeamAtWaist
+elp_waist = ElegantLaguerreParameters(0, w0, lambda, 1, 0);
+elb_waist = ElegantLaguerreBeam(R, Theta, elp_waist);
+if (all(all(isfinite(elb_waist.OpticalField))))
+    fprintf('  PASS: ElegantLaguerreBeam at waist finite\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: ElegantLaguerreBeam waist\n');
+    failed = failed + 1;
+end
+
+% testFFTUtilsTransferFunctionAbsOne
+kx = linspace(-1e6,1e6,32);
+ky = linspace(-1e6,1e6,32);
+[KX, KY] = meshgrid(kx, ky);
+H = FFTUtils.transferFunction(KX, KY, 0.001, 632.8e-9);
+if (max(max(abs(abs(H) - 1))) < 1e-10)
+    fprintf('  PASS: transferFunction has unit magnitude\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: transferFunction magnitude\n');
+    failed = failed + 1;
+end
+
+% testGridUtilsFreqGridRange
+grid_sym = GridUtils(64, 64, 1e-3, 1e-3);
+[Kx_sym, Ky_sym] = grid_sym.createFreqGrid();
+if (min(min(Kx_sym)) < 0 && max(max(Kx_sym)) > 0 && min(min(Ky_sym)) < 0 && max(max(Ky_sym)) > 0)
+    fprintf('  PASS: createFreqGrid spans negative and positive\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: createFreqGrid range\n');
+    failed = failed + 1;
+end
+
+% testGaussianParametersGouySymmetry
+z_pos = 0.05; z_neg = -0.05;
+params_pos = GaussianParameters(z_pos, w0, lambda);
+params_neg = GaussianParameters(z_neg, w0, lambda);
+if (abs(params_pos.GouyPhase + params_neg.GouyPhase) < 1e-10)
+    fprintf('  PASS: GouyPhase anti-symmetric about waist\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: GouyPhase symmetry\n');
+    failed = failed + 1;
+end
+
+% testGaussianParametersRadiusSymmetry
+if (abs(params_pos.Radius + params_neg.Radius) < 1e-10)
+    fprintf('  PASS: Radius symmetric about waist\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: Radius symmetry\n');
+    failed = failed + 1;
+end
+
+% testHermiteParametersPropagation
+hp_prop1 = HermiteParameters(0.05, w0, lambda, 1, 0);
+hp_prop2 = HermiteParameters(0.1, w0, lambda, 1, 0);
+if (hp_prop2.Waist > hp_prop1.Waist)
+    fprintf('  PASS: HermiteParameters waist grows with z\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: HermiteParameters waist propagation\n');
+    failed = failed + 1;
+end
+
+% testLaguerreParametersPropagation
+lp_prop1 = LaguerreParameters(0.05, w0, lambda, 1, 0);
+lp_prop2 = LaguerreParameters(0.1, w0, lambda, 1, 0);
+if (lp_prop2.LaguerreWaist > lp_prop1.LaguerreWaist)
+    fprintf('  PASS: LaguerreParameters waist grows with z\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: LaguerreParameters waist propagation\n');
+    failed = failed + 1;
+end
+
+% testElegantHermiteBeamHigherOrderZ
+grid_small = GridUtils(32, 32, 1e-4, 1e-4);
+[Xs, Ys] = grid_small.create2DGrid();
+ehp_z = ElegantHermiteParameters(0.1, w0, lambda, 2, 2);
+ehb_z = ElegantHermiteBeam(Xs, Ys, ehp_z);
+if (all(all(isfinite(ehb_z.OpticalField))))
+    fprintf('  PASS: ElegantHermiteBeam at moderate z\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: ElegantHermiteBeam moderate z\n');
+    failed = failed + 1;
+end
+
+% testGaussianBeamPhaseRealAtWaist
+params_real = GaussianParameters(0, w0, lambda);
+gb_real = GaussianBeam(zeros(64,64), params_real);
+phase_real = angle(gb_real.OpticalField(33,33));
+if (abs(phase_real) < 1e-10)
+    fprintf('  PASS: GaussianBeam phase zero at waist\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: GaussianBeam phase at waist\n');
+    failed = failed + 1;
+end
+
+% testPhysicalConstantsWaveNumberDifferentLambdas
+lambda_verde = 532e-9;
+lambda_rojo = 633e-9;
+lambda_infra = 1064e-9;
+k_verde = PhysicalConstants.waveNumber(lambda_verde);
+k_rojo = PhysicalConstants.waveNumber(lambda_rojo);
+k_infra = PhysicalConstants.waveNumber(lambda_infra);
+if (k_verde > k_rojo && k_rojo > k_infra)
+    fprintf('  PASS: waveNumber inversely proportional to lambda\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: waveNumber lambda relation\n');
+    failed = failed + 1;
+end
+
+% testPhysicalConstantsRayleighProportionalW0Squared
+w0_small = 50e-6; w0_large = 100e-6;
+zr_small = PhysicalConstants.rayleighDistance(w0_small, lambda);
+zr_large = PhysicalConstants.rayleighDistance(w0_large, lambda);
+ratio_w0 = (w0_large/w0_small)^2;
+ratio_zr = zr_large/zr_small;
+if (abs(ratio_zr - ratio_w0) / ratio_w0 < 1e-10)
+    fprintf('  PASS: rayleighDistance proportional to w0^2\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: rayleighDistance w0^2\n');
+    failed = failed + 1;
+end
+
+% testAnalysisUtilsGradientRZLargeK
+k_large = 1e9;
+fr_large = ones(1, 100); fz_large = ones(1, 100);
+mzr_large = AnalysisUtils.gradientRZ(fr_large, fz_large, k_large, 1e-6, 1e-6, 1e-7, 1e-7);
+if (isfinite(mzr_large))
+    fprintf('  PASS: gradientRZ large k value\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: gradientRZ large k\n');
+    failed = failed + 1;
+end
+
+% testGridUtilsPolarGridMaxRadius
+[r_max, theta_max] = GridUtils.polarGrid(64, 1e-3);
+if (max(max(r_max)) > 0 && min(min(theta_max)) >= -pi && max(max(theta_max)) <= pi)
+    fprintf('  PASS: polarGrid radius positive, theta in [-pi,pi]\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: polarGrid ranges\n');
+    failed = failed + 1;
+end
+
+% testHermiteBeamZeroOrderEqualsGaussian
+grid_test = GridUtils(64, 64, 1e-3, 1e-3);
+[X_test, Y_test] = grid_test.create2DGrid();
+[R_test, ~] = cart2pol(X_test, Y_test);
+hp_zero = HermiteParameters(0, w0, lambda, 0, 0);
+hb_zero = HermiteBeam(X_test, Y_test, hp_zero);
+gb_test = GaussianBeam(R_test, GaussianParameters(0, w0, lambda));
+diff_center = abs(hb_zero.OpticalField(33,33) - gb_test.OpticalField(33,33));
+if (diff_center < 1e-10)
+    fprintf('  PASS: HermiteBeam n=m=0 same field at center as GaussianBeam\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: HermiteBeam zero order vs Gaussian\n');
+    failed = failed + 1;
+end
+
 %% Summary
 fprintf('\n=== Summary ===\n');
 fprintf('Passed: %d\n', passed);
