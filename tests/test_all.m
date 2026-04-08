@@ -98,6 +98,94 @@ else
     failed = failed + 1;
 end
 
+% testPhysicalConstantsSpeedOfLight
+c = PhysicalConstants.speed_of_light;
+expected_c = 299792458;
+if (abs(c - expected_c) < 1)
+    fprintf('  PASS: speed_of_light constant\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: speed_of_light constant\n');
+    failed = failed + 1;
+end
+
+% testPhysicalConstantsPlanck
+h = PhysicalConstants.planck;
+expected_h = 6.62607015e-34;
+if (abs(h - expected_h) < 1e-40)
+    fprintf('  PASS: planck constant\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: planck constant\n');
+    failed = failed + 1;
+end
+
+% testPhysicalConstantsPlanckReduced
+hbar = PhysicalConstants.planck_reduced;
+expected_hbar = 1.054571817e-34;
+if (abs(hbar - expected_hbar) < 1e-40)
+    fprintf('  PASS: planck_reduced constant\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: planck_reduced constant\n');
+    failed = failed + 1;
+end
+
+% testPhysicalConstantsVacuumPermittivity
+eps0 = PhysicalConstants.vacuum_permittivity;
+expected_eps0 = 8.8541878128e-12;
+if (abs(eps0 - expected_eps0) < 1e-20)
+    fprintf('  PASS: vacuum_permittivity constant\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: vacuum_permittivity constant\n');
+    failed = failed + 1;
+end
+
+% testPhysicalConstantsVacuumPermeability
+mu0 = PhysicalConstants.vacuum_permeability;
+expected_mu0 = 1.25663706212e-6;
+if (abs(mu0 - expected_mu0) < 1e-15)
+    fprintf('  PASS: vacuum_permeability constant\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: vacuum_permeability constant\n');
+    failed = failed + 1;
+end
+
+% testPhysicalConstantsImpedanceVacuum
+Z0 = PhysicalConstants.impedance_vacuum;
+expected_Z0 = 376.730313668;
+if (abs(Z0 - expected_Z0) < 1e-6)
+    fprintf('  PASS: impedance_vacuum constant\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: impedance_vacuum constant\n');
+    failed = failed + 1;
+end
+
+% testWaistAtZVectorized
+z_vec = [0, 0.05, 0.1, 0.2];
+w_vec = PhysicalConstants.waistAtZ(w0, z_vec, lambda);
+if (numel(w_vec) == 4 && w_vec(1) == w0 && w_vec(4) > w_vec(1))
+    fprintf('  PASS: waistAtZ vectorized input\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: waistAtZ vectorized input\n');
+    failed = failed + 1;
+end
+
+% testRadiusOfCurvatureVectorized
+z_vec = [0, 0.05, 0.1, 0.2];
+R_vec = PhysicalConstants.radiusOfCurvature(z_vec, zr);
+if (isinf(R_vec(1)) && ~isinf(R_vec(2)) && ~isinf(R_vec(4)))
+    fprintf('  PASS: radiusOfCurvature vectorized with z=0 Inf\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: radiusOfCurvature vectorized\n');
+    failed = failed + 1;
+end
+
 %% Test GridUtils
 fprintf('\n--- GridUtils ---\n');
 
@@ -232,6 +320,80 @@ else
     failed = failed + 1;
 end
 
+% testFFTN3DRoundtrip
+g3d = exp(-(X.^2 + Y.^2));
+fftOps3d = FFTUtils(true, true);
+g3d_rec = fftOps3d.ifftn(fftOps3d.fftn(g3d));
+if (max(max(max(abs(g3d - g3d_rec)))) < 1e-10)
+    fprintf('  PASS: fftn 3D roundtrip\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: fftn 3D roundtrip\n');
+    failed = failed + 1;
+end
+
+% testTransferSimple
+kx = 0; ky = 0;
+z = 0.1;
+lambda = 632.8e-9;
+H_simple = FFTUtils.transferSimple(kx, ky, z, lambda);
+k = 2*pi/lambda;
+expected_simple = exp(1i*k*z);
+if (abs(H_simple - expected_simple) < 1e-10)
+    fprintf('  PASS: transferSimple phase\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: transferSimple phase\n');
+    failed = failed + 1;
+end
+
+% testFFT2Centered
+g = exp(-(X.^2 + Y.^2));
+G_centered = FFTUtils.fft2_centered(g);
+g_rec_centered = FFTUtils.ifft2_centered(G_centered);
+if (max(max(abs(g - g_rec_centered))) < 1e-10)
+    fprintf('  PASS: fft2_centered roundtrip\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: fft2_centered roundtrip\n');
+    failed = failed + 1;
+end
+
+% testFFT2Std
+G_std = FFTUtils.fft2_std(g);
+g_rec_std = FFTUtils.ifft2_std(G_std);
+if (max(max(abs(g - g_rec_std))) < 1e-10)
+    fprintf('  PASS: fft2_std roundtrip\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: fft2_std roundtrip\n');
+    failed = failed + 1;
+end
+
+% testFFTUtilsNoShift
+fftOps_noshift = FFTUtils(true, false);
+g_noshift = fftOps_noshift.fft2(g);
+g_rec_noshift = fftOps_noshift.ifft2(g_noshift);
+if (max(max(abs(g - g_rec_noshift))) < 1e-10)
+    fprintf('  PASS: fft2 no-shift roundtrip\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: fft2 no-shift roundtrip\n');
+    failed = failed + 1;
+end
+
+% testFFTUtilsNoNormalize
+fftOps_nonorm = FFTUtils(false, true);
+g_nonorm = fftOps_nonorm.fft2(g);
+g_rec_nonorm = fftOps_nonorm.ifft2(g_nonorm);
+if (max(max(abs(g - g_rec_nonorm))) < 1e-10)
+    fprintf('  PASS: fft2 no-normalize roundtrip\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: fft2 no-normalize roundtrip\n');
+    failed = failed + 1;
+end
+
 %% Test GaussianParameters
 fprintf('\n--- GaussianParameters ---\n');
 
@@ -343,6 +505,81 @@ if (params1.isEqual(params2))
     passed = passed + 1;
 else
     fprintf('  FAIL: GaussianParameters isEqual\n');
+    failed = failed + 1;
+end
+
+% testStaticRayleighDistance
+zr_static = GaussianParameters.rayleighDistance(w0, lambda);
+zr_expected = pi * w0^2 / lambda;
+if (abs(zr_static - zr_expected) / zr_expected < 1e-5)
+    fprintf('  PASS: GaussianParameters static rayleighDistance\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: GaussianParameters static rayleighDistance\n');
+    failed = failed + 1;
+end
+
+% testStaticGetWaist
+w_static = GaussianParameters.getWaist(0.1, w0, zr_expected);
+w_expected = w0 * sqrt(1 + (0.1/zr_expected)^2);
+if (abs(w_static - w_expected) / w_expected < 1e-5)
+    fprintf('  PASS: GaussianParameters static getWaist\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: GaussianParameters static getWaist\n');
+    failed = failed + 1;
+end
+
+% testStaticGetPhase
+phase_static = GaussianParameters.getPhase(0.05, zr_expected);
+phase_expected = atan(0.05/zr_expected);
+if (abs(phase_static - phase_expected) < 1e-10)
+    fprintf('  PASS: GaussianParameters static getPhase\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: GaussianParameters static getPhase\n');
+    failed = failed + 1;
+end
+
+% testStaticGetRadius
+R_static = GaussianParameters.getRadius(0.1, zr_expected);
+R_expected = 0.1 * (1 + (zr_expected/0.1)^2);
+if (abs(R_static - R_expected) / R_expected < 1e-5)
+    fprintf('  PASS: GaussianParameters static getRadius\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: GaussianParameters static getRadius\n');
+    failed = failed + 1;
+end
+
+% testStaticGetRadiusAtZero
+R_z0 = GaussianParameters.getRadius(0, zr_expected);
+if (isinf(R_z0))
+    fprintf('  PASS: GaussianParameters static getRadius at z=0\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: GaussianParameters static getRadius at z=0\n');
+    failed = failed + 1;
+end
+
+% testRadiusProperty
+params_R = GaussianParameters(0.1, w0, lambda);
+if (abs(params_R.Radius - R_expected) / R_expected < 1e-5)
+    fprintf('  PASS: GaussianParameters Radius property\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: GaussianParameters Radius property\n');
+    failed = failed + 1;
+end
+
+% testAmplitudeProperty
+params_A = GaussianParameters(0, w0, lambda);
+expected_Amp = 1 / w0;
+if (abs(params_A.Amplitude - expected_Amp) / expected_Amp < 1e-5)
+    fprintf('  PASS: GaussianParameters Amplitude property\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: GaussianParameters Amplitude property\n');
     failed = failed + 1;
 end
 
