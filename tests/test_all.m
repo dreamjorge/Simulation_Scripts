@@ -2688,6 +2688,134 @@ else
     failed = failed + 1;
 end
 
+% testPhysicalConstantsPlanckReduced
+hbar = PhysicalConstants.planck_reduced;
+if (hbar > 0 && hbar < PhysicalConstants.planck)
+    fprintf('  PASS: planck_reduced is between 0 and planck\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: planck_reduced range\n');
+    failed = failed + 1;
+end
+
+% testPhysicalConstantsVacuumPermittivity
+eps0 = PhysicalConstants.vacuum_permittivity;
+if (eps0 > 0 && eps0 < 1e-10)
+    fprintf('  PASS: vacuum_permittivity is small positive\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: vacuum_permittivity\n');
+    failed = failed + 1;
+end
+
+% testPhysicalConstantsVacuumPermeability
+mu0 = PhysicalConstants.vacuum_permeability;
+if (mu0 > 0 && mu0 < 1e-5)
+    fprintf('  PASS: vacuum_permeability is small positive\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: vacuum_permeability\n');
+    failed = failed + 1;
+end
+
+% testGaussianParameterskIsWaveNumber
+k_w = PhysicalConstants.waveNumber(lambda);
+params_kw = GaussianParameters(0, w0, lambda);
+if (abs(params_kw.k - k_w) / k_w < 1e-14)
+    fprintf('  PASS: GaussianParameters k matches waveNumber\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: k matches\n');
+    failed = failed + 1;
+end
+
+% testGaussianParametersRayleighIsRayleigh
+zr_r = PhysicalConstants.rayleighDistance(w0, lambda);
+params_zrr = GaussianParameters(0, w0, lambda);
+if (abs(params_zrr.RayleighDistance - zr_r) / zr_r < 1e-14)
+    fprintf('  PASS: GaussianParameters Rayleigh matches rayleighDistance\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: Rayleigh matches\n');
+    failed = failed + 1;
+end
+
+% testHermiteParametersNProperty
+hp_n = HermiteParameters(0.05, w0, lambda, 5, 3);
+if (hp_n.n == 5 && hp_n.m == 3)
+    fprintf('  PASS: HermiteParameters stores n and m\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: HermiteParameters n m\n');
+    failed = failed + 1;
+end
+
+% testLaguerreParametersLProperty
+lp_l = LaguerreParameters(0.05, w0, lambda, 4, 2);
+if (lp_l.l == 4 && lp_l.p == 2)
+    fprintf('  PASS: LaguerreParameters stores l and p\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: LaguerreParameters l p\n');
+    failed = failed + 1;
+end
+
+% testFFTUtilsTransferFunctionSameK
+kx_same = 1e5;
+H1 = FFTUtils.transferFunction(kx_same, 0, 0.05, lambda);
+H2 = FFTUtils.transferFunction(kx_same, 0, 0.05, lambda);
+if (abs(H1 - H2) < 1e-14)
+    fprintf('  PASS: transferFunction deterministic\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: transferFunction deterministic\n');
+    failed = failed + 1;
+end
+
+% testGridUtilsFreqGridValues
+grid_fv = GridUtils(64, 64, 1e-3, 1e-3);
+[Kxfv, Kyfv] = grid_fv.createFreqGrid();
+center_k = Kxfv(33, 33);
+if (abs(center_k) < 1)
+    fprintf('  PASS: createFreqGrid center near zero\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: createFreqGrid center\n');
+    failed = failed + 1;
+end
+
+% testGridUtilsPolarGridValues
+[rpv, tpv] = GridUtils.polarGrid(32, 1e-3);
+if (rpv(17,17) == 0 && tpv(17,17) == 0)
+    fprintf('  PASS: polarGrid center at origin\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: polarGrid center\n');
+    failed = failed + 1;
+end
+
+% testGaussianBeamFieldNotZero
+params_nz = GaussianParameters(0.05, w0, lambda);
+gb_nz = GaussianBeam(R, params_nz);
+if (max(max(abs(gb_nz.OpticalField))) > 0)
+    fprintf('  PASS: GaussianBeam field is non-zero\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: GaussianBeam non-zero\n');
+    failed = failed + 1;
+end
+
+% testHermiteBeamFieldNotZero
+hp_nz = HermiteParameters(0.05, w0, lambda, 1, 1);
+hb_nz = HermiteBeam(X, Y, hp_nz);
+if (size(hb_nz.OpticalField) == [64, 64])
+    fprintf('  PASS: HermiteBeam produces field\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: HermiteBeam non-zero\n');
+    failed = failed + 1;
+end
+
 %% Summary
 fprintf('\n=== Summary ===\n');
 fprintf('Passed: %d\n', passed);
