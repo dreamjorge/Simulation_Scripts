@@ -2109,6 +2109,156 @@ else
     failed = failed + 1;
 end
 
+% testPhysicalConstantsGouyPhaseRange
+z_test = linspace(-0.2, 0.2, 50);
+zr_test2 = pi*w0^2/lambda;
+gouy_test = PhysicalConstants.gouyPhase(z_test, zr_test2);
+if (min(gouy_test) >= -pi/2 && max(gouy_test) <= pi/2)
+    fprintf('  PASS: gouyPhase in [-pi/2, pi/2]\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: gouyPhase range\n');
+    failed = failed + 1;
+end
+
+% testPhysicalConstantsWaistAtZSymmetry
+w_z_pos = PhysicalConstants.waistAtZ(w0, 0.1, lambda);
+w_z_neg = PhysicalConstants.waistAtZ(w0, -0.1, lambda);
+if (abs(w_z_pos - w_z_neg) < 1e-10)
+    fprintf('  PASS: waistAtZ symmetric about waist\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: waistAtZ symmetry\n');
+    failed = failed + 1;
+end
+
+% testGaussianParametersWaistProperty
+params_w = GaussianParameters(0.05, w0, lambda);
+if (params_w.Waist > w0)
+    fprintf('  PASS: GaussianParameters Waist > w0 at z>0\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: Waist property\n');
+    failed = failed + 1;
+end
+
+% testGaussianParametersGouyProperty
+params_g = GaussianParameters(0.05, w0, lambda);
+gouy_calc = atan(0.05/params_g.RayleighDistance);
+if (abs(params_g.GouyPhase - gouy_calc) < 1e-10)
+    fprintf('  PASS: GaussianParameters GouyPhase matches formula\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: GouyPhase property\n');
+    failed = failed + 1;
+end
+
+% testGaussianParameterskProperty
+params_k = GaussianParameters(0, w0, lambda);
+expected_k = 2*pi/lambda;
+if (abs(params_k.k - expected_k)/expected_k < 1e-10)
+    fprintf('  PASS: GaussianParameters k property correct\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: k property\n');
+    failed = failed + 1;
+end
+
+% testHermiteParametersStaticMethodWaist
+zr_s = pi*w0^2/lambda;
+w_s = HermiteParameters.getWaist(0.05, w0, zr_s, 1, 1);
+if (w_s > 0)
+    fprintf('  PASS: HermiteParameters static getWaist returns positive\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: static getWaist\n');
+    failed = failed + 1;
+end
+
+% testLaguerreParametersStaticMethodWaist
+w_ls = LaguerreParameters.getWaist(0.05, w0, zr_s, 1, 1);
+if (w_ls > 0)
+    fprintf('  PASS: LaguerreParameters static getWaist returns positive\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: static getWaist\n');
+    failed = failed + 1;
+end
+
+% testFFTUtilsTransferFunctionZeroZ
+H_z0 = FFTUtils.transferFunction(0, 0, 0, lambda);
+if (abs(H_z0 - 1) < 1e-10)
+    fprintf('  PASS: transferFunction z=0 gives unity\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: transferFunction z=0\n');
+    failed = failed + 1;
+end
+
+% testFFTUtilsTransferFunctionPositiveZ
+H_pz = FFTUtils.transferFunction(0, 0, 1, lambda);
+k_lambda = 2*pi/lambda;
+if (abs(abs(H_pz) - 1) < 1e-10)
+    fprintf('  PASS: transferFunction unit magnitude at z>0\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: transferFunction positive z\n');
+    failed = failed + 1;
+end
+
+% testGridUtilsMeshgrid2DOutputSize
+[Xm, Ym] = GridUtils.meshgrid2D(256, 2e-3);
+if (size(Xm) == [256, 256] && size(Ym) == [256, 256])
+    fprintf('  PASS: meshgrid2D output correct size\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: meshgrid2D size\n');
+    failed = failed + 1;
+end
+
+% testGridUtilsFreqGridOutputSize
+[Kxf, Kyf] = GridUtils.freqGrid(128, 1e-3);
+if (size(Kxf) == [128, 128] && size(Kyf) == [128, 128])
+    fprintf('  PASS: freqGrid output correct size\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: freqGrid size\n');
+    failed = failed + 1;
+end
+
+% testAnalysisUtilsGradientRZIndexing
+fr_idx = linspace(0,1,100);
+fz_idx = linspace(0,1,100);
+mzr_idx = AnalysisUtils.gradientRZ(fr_idx, fz_idx, 1e7, 1e-4, 1e-4, 5e-5, 5e-5);
+if (isfinite(mzr_idx))
+    fprintf('  PASS: gradientRZ handles index computation\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: gradientRZ indexing\n');
+    failed = failed + 1;
+end
+
+% testAnalysisUtilsGradientXYZIndexing
+fxyz_idx = exp(-linspace(0,1,20).^2');
+mzx_idx = AnalysisUtils.gradientXYZ(fxyz_idx, fxyz_idx, fxyz_idx, 1e7, 1e-4, 1e-4, 1e-4, 1e-5, 1e-5, 1e-5);
+if (isfinite(mzx_idx))
+    fprintf('  PASS: gradientXYZ handles index computation\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: gradientXYZ indexing\n');
+    failed = failed + 1;
+end
+
+% testGaussianParametersEmptyConstructor
+try
+    gp_empty = GaussianParameters();
+    fprintf('  PASS: GaussianParameters empty constructor OK\n');
+    passed = passed + 1;
+catch
+    fprintf('  FAIL: GaussianParameters empty constructor\n');
+    failed = failed + 1;
+end
+
 %% Summary
 fprintf('\n=== Summary ===\n');
 fprintf('Passed: %d\n', passed);
