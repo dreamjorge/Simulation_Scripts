@@ -1,5 +1,5 @@
 %% add path for classes and functions
-addpath ParaxialBeams
+addpath(fullfile('ParaxialBeams'))
 %% elegant normalization 
 %principal 2 parameters of paraxial beams
 InitialWaist     = 1;

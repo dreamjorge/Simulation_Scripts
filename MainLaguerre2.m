@@ -1,8 +1,8 @@
  
 %%          Script of Laguerre Beam (properties and propagation)
 % adding path for classes and functions
-addpath ParaxialBeams
-addpath ParaxialBeams\Addons
+addpath(fullfile('ParaxialBeams'))
+addpath(fullfile('ParaxialBeams', 'Addons'))
 % Selecting green color for beam
 mapgreen = AdvancedColormap('kgg',256,[0 100 255]/255);
 % use gpu? 
