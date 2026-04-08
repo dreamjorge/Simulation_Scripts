@@ -2928,6 +2928,132 @@ else
     failed = failed + 1;
 end
 
+% testPhysicalConstantsSpeedOfLightUnits
+c = PhysicalConstants.speed_of_light;
+if (c > 1e8 && c < 3e8)
+    fprintf('  PASS: speed_of_light in valid range\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: speed_of_light range\n');
+    failed = failed + 1;
+end
+
+% testPhysicalConstantsPlanckUnits
+h = PhysicalConstants.planck;
+if (h > 1e-34 && h < 1e-33)
+    fprintf('  PASS: planck constant in valid range\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: planck range\n');
+    failed = failed + 1;
+end
+
+% testGaussianParametersInitialWaistProperty
+params_iw = GaussianParameters(0.05, 150e-6, lambda);
+if (params_iw.InitialWaist == 150e-6)
+    fprintf('  PASS: GaussianParameters InitialWaist stored\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: InitialWaist\n');
+    failed = failed + 1;
+end
+
+% testGaussianParametersWavelengthProperty
+params_wl = GaussianParameters(0.05, w0, 800e-9);
+if (params_wl.Wavelength == 800e-9)
+    fprintf('  PASS: GaussianParameters Wavelength stored\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: Wavelength\n');
+    failed = failed + 1;
+end
+
+% testGaussianParameterszCoordinateProperty
+params_zc = GaussianParameters(0.15, w0, lambda);
+if (params_zc.zCoordinate == 0.15)
+    fprintf('  PASS: GaussianParameters zCoordinate stored\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: zCoordinate\n');
+    failed = failed + 1;
+end
+
+% testHermiteParametersWavelengthProperty
+hp_wl = HermiteParameters(0.05, w0, 1550e-9, 1, 1);
+if (hp_wl.Wavelength == 1550e-9)
+    fprintf('  PASS: HermiteParameters Wavelength stored\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: HermiteParameters Wavelength\n');
+    failed = failed + 1;
+end
+
+% testLaguerreParametersWavelengthProperty
+lp_wl = LaguerreParameters(0.05, w0, 1550e-9, 1, 1);
+if (lp_wl.Wavelength == 1550e-9)
+    fprintf('  PASS: LaguerreParameters Wavelength stored\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: LaguerreParameters Wavelength\n');
+    failed = failed + 1;
+end
+
+% testFFTUtilsTransferFunctionWaveNumber
+k_wn = 2*pi/lambda;
+kx_wn = linspace(-k_wn/2, k_wn/2, 32);
+ky_wn = 0;
+[KXwn, KYwn] = meshgrid(kx_wn, ky_wn);
+H_wn = FFTUtils.transferFunction(KXwn, KYwn, 0.01, lambda);
+if (all(all(isfinite(H_wn))))
+    fprintf('  PASS: transferFunction with physical k values\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: transferFunction k range\n');
+    failed = failed + 1;
+end
+
+% testGridUtilsCreate2DGridOutputClass
+grid_oc = GridUtils(32, 32, 1e-3, 1e-3);
+[Xoc, Yoc] = grid_oc.create2DGrid();
+if (isa(Xoc, 'double'))
+    fprintf('  PASS: create2DGrid returns double\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: create2DGrid class\n');
+    failed = failed + 1;
+end
+
+% testAnalysisUtilsGradientRZClass
+fr_cl = ones(1, 50); fz_cl = ones(1, 50);
+mzr_cl = AnalysisUtils.gradientRZ(fr_cl, fz_cl, 1e7, 1e-4, 1e-4, 1e-5, 1e-5);
+if (isa(mzr_cl, 'double'))
+    fprintf('  PASS: gradientRZ returns double\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: gradientRZ class\n');
+    failed = failed + 1;
+end
+
+% testGaussianBeamParametersClass
+gb_pcl = GaussianBeam(R, GaussianParameters(0, w0, lambda));
+if (isa(gb_pcl.Parameters, 'GaussianParameters'))
+    fprintf('  PASS: GaussianBeam Parameters is GaussianParameters\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: GaussianBeam Parameters class\n');
+    failed = failed + 1;
+end
+
+% testHermiteBeamParametersClass
+hb_pcl = HermiteBeam(X, Y, HermiteParameters(0, w0, lambda, 1, 1));
+if (isa(hb_pcl.Parameters, 'HermiteParameters'))
+    fprintf('  PASS: HermiteBeam Parameters is HermiteParameters\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: HermiteBeam Parameters class\n');
+    failed = failed + 1;
+end
+
 %% Summary
 fprintf('\n=== Summary ===\n');
 fprintf('Passed: %d\n', passed);
