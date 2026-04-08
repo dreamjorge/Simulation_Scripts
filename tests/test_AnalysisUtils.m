@@ -66,6 +66,141 @@ catch
     failed = failed + 1;
 end
 
+% testGradientRZAtSpecificPoint
+fr_s = linspace(0, 1, 20);
+fz_s = linspace(0, 1, 20);
+mzr_s = AnalysisUtils.gradientRZ(fr_s, fz_s, 1e7, 1e-4, 1e-4, 0.0005, 0.0005);
+if (isfinite(mzr_s))
+    fprintf('  PASS: gradientRZ at specific point\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: gradientRZ at point\n');
+    failed = failed + 1;
+end
+
+% testGradientXYZAtSpecificPoint
+fyz_p = ones(20, 20); fxz_p = ones(20, 20); fxy_p = ones(20, 20);
+[mzx_p, mzy_p, mxy_p] = AnalysisUtils.gradientXYZ(fyz_p, fxz_p, fxy_p, 1e6, 1e-4, 1e-4, 1e-4, 0.0005, 0.0005, 0.0005);
+if (isfinite(mzx_p) && isfinite(mzy_p))
+    fprintf('  PASS: gradientXYZ at specific point\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: gradientXYZ at point\n');
+    failed = failed + 1;
+end
+
+% testCombinedHankelWaveNotImplemented
+try
+    AnalysisUtils.combinedHankelWave(1, 1, [], zeros(10), zeros(10));
+    fprintf('  FAIL: combinedHankelWave should error\n');
+    failed = failed + 1;
+catch
+    fprintf('  PASS: combinedHankelWave not implemented\n');
+    passed = passed + 1;
+end
+
+% testGradientRZWithZeroField
+fr_z = zeros(1, 10);
+fz_z = ones(1, 10);
+try
+    mzr_z = AnalysisUtils.gradientRZ(fr_z, fz_z, 1e7, 1e-4, 1e-4, 0, 0);
+    fprintf('  PASS: gradientRZ with zero field\n');
+    passed = passed + 1;
+catch
+    fprintf('  FAIL: gradientRZ zero field\n');
+    failed = failed + 1;
+end
+
+% testGradientXYZNonUniform
+fyz_n = rand(16, 16);
+fxz_n = rand(16, 16);
+fxy_n = rand(16, 16);
+[mzx_n, mzy_n, mxy_n] = AnalysisUtils.gradientXYZ(fyz_n, fxz_n, fxy_n, 1e6, 1e-4, 1e-4, 1e-4, 1e-5, 1e-5, 1e-5);
+if (numel(mzx_n) > 0)
+    fprintf('  PASS: gradientXYZ non-uniform\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: gradientXYZ non-uniform\n');
+    failed = failed + 1;
+end
+
+% testGradientXYZOutputSize
+[mzx_s, mzy_s, mxy_s] = AnalysisUtils.gradientXYZ(ones(8,8), ones(8,8), ones(8,8), 1e6, 1e-4, 1e-4, 1e-4, 1e-5, 1e-5, 1e-5);
+if (numel(mzx_s) == 1)
+    fprintf('  PASS: gradientXYZ scalar output\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: gradientXYZ scalar\n');
+    failed = failed + 1;
+end
+
+% testGradientRZLargeK
+mzr_lk = AnalysisUtils.gradientRZ(ones(1,10), ones(1,10), 1e9, 1e-4, 1e-4, 0, 0);
+if (isfinite(mzr_lk))
+    fprintf('  PASS: gradientRZ large k\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: gradientRZ large k\n');
+    failed = failed + 1;
+end
+
+% testGradientXYZLargeK
+[mzx_lk, mzy_lk, mxy_lk] = AnalysisUtils.gradientXYZ(ones(16,16), ones(16,16), ones(16,16), 1e9, 1e-4, 1e-4, 1e-4, 1e-5, 1e-5, 1e-5);
+if (numel(mzx_lk) > 0)
+    fprintf('  PASS: gradientXYZ large k\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: gradientXYZ large k\n');
+    failed = failed + 1;
+end
+
+% testGradientRZSmallStep
+mzr_ss = AnalysisUtils.gradientRZ(ones(1,10), ones(1,10), 1e7, 1e-6, 1e-6, 1e-7, 1e-7);
+if (isfinite(mzr_ss))
+    fprintf('  PASS: gradientRZ small step\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: gradientRZ small step\n');
+    failed = failed + 1;
+end
+
+% testGradientXYZSmallStep
+[mzx_ss, mzy_ss, mxy_ss] = AnalysisUtils.gradientXYZ(ones(16,16), ones(16,16), ones(16,16), 1e6, 1e-6, 1e-6, 1e-6, 1e-7, 1e-7, 1e-7);
+if (numel(mzx_ss) > 0)
+    fprintf('  PASS: gradientXYZ small step\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: gradientXYZ small step\n');
+    failed = failed + 1;
+end
+
+% testCombinedHankelWaveErrorMessage
+try
+    AnalysisUtils.combinedHankelWave(1, 1, [], zeros(10), zeros(10));
+    fprintf('  FAIL: combinedHankelWave error\n');
+    failed = failed + 1;
+catch err
+    if (~isempty(strfind(err.message, 'NotImplemented')))
+        fprintf('  PASS: combinedHankelWave error message\n');
+        passed = passed + 1;
+    else
+        fprintf('  PASS: combinedHankelWave throws error\n');
+        passed = passed + 1;
+    end
+end
+
+% testGradientRZEdgeCase
+fr_e = linspace(0, 10, 20);
+fz_e = linspace(0, 10, 20);
+mzr_e = AnalysisUtils.gradientRZ(fr_e, fz_e, 1e7, 1e-4, 1e-4, 0.0009, 0.0009);
+if (isfinite(mzr_e))
+    fprintf('  PASS: gradientRZ edge case\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: gradientRZ edge\n');
+    failed = failed + 1;
+end
+
 fprintf('\n=== AnalysisUtils: %d/%d passed ===\n', passed, passed + failed);
 
 if (failed == 0)

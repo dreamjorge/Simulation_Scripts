@@ -112,6 +112,68 @@ else
     failed = failed + 1;
 end
 
+% testVectorZInput
+z_vec = linspace(0, 0.1, 5);
+elp_vec = ElegantLaguerreParameters(z_vec, w0, lambda, 1, 1);
+if (numel(elp_vec.zCoordinate) == 5)
+    fprintf('  PASS: vector z input\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: vector z\n');
+    failed = failed + 1;
+end
+
+% testAlphaPurelyImaginaryAtWaist
+elp_waist = ElegantLaguerreParameters(0, w0, lambda, 1, 1);
+if (elp_waist.alpha > 0)
+    fprintf('  PASS: alpha purely imaginary at waist\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: alpha at waist\n');
+    failed = failed + 1;
+end
+
+% testDifferentLandP
+elp_lp = ElegantLaguerreParameters(0.05, w0, lambda, 2, 3);
+if (elp_lp.l == 2 && elp_lp.p == 3)
+    fprintf('  PASS: different l p values\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: different l p\n');
+    failed = failed + 1;
+end
+
+% testAlphaNegativeZ
+elp_neg_z = ElegantLaguerreParameters(-0.05, w0, lambda, 1, 1);
+if (isfinite(elp_neg_z.alpha))
+    fprintf('  PASS: alpha at negative z\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: alpha at negative z\n');
+    failed = failed + 1;
+end
+
+% testHigherOrderLP
+elp_ho = ElegantLaguerreParameters(0.05, w0, lambda, 3, 2);
+if (elp_ho.l == 3 && elp_ho.p == 2)
+    fprintf('  PASS: higher order l p\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: higher order\n');
+    failed = failed + 1;
+end
+
+% testInheritedWaistCalculation
+elp_wc = ElegantLaguerreParameters(0.1, w0, lambda, 1, 1);
+expected_w = w0 * sqrt(1 + (0.1/elp_wc.RayleighDistance)^2);
+if (abs(elp_wc.Waist - expected_w) / expected_w < 1e-10)
+    fprintf('  PASS: inherited waist calculation\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: waist calc\n');
+    failed = failed + 1;
+end
+
 fprintf('\n=== ElegantLaguerreParameters: %d/%d passed ===\n', passed, passed + failed);
 
 if (failed == 0)

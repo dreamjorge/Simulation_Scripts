@@ -136,6 +136,82 @@ else
     failed = failed + 1;
 end
 
+% testVectorZInput
+z_vec = linspace(0, 0.1, 5);
+hp_vec = HermiteParameters(z_vec, w0, lambda, 1, 1);
+if (numel(hp_vec.zCoordinate) == 5)
+    fprintf('  PASS: vector z input\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: vector z\n');
+    failed = failed + 1;
+end
+
+% testStaticGetWaistOneDirectionAtWaist
+wH_at_waist = HermiteParameters.getWaistOneDirection(0, w0, zr_s, 1);
+expected_at_waist = w0 * sqrt(2);
+if (abs(wH_at_waist - expected_at_waist) / expected_at_waist < 1e-10)
+    fprintf('  PASS: static getWaistOneDirection at waist\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: getWaistOneDirection at waist\n');
+    failed = failed + 1;
+end
+
+% testStaticGetWaistAtWaist
+wH2_at_waist = HermiteParameters.getWaist(0, w0, zr_s, 1, 1);
+expected_w2 = w0 * sqrt(3);
+if (abs(wH2_at_waist - expected_w2) / expected_w2 < 1e-10)
+    fprintf('  PASS: static getWaist at waist\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: getWaist at waist\n');
+    failed = failed + 1;
+end
+
+% testInheritedProperties
+hp_inherit = HermiteParameters(z, w0, lambda, 1, 1);
+if (hp_inherit.k > 0 && hp_inherit.RayleighDistance > 0 && hp_inherit.Waist > 0)
+    fprintf('  PASS: inherited properties\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: inherited properties\n');
+    failed = failed + 1;
+end
+
+% testDifferentNandM
+hp_n1 = HermiteParameters(z, w0, lambda, 3, 0);
+hp_m1 = HermiteParameters(z, w0, lambda, 0, 3);
+if (hp_n1.HermiteWaistX == hp_m1.HermiteWaistY && hp_n1.n == 3 && hp_m1.m == 3)
+    fprintf('  PASS: different n m values\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: different n m\n');
+    failed = failed + 1;
+end
+
+% testPhiPhaseScalesWithOrder
+hp_11 = HermiteParameters(z, w0, lambda, 1, 1);
+hp_22 = HermiteParameters(z, w0, lambda, 2, 2);
+if (hp_22.PhiPhase > hp_11.PhiPhase)
+    fprintf('  PASS: PhiPhase scales with order\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: PhiPhase scaling\n');
+    failed = failed + 1;
+end
+
+% testHigherNProducesLargerWaistX
+hp_n0 = HermiteParameters(z, w0, lambda, 0, 0);
+hp_n2 = HermiteParameters(z, w0, lambda, 2, 0);
+if (hp_n2.HermiteWaistX > hp_n0.HermiteWaistX)
+    fprintf('  PASS: higher n produces larger WaistX\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: higher n waistX\n');
+    failed = failed + 1;
+end
+
 fprintf('\n=== HermiteParameters: %d/%d passed ===\n', passed, passed + failed);
 
 if (failed == 0)
