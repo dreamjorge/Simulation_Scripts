@@ -1,7 +1,7 @@
 % Default Parameters
 defaultFormat = '*.mat';
-addpath ParaxialBeams
-addpath ParaxialBeams\Addons
+addpath(fullfile('ParaxialBeams'))
+addpath(fullfile('ParaxialBeams', 'Addons'))
 mapgreen = parula;
 % open files of images
 
