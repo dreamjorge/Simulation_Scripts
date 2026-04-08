@@ -260,6 +260,48 @@ else
     failed = failed + 1;
 end
 
+% testCreate3DGrid
+Nx = 32; Ny = 32; Nz = 16;
+Dx = 1e-3; Dy = 1e-3; Dz = 2e-3;
+grid3d = GridUtils(Nx, Ny, Dx, Dy, Nz, Dz);
+[X, Y, Z] = grid3d.create3DGrid();
+if (size(X) == [Nx, Ny, Nz] && size(Y) == [Nx, Ny, Nz] && size(Z) == [Nx, Ny, Nz])
+    fprintf('  PASS: create3DGrid size\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: create3DGrid size\n');
+    failed = failed + 1;
+end
+
+% testCreate3DGridSpacing
+if (abs(grid3d.dz - Dz/Nz) < 1e-15 && abs(grid3d.dx - Dx/Nx) < 1e-15)
+    fprintf('  PASS: create3DGrid spacing\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: create3DGrid spacing\n');
+    failed = failed + 1;
+end
+
+% testPolarGrid
+[r, theta] = GridUtils.polarGrid(64, 1e-3);
+if (size(r) == [64, 64] && size(theta) == [64, 64] && r(33,33) == 0 && theta(33,33) == 0)
+    fprintf('  PASS: polarGrid center at origin\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: polarGrid\n');
+    failed = failed + 1;
+end
+
+% testGridUtilsProperties
+grid = GridUtils(64, 64, 1e-3, 1e-3);
+if (grid.Nx == 64 && grid.Ny == 64 && grid.Dx == 1e-3 && grid.dx == 1e-3/64)
+    fprintf('  PASS: GridUtils properties\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: GridUtils properties\n');
+    failed = failed + 1;
+end
+
 %% Test FFTUtils
 fprintf('\n--- FFTUtils ---\n');
 
@@ -606,6 +648,118 @@ else
     failed = failed + 1;
 end
 
+% testHermiteParametersWaistX
+hp_wx = HermiteParameters(0.1, w0, lambda, 2, 0);
+expected_wx = hp_wx.Waist * sqrt(2 + 1);
+if (abs(hp_wx.HermiteWaistX - expected_wx) / expected_wx < 1e-10)
+    fprintf('  PASS: HermiteParameters HermiteWaistX\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: HermiteParameters HermiteWaistX\n');
+    failed = failed + 1;
+end
+
+% testHermiteParametersWaistY
+expected_wy = hp_wx.Waist * sqrt(0 + 1);
+if (abs(hp_wx.HermiteWaistY - expected_wy) / expected_wy < 1e-10)
+    fprintf('  PASS: HermiteParameters HermiteWaistY\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: HermiteParameters HermiteWaistY\n');
+    failed = failed + 1;
+end
+
+% testHermiteParametersWaist
+expected_w = hp_wx.Waist * sqrt(2 + 0 + 1);
+if (abs(hp_wx.HermiteWaist - expected_w) / expected_w < 1e-10)
+    fprintf('  PASS: HermiteParameters HermiteWaist\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: HermiteParameters HermiteWaist\n');
+    failed = failed + 1;
+end
+
+% testHermiteParametersPhiPhase
+zr = hp_wx.RayleighDistance;
+expected_phi = (2 + 0) * atan(0.1/zr);
+if (abs(hp_wx.PhiPhase - expected_phi) < 1e-10)
+    fprintf('  PASS: HermiteParameters PhiPhase\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: HermiteParameters PhiPhase\n');
+    failed = failed + 1;
+end
+
+% testHermiteParametersStaticGetWaistOneDirection
+w0_static = 100e-6;
+zr_static = pi * w0_static^2 / lambda;
+wH_static = HermiteParameters.getWaistOneDirection(0.05, w0_static, zr_static, 1);
+expected_wH = w0_static * sqrt(1 + (0.05/zr_static)^2) * sqrt(1 + 1);
+if (abs(wH_static - expected_wH) / expected_wH < 1e-10)
+    fprintf('  PASS: HermiteParameters static getWaistOneDirection\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: HermiteParameters static getWaistOneDirection\n');
+    failed = failed + 1;
+end
+
+% testHermiteParametersStaticGetWaist
+wH2_static = HermiteParameters.getWaist(0.05, w0_static, zr_static, 1, 2);
+expected_wH2 = w0_static * sqrt(1 + (0.05/zr_static)^2) * sqrt(1 + 2 + 1);
+if (abs(wH2_static - expected_wH2) / expected_wH2 < 1e-10)
+    fprintf('  PASS: HermiteParameters static getWaist\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: HermiteParameters static getWaist\n');
+    failed = failed + 1;
+end
+
+% testLaguerreParametersWaist
+lp_w = LaguerreParameters(0.1, w0, lambda, 1, 1);
+expected_lw = lp_w.Waist * sqrt(2*1 + abs(1) + 1);
+if (abs(lp_w.LaguerreWaist - expected_lw) / expected_lw < 1e-10)
+    fprintf('  PASS: LaguerreParameters LaguerreWaist\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: LaguerreParameters LaguerreWaist\n');
+    failed = failed + 1;
+end
+
+% testLaguerreParametersPhiPhase
+expected_lphi = (abs(1) + 2*1) * atan(0.1/zr);
+if (abs(lp_w.PhiPhase - expected_lphi) < 1e-10)
+    fprintf('  PASS: LaguerreParameters PhiPhase\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: LaguerreParameters PhiPhase\n');
+    failed = failed + 1;
+end
+
+% testLaguerreParametersStaticGetWaist
+l_static = 2; p_static = 1;
+wL_static = LaguerreParameters.getWaist(0.05, w0_static, zr_static, l_static, p_static);
+expected_wL = w0_static * sqrt(1 + (0.05/zr_static)^2) * sqrt(2*p_static + abs(l_static) + 1);
+if (abs(wL_static - expected_wL) / expected_wL < 1e-10)
+    fprintf('  PASS: LaguerreParameters static getWaist\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: LaguerreParameters static getWaist\n');
+    failed = failed + 1;
+end
+
+% testLaguerreParametersAssociatedLaguerre
+x_test = [0, 0.5, 1, 2];
+L_test = LaguerreParameters.getAssociatedLaguerrePolynomial(2, 1, x_test);
+% L_2^1(x) = 3 - 3x + x^2/2
+expected_L = 3 - 3*x_test + x_test.^2/2;
+if (max(abs(L_test - expected_L)) < 1e-10)
+    fprintf('  PASS: LaguerreParameters getAssociatedLaguerrePolynomial\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: LaguerreParameters getAssociatedLaguerrePolynomial\n');
+    failed = failed + 1;
+end
+
 % testGaussianBeamField
 grid = GridUtils(64, 64, 1e-3, 1e-3);
 [X, Y] = grid.create2DGrid();
@@ -694,6 +848,81 @@ if (all(all(isfinite(lb1.OpticalField))))
     passed = passed + 1;
 else
     fprintf('  FAIL: LaguerreBeam (z=0) field has NaN (R=Inf fix failed)\n');
+    failed = failed + 1;
+end
+
+% testGaussianBeamAmplitudeAtCenter
+params_center = GaussianParameters(0, w0, lambda);
+gb_center = GaussianBeam(zeros(64,64), params_center);
+expected_amp = 1;
+if (abs(abs(gb_center.OpticalField(33,33)) - expected_amp) < 1e-10)
+    fprintf('  PASS: GaussianBeam amplitude at center equals 1\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: GaussianBeam amplitude at center\n');
+    failed = failed + 1;
+end
+
+% testGaussianBeamDecaysWithRadius
+gb_far = GaussianBeam(3*w0*ones(64,64), params_center);
+if (abs(gb_far.OpticalField(1,1)) < 0.01)
+    fprintf('  PASS: GaussianBeam decays with radius\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: GaussianBeam decays with radius\n');
+    failed = failed + 1;
+end
+
+% testGaussianBeamParametersStored
+if (gb.Parameters.InitialWaist == w0 && gb.Parameters.Wavelength == lambda)
+    fprintf('  PASS: GaussianBeam stores parameters\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: GaussianBeam stores parameters\n');
+    failed = failed + 1;
+end
+
+% testHermiteBeamHigherOrderModes
+hp_high = HermiteParameters(0, w0, lambda, 2, 3);
+hb_high = HermiteBeam(X, Y, hp_high);
+if (size(hb_high.OpticalField) == [64, 64] && all(all(isfinite(hb_high.OpticalField))))
+    fprintf('  PASS: HermiteBeam higher order modes\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: HermiteBeam higher order modes\n');
+    failed = failed + 1;
+end
+
+% testLaguerreBeamHigherOrderModes
+lp_high = LaguerreParameters(0, w0, lambda, 2, 3);
+lb_high = LaguerreBeam(R, Theta, lp_high);
+if (size(lb_high.OpticalField) == [64, 64] && all(all(isfinite(lb_high.OpticalField))))
+    fprintf('  PASS: LaguerreBeam higher order modes\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: LaguerreBeam higher order modes\n');
+    failed = failed + 1;
+end
+
+% testElegantHermiteBeamParameters
+ehp_test = ElegantHermiteParameters(0.05, w0, lambda, 1, 1);
+ehb_test = ElegantHermiteBeam(X, Y, ehp_test);
+if (ehb_test.Parameters.n == 1 && ehb_test.Parameters.m == 1)
+    fprintf('  PASS: ElegantHermiteBeam stores parameters\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: ElegantHermiteBeam stores parameters\n');
+    failed = failed + 1;
+end
+
+% testElegantLaguerreBeamParameters
+elp_test = ElegantLaguerreParameters(0.05, w0, lambda, 1, 1);
+elb_test = ElegantLaguerreBeam(R, Theta, elp_test);
+if (elb_test.Parameters.l == 1 && elb_test.Parameters.p == 1)
+    fprintf('  PASS: ElegantLaguerreBeam stores parameters\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: ElegantLaguerreBeam stores parameters\n');
     failed = failed + 1;
 end
 
