@@ -2,7 +2,7 @@
 % Refactored version using classdef architecture
 % original scripts by: dreamjorge
 
-addpath ParaxialBeams
+addpath(fullfile('ParaxialBeams'))
 
 %% Parameters
 InitialWaist = 100e-6;

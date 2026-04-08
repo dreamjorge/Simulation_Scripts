@@ -1,9 +1,9 @@
 %%          Script of Laguerre Beam (properties and propagation)
 % adding path for classes and functions
-addpath ParaxialBeams
-addpath ParaxialBeams\Addons
-addpath ParaxialBeams\Addons\export_fig-master
-addpath ParaxialBeams\Addons\Plots_Functions
+addpath(fullfile('ParaxialBeams'))
+addpath(fullfile('ParaxialBeams', 'Addons'))
+addpath(fullfile('ParaxialBeams', 'Addons', 'export_fig-master'))
+addpath(fullfile('ParaxialBeams', 'Addons', 'Plots_Functions'))
 % Selecting green color for beam
 mapgreen    = AdvancedColormap('kggg',256,[0 30 70 255]/255);
 redColor    = [1,0,0];
