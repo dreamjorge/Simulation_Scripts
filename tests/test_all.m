@@ -1798,6 +1798,170 @@ else
     failed = failed + 1;
 end
 
+% testGaussianBeamLargeRadiusDecay
+R_large = 10 * w0 * ones(64, 64);
+gb_decay = GaussianBeam(R_large, GaussianParameters(0, w0, lambda));
+if (abs(gb_decay.OpticalField(1,1)) < 1e-10)
+    fprintf('  PASS: GaussianBeam decays at large radius\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: GaussianBeam large radius\n');
+    failed = failed + 1;
+end
+
+% testGaussianBeamPhaseSign
+params_pos = GaussianParameters(0.1, w0, lambda);
+params_neg = GaussianParameters(-0.1, w0, lambda);
+gb_pos = GaussianBeam(zeros(64,64), params_pos);
+gb_neg = GaussianBeam(zeros(64,64), params_neg);
+if (all(all(isfinite(gb_pos.OpticalField))) && all(all(isfinite(gb_neg.OpticalField))))
+    fprintf('  PASS: GaussianBeam both propagation directions finite\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: GaussianBeam phase sign\n');
+    failed = failed + 1;
+end
+
+% testHermiteBeamHigherOrderAmplitudeSpread
+hp_high = HermiteParameters(0, w0, lambda, 3, 3);
+hb_high = HermiteBeam(X, Y, hp_high);
+if (size(hb_high.OpticalField) == [64, 64] && all(all(isfinite(hb_high.OpticalField))))
+    fprintf('  PASS: HermiteBeam higher order produces valid field\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: HermiteBeam higher order\n');
+    failed = failed + 1;
+end
+
+% testLaguerreBeamLZeroPZero
+lp_00 = LaguerreParameters(0, w0, lambda, 0, 0);
+lb_00 = LaguerreBeam(R, Theta, lp_00);
+gb_00 = GaussianBeam(R, GaussianParameters(0, w0, lambda));
+if (abs(lb_00.OpticalField(33,33) - gb_00.OpticalField(33,33)) < 1e-10)
+    fprintf('  PASS: LaguerreBeam l=0 p=0 equals Gaussian\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: LaguerreBeam l=0 p=0\n');
+    failed = failed + 1;
+end
+
+% testElegantLaguerreBeamFieldGeneration
+elp_elg = ElegantLaguerreParameters(0.01, w0, lambda, 1, 0);
+elb_elg = ElegantLaguerreBeam(R, Theta, elp_elg);
+if (size(elb_elg.OpticalField) == [64, 64] && all(all(isfinite(elb_elg.OpticalField))))
+    fprintf('  PASS: ElegantLaguerreBeam generates valid field\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: ElegantLaguerreBeam field\n');
+    failed = failed + 1;
+end
+
+% testFFTUtilsFFTShiftBehavior
+g_shift = [zeros(1,32), ones(1,32)];
+g_shifted = fftshift(g_shift);
+if (g_shifted(1) == 1 && g_shifted(64) == 0)
+    fprintf('  PASS: fftshift moves DC to center\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: fftshift behavior\n');
+    failed = failed + 1;
+end
+
+% testFFTUtilsIFFTShiftRoundtrip
+signal = rand(64, 64);
+signal_shifted = fftshift(signal);
+signal_unshifted = ifftshift(signal_shifted);
+if (max(max(abs(signal - signal_unshifted))) < 1e-10)
+    fprintf('  PASS: fftshift-ifftshift roundtrip\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: fftshift roundtrip\n');
+    failed = failed + 1;
+end
+
+% testGridUtilsFreqGridPositiveOnly
+grid_p = GridUtils(32, 32, 1e-3, 1e-3);
+[Kxp, Kyp] = grid_p.createFreqGrid();
+if (min(min(Kxp)) < 0)
+    fprintf('  PASS: createFreqGrid includes negative frequencies\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: createFreqGrid range\n');
+    failed = failed + 1;
+end
+
+% testPhysicalConstantsPlanckEnergyRelation
+h = PhysicalConstants.planck;
+c = PhysicalConstants.speed_of_light;
+lambda_test = 500e-9;
+E_photon = h * c / lambda_test;
+if (E_photon > 0)
+    fprintf('  PASS: Planck relation gives positive energy\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: Planck relation\n');
+    failed = failed + 1;
+end
+
+% testPhysicalConstantsWaveNumberAngularFrequency
+lambda = 532e-9;
+k = PhysicalConstants.waveNumber(lambda);
+omega = k * PhysicalConstants.speed_of_light;
+expected_omega = 2 * pi * c / lambda;
+if (abs(omega - expected_omega) / expected_omega < 1e-10)
+    fprintf('  PASS: waveNumber and c give angular frequency\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: waveNumber angular frequency\n');
+    failed = failed + 1;
+end
+
+% testGaussianParametersDivergencePositive
+params_div = GaussianParameters(0, w0, lambda);
+if (params_div.DivergenceAngle > 0)
+    fprintf('  PASS: GaussianParameters divergence is positive\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: divergence sign\n');
+    failed = failed + 1;
+end
+
+% testHermiteBeamHermiteWaistXProperty
+hp_hwx = HermiteParameters(0.05, w0, lambda, 2, 1);
+w_x = hp_hwx.HermiteWaistX;
+w_base = hp_hwx.Waist;
+if (w_x > w_base)
+    fprintf('  PASS: HermiteWaistX larger than base waist\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: HermiteWaistX\n');
+    failed = failed + 1;
+end
+
+% testLaguerreBeamLaguerreWaistLarger
+lp_lw = LaguerreParameters(0.05, w0, lambda, 1, 1);
+w_lg = lp_lw.LaguerreWaist;
+w_gauss = lp_lw.Waist;
+if (w_lg >= w_gauss)
+    fprintf('  PASS: LaguerreWaist >= Gaussian waist\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: LaguerreWaist\n');
+    failed = failed + 1;
+end
+
+% testAnalysisUtilsGradientRZConsistency
+fr1 = exp(-linspace(0,1,50).^2);
+fz1 = exp(-linspace(0,1,50).^2);
+mzr1 = AnalysisUtils.gradientRZ(fr1, fz1, 1e7, 1e-4, 1e-4, 1e-5, 1e-5);
+if (isfinite(mzr1))
+    fprintf('  PASS: gradientRZ produces finite result\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: gradientRZ finite\n');
+    failed = failed + 1;
+end
+
 %% Summary
 fprintf('\n=== Summary ===\n');
 fprintf('Passed: %d\n', passed);
