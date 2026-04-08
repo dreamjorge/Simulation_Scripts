@@ -2407,6 +2407,146 @@ else
     failed = failed + 1;
 end
 
+% testGaussianParametersWaistAtOrigin
+params_wo = GaussianParameters(0, w0, lambda);
+if (abs(params_wo.Waist - w0) / w0 < 1e-10)
+    fprintf('  PASS: GaussianParameters Waist equals w0 at origin\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: Waist at origin\n');
+    failed = failed + 1;
+end
+
+% testGaussianParametersAmplitudeAtOrigin
+params_amp = GaussianParameters(0, w0, lambda);
+expected_amp = 1/w0;
+if (abs(params_amp.Amplitude - expected_amp) / expected_amp < 1e-10)
+    fprintf('  PASS: GaussianParameters Amplitude = 1/w0 at origin\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: Amplitude at origin\n');
+    failed = failed + 1;
+end
+
+% testPhysicalConstantsVacuumImpedanceFromConstants
+mu0 = PhysicalConstants.vacuum_permeability;
+eps0 = PhysicalConstants.vacuum_permittivity;
+Z0_calc = sqrt(mu0/eps0);
+Z0_ref = PhysicalConstants.impedance_vacuum;
+if (abs(Z0_calc - Z0_ref) / Z0_ref < 1e-6)
+    fprintf('  PASS: impedance_vacuum derived from mu0/eps0\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: impedance derivation\n');
+    failed = failed + 1;
+end
+
+% testGridUtilsPolarGridThetaRange
+[r_p, theta_p] = GridUtils.polarGrid(32, 1e-3);
+if (min(theta_p(:)) >= -pi && max(theta_p(:)) <= pi)
+    fprintf('  PASS: polarGrid theta in [-pi, pi]\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: polarGrid theta\n');
+    failed = failed + 1;
+end
+
+% testFFTUtilsTransferFunctionSmallPropagation
+H_small_z = FFTUtils.transferFunction(0, 0, 1e-6, lambda);
+if (all(all(isfinite(H_small_z))))
+    fprintf('  PASS: transferFunction small z finite\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: transferFunction small z\n');
+    failed = failed + 1;
+end
+
+% testAnalysisUtilsGradientRZConsistentWithK
+fr_k = exp(-linspace(0,1,100).^2);
+fz_k = exp(-linspace(0,1,100).^2);
+mzr_k = AnalysisUtils.gradientRZ(fr_k, fz_k, 1e8, 1e-4, 1e-4, 5e-5, 5e-5);
+if (isfinite(mzr_k))
+    fprintf('  PASS: gradientRZ handles large k\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: gradientRZ large k\n');
+    failed = failed + 1;
+end
+
+% testHermiteParametersPhiPhaseZeroAtWaist
+hp_phi = HermiteParameters(0, w0, lambda, 2, 3);
+if (abs(hp_phi.PhiPhase) < 1e-10)
+    fprintf('  PASS: HermiteParameters PhiPhase zero at waist\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: PhiPhase at waist\n');
+    failed = failed + 1;
+end
+
+% testLaguerreParametersPhiPhaseZeroAtWaist
+lp_phi = LaguerreParameters(0, w0, lambda, 2, 3);
+if (abs(lp_phi.PhiPhase) < 1e-10)
+    fprintf('  PASS: LaguerreParameters PhiPhase zero at waist\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: Laguerre PhiPhase at waist\n');
+    failed = failed + 1;
+end
+
+% testGaussianBeamRInfAtWaist
+params_ri = GaussianParameters(0, w0, lambda);
+if (isinf(params_ri.Radius))
+    fprintf('  PASS: GaussianParameters R=Inf at waist\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: R at waist\n');
+    failed = failed + 1;
+end
+
+% testHermiteBeamCoordinatesStored
+hp_cs = HermiteParameters(0.05, w0, lambda, 1, 1);
+hb_cs = HermiteBeam(X, Y, hp_cs);
+if (isequal(size(hb_cs.x), [64, 64]) && isequal(size(hb_cs.y), [64, 64]))
+    fprintf('  PASS: HermiteBeam stores x and y coordinates\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: HermiteBeam coordinates\n');
+    failed = failed + 1;
+end
+
+% testLaguerreBeamCoordinatesStored
+lp_cs = LaguerreParameters(0.05, w0, lambda, 1, 0);
+lb_cs = LaguerreBeam(R, Theta, lp_cs);
+if (isequal(size(lb_cs.r), [64, 64]) && isequal(size(lb_cs.theta), [64, 64]))
+    fprintf('  PASS: LaguerreBeam stores r and theta\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: LaguerreBeam coordinates\n');
+    failed = failed + 1;
+end
+
+% testElegantHermiteBeamCoordinatesStored
+ehp_cs = ElegantHermiteParameters(0.05, w0, lambda, 1, 1);
+ehb_cs = ElegantHermiteBeam(X, Y, ehp_cs);
+if (isequal(size(ehb_cs.X), [64, 64]) && isequal(size(ehb_cs.Y), [64, 64]))
+    fprintf('  PASS: ElegantHermiteBeam stores X and Y\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: ElegantHermite coordinates\n');
+    failed = failed + 1;
+end
+
+% testGaussianParametersVectorizedGouy
+z_vec = linspace(-0.1, 0.1, 20);
+params_vec_g = GaussianParameters(z_vec, w0, lambda);
+if (numel(params_vec_g.GouyPhase) == 20)
+    fprintf('  PASS: GaussianParameters vectorized GouyPhase\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: vectorized Gouy\n');
+    failed = failed + 1;
+end
+
 %% Summary
 fprintf('\n=== Summary ===\n');
 fprintf('Passed: %d\n', passed);
