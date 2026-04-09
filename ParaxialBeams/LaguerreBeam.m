@@ -12,17 +12,13 @@ classdef LaguerreBeam < ParaxialBeam
     methods
         function obj = LaguerreBeam(r, theta, params)
             % Constructor
-            % r: radial coordinate matrix
-            % theta: angular coordinate matrix
-            % params: LaguerreParameters object
-            
             obj = obj@ParaxialBeam(params.Lambda);
             
             if nargin > 0
                 obj.Parameters = params;
                 obj.r = r;
                 obj.theta = theta;
-                obj.OpticalField = obj.computeFieldFromPol(r, theta, params);
+                obj.OpticalField = obj.computeComplexField(r, theta, params);
             end
         end
         
@@ -33,28 +29,28 @@ classdef LaguerreBeam < ParaxialBeam
         end
         
         function field = computeComplexField(obj, r, theta, params)
-                obj.r = r;
-                obj.theta = theta;
-                
-                % Fundamental Gaussian Field
-                GB = GaussianBeam(r, params);
-                GField = GB.OpticalField;
-                
-                % Laguerre mode part
-                w = params.Waist;
-                l = params.l;
-                p = params.p;
-                
-                % Amplitude term: (sqrt(2)*r/w)^|l|
-                amplitudeTerm = (sqrt(2) * r ./ w).^abs(l);
+            obj.r = r;
+            obj.theta = theta;
+            
+            % Fundamental Gaussian Field
+            GB = GaussianBeam(r, params);
+            GField = GB.OpticalField;
+            
+            % Laguerre mode part
+            w = params.Waist;
+            l = params.l;
+            p = params.p;
+            
+            % Amplitude term: (sqrt(2)*r/w)^|l|
+            amplitudeTerm = (sqrt(2) * r ./ w).^abs(l);
 
-                % Laguerre polynomial: L_p^|l|(2*r^2 / w^2)
-                xArg = 2 * r.^2 ./ w.^2;
-                Lpl = PolynomialUtils.associatedLaguerre(p, l, xArg);
+            % Laguerre polynomial: L_p^|l|(2*r^2 / w^2)
+            xArg = 2 * r.^2 ./ w.^2;
+            Lpl = PolynomialUtils.associatedLaguerre(p, l, xArg);
 
-                % GField = (w0/w)*exp(-r^2/w^2)*exp(i*phase). Gouy for LG adds (2p+|l|)*psi via PhiPhase.
-                obj.OpticalField = amplitudeTerm .* Lpl .* exp(1i * l * theta) .* exp(1i * params.PhiPhase) .* GField;
-            end
+            % Mode assembly
+            field = amplitudeTerm .* Lpl .* exp(1i * l * theta) .* exp(1i * params.PhiPhase) .* GField;
+            obj.OpticalField = field;
         end
     end
 end

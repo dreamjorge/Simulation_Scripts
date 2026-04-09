@@ -5,7 +5,7 @@ classdef GaussianParameters
     properties
         zCoordinate
         InitialWaist
-        Wavelength
+        Lambda          % Changed from Wavelength for consistency with ParaxialBeam
         RayleighDistance
         k
         Waist
@@ -20,7 +20,7 @@ classdef GaussianParameters
             if nargin > 0
                 obj.zCoordinate = z;
                 obj.InitialWaist = w0;
-                obj.Wavelength = lambda;
+                obj.Lambda = lambda;
                 
                 % Use PhysicalConstants for calculations
                 obj.RayleighDistance = PhysicalConstants.rayleighDistance(w0, lambda);
@@ -37,14 +37,14 @@ classdef GaussianParameters
         
         function str = toString(obj)
             str = sprintf(...
-                'GaussianParameters:\n  zCoordinate: %g\n  InitialWaist: %g\n  Wavelength: %g\n  RayleighDistance: %g\n  k: %g\n  Waist: %g\n', ...
-                obj.zCoordinate(1), obj.InitialWaist, obj.Wavelength, obj.RayleighDistance, obj.k, obj.Waist(1));
+                'GaussianParameters:\n  zCoordinate: %g\n  InitialWaist: %g\n  Lambda: %g\n  RayleighDistance: %g\n  k: %g\n  Waist: %g\n', ...
+                obj.zCoordinate(1), obj.InitialWaist, obj.Lambda, obj.RayleighDistance, obj.k, obj.Waist(1));
         end
         
         function res = isEqual(obj, other)
             res = abs(obj.zCoordinate - other.zCoordinate) < 1e-12 && ...
                   abs(obj.InitialWaist - other.InitialWaist) < 1e-12 && ...
-                  abs(obj.Wavelength - other.Wavelength) < 1e-12;
+                  abs(obj.Lambda - other.Lambda) < 1e-12;
             res = all(res);
         end
     end

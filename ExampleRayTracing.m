@@ -4,8 +4,10 @@ addpath('ParaxialBeams');
 % 1. Create a Gaussian Beam
 lambda = 632.8e-9;
 w0 = 100e-6;
-beam = GaussianBeam(w0, lambda);
-zr = pi * w0^2 / lambda;
+% NEW API: Use Parameters object
+params = GaussianParameters(0, w0, lambda);
+beam = GaussianBeam(0, params);
+zr = params.RayleighDistance;
 
 % 2. Create a Bundle of Rays (Concentric pattern)
 Nr = 5; Ntheta = 12; maxR = 2*w0;
