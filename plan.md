@@ -8,6 +8,22 @@
 
 **Tech Stack:** MATLAB, Octave, scripts `.m`, test runner `tests/test_all.m`, runner portátil `tests/portable_runner.m`, Git/GitHub Actions.
 
+## Merge Scope Checklist
+
+- [ ] `ParaxialBeams/*.m` modernos auditados
+- [ ] `tests/` vigentes y ejecutables en Octave/MATLAB
+- [ ] compatibilidad y portabilidad preservadas
+- [ ] ejemplos canónicos identificados
+- [ ] narrativa pública alineada con el estado real
+
+## Explicitly Out of Scope
+
+- package migration a `+paraxial/...`
+- rediseño OO profundo de beams/propagators
+- reescritura total de ejemplos históricos
+- rescate de ramas legacy completas
+- limpieza estructural grande de addons terceros
+
 ---
 
 ### Task 1: Freeze Merge Scope
