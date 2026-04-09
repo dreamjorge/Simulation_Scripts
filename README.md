@@ -68,6 +68,13 @@ sim.createGrid();
 
 ## Uso
 
+## Beam API Contract
+
+- canonical field entrypoint: `opticalField(...)`
+- `Parameters` define constantes/modelo, no reemplaza argumentos dinámicos ambiguamente
+- cada beam debe declarar sus coordenadas aceptadas
+- cualquier desvío temporal queda documentado hasta el post-merge cleanup
+
 ### MATLAB
 ```matlab
 addpath ParaxialBeams

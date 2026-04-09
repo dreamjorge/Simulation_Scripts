@@ -70,6 +70,15 @@ git commit -m "docs: freeze pre-merge scope"
 
 ### Task 2: Audit Public Beam API
 
+| Class | Primary field method | Accepted coordinates | z semantics | Uses Parameters state | Status |
+| --- | --- | --- | --- | --- | --- |
+| `ParaxialBeam` | `opticalField(obj, X, Y, z)` | cartesian `X`, `Y` | abstract contract requires dynamic `z` argument | no | aligned |
+| `GaussianBeam` | `opticalField(obj, X, Y, z)` | cartesian `X`, `Y` converted to radial distance internally | dynamic `z` used directly to compute `w`, `R`, and `psi` | yes, for `InitialWaist` and `Lambda` only | aligned |
+| `HermiteBeam` | `opticalField(obj, X, Y, z)` -> `computeComplexField(X, Y, obj.Parameters)` | cartesian `X`, `Y` | `z` argument accepted but ignored; propagation comes from `obj.Parameters` | yes, `Waist`, `PhiPhase`, and modal indices | needs-fix |
+| `LaguerreBeam` | `opticalField(obj, X, Y, z)` -> `cart2pol(X, Y)` -> `computeComplexField(R, TH, obj.Parameters)` | cartesian `X`, `Y` converted to polar `R`, `TH` | `z` argument accepted but ignored; propagation comes from `obj.Parameters` | yes, `Waist`, `PhiPhase`, and modal indices | needs-fix |
+| `ElegantHermiteBeam` | `opticalField(obj, X, Y, z)` -> `computeComplexField(X, Y, obj.Parameters)` | cartesian `X`, `Y` | `z` argument accepted but ignored; propagation comes from `obj.Parameters` | yes, `alpha`, `PhiPhase`, and modal indices | needs-fix |
+| `ElegantLaguerreBeam` | `opticalField(obj, X, Y, z)` -> `cart2pol(X, Y)` -> `computeComplexField(R, TH, obj.Parameters)` | cartesian `X`, `Y` converted to polar `R`, `TH` | `z` argument accepted but ignored; propagation comes from `obj.Parameters` | yes, `alpha`, `PhiPhase`, and modal indices | needs-fix |
+
 **Files:**
 - Reference: `ParaxialBeams/ParaxialBeam.m`
 - Reference: `ParaxialBeams/GaussianBeam.m`
