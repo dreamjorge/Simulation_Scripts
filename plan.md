@@ -274,6 +274,28 @@ git commit -m "docs: align repository narrative with current structure"
 
 ### Task 6: Prepare Git Integration Hygiene
 
+## Merge Delta Summary
+
+- architecture
+- tests
+- ci
+- portability
+- examples
+- docs
+
+## Merge Strategy Decision
+
+- decision: `merge commit`
+- rationale: `integration/pre-master` ya agrupa una secuencia visible de checkpoints de hardening (scope, API, examples, tests, docs) y preservarlos da mejor trazabilidad que un `squash` único antes del merge a `main/master`
+
+## Integration Commit Draft
+
+Merge `integration/pre-master`: stabilize modern beam API, portability, tests, and canonical examples
+
+- consolidates modern `ParaxialBeams/` classes and portability fixes
+- preserves current test surface and runner compatibility
+- documents canonical examples and deferred post-merge redesign work
+
 **Files:**
 - Modify: `plan.md`
 
