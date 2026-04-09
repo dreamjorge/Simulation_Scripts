@@ -1,4 +1,4 @@
-classdef HermiteBeam
+classdef HermiteBeam < ParaxialBeam
     % HermiteBeam - Scalar optical field for a Hermite-Gaussian beam
     % Compatible with GNU Octave and MATLAB
     
@@ -15,8 +15,24 @@ classdef HermiteBeam
             % x, y: coordinate matrices
             % params: HermiteParameters object
             
+            obj = obj@ParaxialBeam(params.Lambda);
+            
             if nargin > 0
                 obj.Parameters = params;
+                obj.x = x;
+                obj.y = y;
+                obj.OpticalField = obj.computeComplexField(x, y, params);
+            end
+        end
+        
+        function field = opticalField(obj, X, Y, z)
+            % Unified API
+            % Note: For z != params.zCoordinate, should update parameters.
+            % For now, using constructor parameters for consistency with other beams.
+            field = obj.computeComplexField(X, Y, obj.Parameters);
+        end
+        
+        function field = computeComplexField(obj, x, y, params)
                 obj.x = x;
                 obj.y = y;
                 

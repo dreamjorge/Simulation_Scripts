@@ -1,4 +1,4 @@
-classdef ElegantLaguerreBeam
+classdef ElegantLaguerreBeam < ParaxialBeam
     % ElegantLaguerreBeam - Elegant Laguerre-Gaussian beam implementation
     % Consistent with composition architecture.
     
@@ -16,8 +16,23 @@ classdef ElegantLaguerreBeam
             % theta: angular coordinate matrix
             % params: ElegantLaguerreParameters object
             
+            obj = obj@ParaxialBeam(params.Lambda);
+            
             if nargin > 0
                 obj.Parameters = params;
+                obj.r = r;
+                obj.theta = theta;
+                obj.OpticalField = obj.computeComplexField(r, theta, params);
+            end
+        end
+        
+        function field = opticalField(obj, X, Y, z)
+            [TH, R] = cart2pol(X, Y);
+            % Unified API
+            field = obj.computeComplexField(R, TH, obj.Parameters);
+        end
+        
+        function field = computeComplexField(obj, r, theta, params)
                 obj.r = r;
                 obj.theta = theta;
                 

@@ -1,4 +1,4 @@
-classdef LaguerreBeam
+classdef LaguerreBeam < ParaxialBeam
     % LaguerreBeam - Scalar optical field for a Laguerre-Gaussian beam
     % Compatible with GNU Octave and MATLAB
     
@@ -16,8 +16,23 @@ classdef LaguerreBeam
             % theta: angular coordinate matrix
             % params: LaguerreParameters object
             
+            obj = obj@ParaxialBeam(params.Lambda);
+            
             if nargin > 0
                 obj.Parameters = params;
+                obj.r = r;
+                obj.theta = theta;
+                obj.OpticalField = obj.computeFieldFromPol(r, theta, params);
+            end
+        end
+        
+        function field = opticalField(obj, X, Y, z)
+            % Unified API
+            [TH, R] = cart2pol(X, Y);
+            field = obj.computeComplexField(R, TH, obj.Parameters);
+        end
+        
+        function field = computeComplexField(obj, r, theta, params)
                 obj.r = r;
                 obj.theta = theta;
                 
