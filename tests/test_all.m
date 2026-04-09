@@ -1,36 +1,34 @@
 #!/usr/bin/env octave
-% Test Suite Runner - Simulation_Scripts
-% Runs all modular tests using the runtests framework
+% Test Suite Runner - Simulation_Scripts (CI & Local Wrapper)
+% Uses portable_runner.m to ensure Octave 11 and MATLAB compatibility.
 
 scriptPath = fileparts(mfilename('fullpath'));
 addpath(fullfile(scriptPath, '..', 'ParaxialBeams'));
+addpath(scriptPath);
 
-fprintf('=== Simulation_Scripts Test Suite ===\n\n');
+fprintf('=== Simulation_Scripts Test Suite (Portable) ===\n\n');
 
-% Run all tests in the tests/ directory
 try
-    results = runtests(scriptPath);
-    display(results);
+    status = portable_runner();
     
-    % Summary
-    passCount = sum([results.Passed]);
-    failCount = sum([results.Failed]);
-    incompleteCount = sum([results.Incomplete]);
-    
-    fprintf('\n=== Test Summary ===\n');
-    fprintf('Passed: %d\n', passCount);
-    fprintf('Failed: %d\n', failCount);
-    if incompleteCount > 0
-        fprintf('Incomplete: %d\n', incompleteCount);
-    end
-    
-    if failCount > 0
-        error('Tests failed.');
+    if status == 0
+        fprintf('\n=== ÉXITO: Todos los tests pasaron ===\n');
+    else
+        fprintf('\n=== FALLO: Se detectaron errores en la suite ===\n');
+        % Exit with error if in Octave to signal CI failure
+        if exist('OCTAVE_VERSION', 'builtin')
+            exit(1);
+        else
+            error('Tests failed.');
+        end
     end
 catch ME
-    fprintf('Error running test suite: %s\n', ME.message);
-    % Fallback for environments where runtests might behave differently
-    run('test_RayTracing.m');
+    fprintf('Error crítico ejecutando la suite: %s\n', ME.message);
+    if exist('OCTAVE_VERSION', 'builtin')
+        exit(1);
+    else
+        rethrow(ME);
+    end
 end
 
-fprintf('\n=== All Tests Complete ===\n');
+fprintf('\n=== Fin de la ejecución ===\n');
