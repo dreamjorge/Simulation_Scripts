@@ -125,6 +125,15 @@ git commit -m "docs: document public beam api contract"
 
 ### Task 3: Classify Canonical Examples
 
+| File | Tier | Reason | Action |
+| --- | --- | --- | --- |
+| `examples/MainGauss_refactored.m` | canonical | usa `PhysicalConstants`, `GridUtils`, `FFTUtils` y flujo moderno explícito para Gaussian beam | mantener como punto de entrada principal para propagación escalar |
+| `examples/MainMultiMode.m` | canonical | demuestra Hermite y Laguerre con clases modernas y setup corto, legible y actual | mantener como entrada canónica para modos múltiples |
+| `ExampleRayTracing.m` | canonical | cubre la superficie moderna de ray tracing integrada con `GaussianBeam`, `RayBundle` y `RayTracer` | mantener como entrada canónica para ray tracing |
+| `examples/MainGauss.m` | legacy-usable | nombre visible pero anterior al script refactorizado y menos alineado con utilidades nuevas | no presentarlo como default; dejarlo como referencia histórica utilizable |
+| `examples/MainHermite.m` | historical | convive con múltiples variantes de tesis/paper y no está señalado como camino moderno principal | no enlazar en onboarding público |
+| `examples/MainLaguerre.m` | historical | forma parte de una familia de scripts heredados con variantes específicas y naming inconsistente | no enlazar en onboarding público |
+
 **Files:**
 - Reference: `examples/MainGauss_refactored.m`
 - Reference: `examples/MainMultiMode.m`

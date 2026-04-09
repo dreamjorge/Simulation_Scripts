@@ -75,6 +75,12 @@ sim.createGrid();
 - cada beam debe declarar sus coordenadas aceptadas
 - cualquier desvío temporal queda documentado hasta el post-merge cleanup
 
+### Canonical Examples
+
+- `examples/MainGauss_refactored.m` - entrada principal para propagación Gaussiana con utilidades modernas
+- `examples/MainMultiMode.m` - entrada recomendada para modos Hermite y Laguerre
+- `ExampleRayTracing.m` - entrada recomendada para ray tracing integrado
+
 ### MATLAB
 ```matlab
 addpath ParaxialBeams
