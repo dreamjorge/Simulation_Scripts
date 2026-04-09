@@ -338,6 +338,16 @@ git commit -m "docs: prepare merge integration checklist"
 
 ### Task 7: Final Readiness Gate
 
+- [x] merge scope frozen
+- [x] public API audited and documented
+- [x] canonical examples chosen
+- [ ] critical tests green in Octave and MATLAB
+- [x] repo docs aligned with reality
+- [x] merge strategy decided
+- [x] deferred redesign work documented separately
+
+Blocker: `critical tests green in Octave and MATLAB` sigue incompleto porque Octave está verificado localmente, pero la máquina actual no tiene MATLAB completo (`matlab.exe`); solo hay MATLAB Runtime y eso no permite ejecutar `matlab -batch "run('tests/test_all.m')"`.
+
 **Files:**
 - Modify: `plan.md`
 - Reference: `README.md`
