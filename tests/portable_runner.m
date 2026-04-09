@@ -1,4 +1,4 @@
-function portable_runner()
+function totalFailed = portable_runner()
     % Portable test runner for Octave and MATLAB
     % Runs script-based and class-based tests in the current directory.
     
