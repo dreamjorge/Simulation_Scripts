@@ -168,6 +168,18 @@ git commit -m "docs: classify canonical examples"
 
 ### Task 4: Validate Critical Test Coverage
 
+## Critical Coverage Gates
+
+- [ ] `z = 0` no produce NaN/Inf inválidos
+- [ ] modo cero Hermite/Laguerre mantiene equivalencia razonable con Gaussian
+- [ ] ray tracing cilíndrico sigue estable
+- [ ] `tests/test_all.m` corre vía `portable_runner()`
+- [ ] el runner funciona en Octave y MATLAB
+
+Gap -> portable runner coverage -> pre-merge: `portable_runner()` hoy solo ejecuta `test_PhysicalConstants.m` y `test_RayTracing.m`; los checks de beams (`z = 0`, modos cero, elegant variants) existen como tests individuales pero no entran todavía por `tests/test_all.m`.
+
+Gap -> MATLAB verification environment -> pre-merge: la máquina actual solo tiene MATLAB Runtime (`D:\Program Files\MATLAB\MATLAB Runtime\R2025b`), no `matlab.exe`; la compatibilidad MATLAB queda sin evidencia ejecutable local hasta correr `matlab -batch "run('tests/test_all.m')"` en un entorno con MATLAB completo.
+
 **Files:**
 - Reference: `tests/test_all.m`
 - Reference: `tests/portable_runner.m`

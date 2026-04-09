@@ -5,14 +5,29 @@ This directory contains tests for the ParaxialBeams simulation library.
 ## Running Tests
 
 ```bash
-cd /root/Simulation_Scripts
+cd <repo-root>
 octave --no-gui --eval "run('tests/test_all.m')"
 ```
 
-Or in MATLAB:
-```matlab
-run('tests/test_all.m')
+With full MATLAB installed:
+```bash
+matlab -batch "run('tests/test_all.m')"
 ```
+
+Note: MATLAB Runtime alone is not enough for the `matlab -batch` command above.
+
+## Critical Coverage Gates
+
+- `z = 0` no produce NaN/Inf invalidos en tests individuales de beams (`test_GaussianBeam.m`, `test_HermiteBeam.m`, `test_LaguerreBeam.m`, `test_ElegantHermiteBeam.m`, `test_ElegantLaguerreBeam.m`)
+- modo cero Hermite/Laguerre mantiene equivalencia razonable con Gaussian en `test_HermiteBeam.m` y `test_LaguerreBeam.m`
+- ray tracing cilindrico sigue estable en `test_RayTracing.m`
+- `tests/test_all.m` corre via `portable_runner()`
+- compatibilidad MATLAB requiere ejecutar la misma suite en un entorno con MATLAB completo
+
+## Current Runner Scope
+
+- `portable_runner()` ejecuta hoy `test_PhysicalConstants.m` y `test_RayTracing.m`
+- los tests de beams existen y cubren checks criticos, pero todavia no forman parte del runner portable principal
 
 ## Test Coverage
 
