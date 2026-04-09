@@ -1,4 +1,4 @@
-classdef ElegantHermiteBeam
+classdef ElegantHermiteBeam < ParaxialBeam
     % ElegantHermiteBeam - Elegant Hermite-Gaussian beam implementation
     
     properties
@@ -11,14 +11,27 @@ classdef ElegantHermiteBeam
     methods
         function obj = ElegantHermiteBeam(X, Y, params)
             % Constructor
+            obj = obj@ParaxialBeam(params.Lambda);
+            
             if nargin > 0
                 obj.Parameters = params;
                 obj.X = X;
                 obj.Y = Y;
+                obj.OpticalField = obj.computeComplexField(X, Y, params);
+            end
+        end
+        
+        function field = opticalField(obj, X, Y, z)
+            % Unified API
+            field = obj.computeComplexField(X, Y, obj.Parameters);
+        end
+        
+        function field = computeComplexField(obj, x, y, params)
+                obj.X = x;
+                obj.Y = y;
                 
                 % Elegant argument for Hermite polynomials: sqrt(alpha) * coordinate
                 sqrt_alpha = sqrt(params.alpha);
-                argX = sqrt_alpha .* X;
                 argY = sqrt_alpha .* Y;
                 
                 % Hermite polynomials: H_n(sqrt(alpha)*x)
