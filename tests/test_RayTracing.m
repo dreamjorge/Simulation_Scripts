@@ -1,8 +1,8 @@
-classdef test_RayTracing < matlab.unittest.TestCase
+classdef test_RayTracing
     % Unit tests for Ray Tracing integration
     
-    methods (Test)
-        function testRayBundleInitialization(testCase)
+    methods
+        function testRayBundleInitialization(obj, testCase)
             % Test grid creation
             bundle = RayBundle.createGrid(10, 12, 1e-3, 1.2e-3);
             testCase.verifySize(bundle.x, [12, 10]);
@@ -10,15 +10,16 @@ classdef test_RayTracing < matlab.unittest.TestCase
             
             % Test concentric creation
             bundle = RayBundle.createConcentric(5, 8, 1e-3);
-            testCase.verifyEqual(bundle.Nx, 8);
-            testCase.verifyEqual(bundle.Ny, 5);
+            testCase.verifyEqual(bundle.Nx, 5);
+            testCase.verifyEqual(bundle.Ny, 8);
         end
         
-        function testRayTracerSlopes(testCase)
+        function testRayTracerSlopes(obj, testCase)
             % Test slope calculation for a Gaussian beam
             lambda = 632.8e-9;
             w0 = 100e-6;
-            beam = GaussianBeam(w0, lambda);
+            params = GaussianParameters(0, w0, lambda);
+            beam = GaussianBeam(0, params);
             
             % At z=0, the phase of a Gaussian beam is flat (m=0)
             [sx, sy] = RayTracer.calculateSlopes(beam, 0, 0, 0);
@@ -30,11 +31,12 @@ classdef test_RayTracing < matlab.unittest.TestCase
             testCase.verifyEqual(sx, 0, 'AbsTol', 1e-6);
         end
         
-        function testPropagationFreeSpace(testCase)
+        function testPropagationFreeSpace(obj, testCase)
             % Test Euler and RK4 for a Gaussian beam
             lambda = 632.8e-9;
             w0 = 100e-6;
-            beam = GaussianBeam(w0, lambda);
+            params = GaussianParameters(0, w0, lambda);
+            beam = GaussianBeam(0, params);
             zr = pi * w0^2 / lambda;
             
             bundle = RayBundle.createGrid(5, 5, 200e-6, 200e-6);

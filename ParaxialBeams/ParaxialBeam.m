@@ -16,11 +16,12 @@ classdef (Abstract) ParaxialBeam < handle
         end
     end
     
-    methods (Abstract)
-        % field = opticalField(obj, X, Y, z)
-        % Computes the complex optical field at given coordinates.
-        % X, Y: matrix of coordinates (m)
-        % z: scalar propagation distance (m)
-        field = opticalField(obj, X, Y, z)
+    methods
+        function field = opticalField(obj, X, Y, z)
+            % This is a dummy implementation for portability.
+            % Must be overridden by subclasses.
+            error('ParaxialBeam:opticalFieldNotImplemented', ...
+                'The method opticalField must be implemented by the subclass.');
+        end
     end
 end

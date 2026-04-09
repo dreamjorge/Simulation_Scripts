@@ -27,24 +27,25 @@ classdef ElegantHermiteBeam < ParaxialBeam
         end
         
         function field = computeComplexField(obj, x, y, params)
-                obj.X = x;
-                obj.Y = y;
-                
-                % Elegant argument for Hermite polynomials: sqrt(alpha) * coordinate
-                sqrt_alpha = sqrt(params.alpha);
-                argY = sqrt_alpha .* Y;
-                
-                % Hermite polynomials: H_n(sqrt(alpha)*x)
-                Hn = PolynomialUtils.hermitePoly(params.n, argX);
-                Hm = PolynomialUtils.hermitePoly(params.m, argY);
-                
-                % Physical Gaussian Beam (Carrier)
-                [R, ~] = cart2pol(X, Y);
-                GB = GaussianBeam(R, params);
-                GField = GB.OpticalField;
-                
-                obj.OpticalField = Hn .* Hm .* exp(1i * params.PhiPhase) .* GField;
-            end
+            obj.X = x;
+            obj.Y = y;
+            
+            % Elegant argument for Hermite polynomials: sqrt(alpha) * coordinate
+            sqrt_alpha = sqrt(params.alpha);
+            argX = sqrt_alpha .* x;
+            argY = sqrt_alpha .* y;
+            
+            % Hermite polynomials: H_n(sqrt(alpha)*x)
+            Hn = PolynomialUtils.hermitePoly(params.n, argX);
+            Hm = PolynomialUtils.hermitePoly(params.m, argY);
+            
+            % Physical Gaussian Beam (Carrier)
+            [R, ~] = cart2pol(x, y);
+            GB = GaussianBeam(R, params);
+            GField = GB.OpticalField;
+            
+            field = Hn .* Hm .* exp(1i * params.PhiPhase) .* GField;
+            obj.OpticalField = field;
         end
     end
 end
