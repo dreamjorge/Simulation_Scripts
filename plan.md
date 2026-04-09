@@ -231,6 +231,13 @@ git commit -m "test: lock critical pre-merge coverage gates"
 
 ### Task 5: Align Repository Narrative
 
+## Stale Claims To Correct
+
+- `README.md` describe clases como carpetas `@.../`, pero `ParaxialBeams/` hoy expone archivos `.m` planos
+- `README.md` documenta `BeamSimulation`, pero ese archivo no existe en `ParaxialBeams/`
+- `README.md` muestra scripts raíz `MainGauss.m`, `MainHermite.m`, `MainLaguerre.m`, pero los ejemplos auditados viven en `examples/` y el entrypoint recomendado para ray tracing está en `ExampleRayTracing.m`
+- `tests/README.md` ya no debe sugerir que MATLAB Runtime alcanza para correr la suite
+
 **Files:**
 - Modify: `README.md`
 - Modify: `tests/README.md`

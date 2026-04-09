@@ -9,21 +9,26 @@ Author: Ugalde-Ontiveros J.A.
 ```
 Simulation_Scripts/
 ├── ParaxialBeams/
-│   ├── @GaussianParameters/    % Clase de parámetros Gaussian
-│   ├── @HermiteParameters/     % Clase de parámetros Hermite
-│   ├── @LaguerreParameters/    % Clase de parámetros Laguerre
-│   ├── @GaussianBeam/          % haz Gaussiano
-│   ├── @HermiteBeam/           % haz Hermite-Gauss
-│   ├── @LaguerreBeam/          % haz Laguerre-Gauss
-│   ├── @PhysicalConstants/    % ⭐ Constantes físicas
-│   ├── @GridUtils/             % ⭐ Utilidades de grid
-│   ├── @FFTUtils/              % ⭐ Utilidades FFT
-│   ├── @BeamSimulation/        % ⭐ Clase base para simulaciones
+│   ├── GaussianBeam.m
+│   ├── HermiteBeam.m
+│   ├── LaguerreBeam.m
+│   ├── ElegantHermiteBeam.m
+│   ├── ElegantLaguerreBeam.m
+│   ├── GaussianParameters.m
+│   ├── HermiteParameters.m
+│   ├── LaguerreParameters.m
+│   ├── PhysicalConstants.m
+│   ├── GridUtils.m
+│   ├── FFTUtils.m
+│   ├── RayBundle.m / RayTracer.m
 │   └── Addons/
-├── MainGauss.m                 % Script Gauss original
-├── MainHermite.m               % Script Hermite original
-├── MainLaguerre.m              % Script Laguerre original
-└── MainGauss_refactored.m      # ⭐ Versión refactorizada
+├── examples/
+│   ├── MainGauss_refactored.m
+│   └── MainMultiMode.m
+├── tests/
+│   ├── test_all.m
+│   └── portable_runner.m
+└── ExampleRayTracing.m
 ```
 
 ## ⭐ Nuevas Clases (v2.0)
@@ -58,14 +63,6 @@ H = fftOps.transferFunction(kx, ky, z, lambda);  % Función de transferencia
 gProp = fftOps.propagate(g, kx, ky, z, lambda);  % Propagación angular
 ```
 
-### BeamSimulation
-Clase base para simulaciones:
-```matlab
-sim = BeamSimulation();
-sim.setPhysicalParameters('w0', 100e-6, 'lambda', 632.e-9);
-sim.createGrid();
-```
-
 ## Uso
 
 ## Beam API Contract
@@ -98,6 +95,12 @@ grid = GridUtils(1024, 1024, 1e-3, 1e-3);
 fftOps = FFTUtils;
 G = fftOps.fft2(field);
 ```
+
+### Compatibilidad
+
+- Octave: verificado localmente con `tests/test_all.m`
+- MATLAB completo: requerido para validar `matlab -batch "run('tests/test_all.m')"`
+- MATLAB Runtime solo no alcanza para ejecutar la suite del repo
 
 ## Referencias
 

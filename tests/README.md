@@ -28,6 +28,7 @@ Note: MATLAB Runtime alone is not enough for the `matlab -batch` command above.
 
 - `portable_runner()` ejecuta hoy `test_PhysicalConstants.m` y `test_RayTracing.m`
 - los tests de beams existen y cubren checks criticos, pero todavia no forman parte del runner portable principal
+- `runAllTests.m` y otros helpers quedan como scripts auxiliares, no como entrypoint auditado principal
 
 ## Test Coverage
 
