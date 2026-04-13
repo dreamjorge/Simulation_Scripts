@@ -11,7 +11,20 @@ function totalFailed = portable_runner()
     % List of tests to run
     testFiles = {
         'test_PhysicalConstants.m',
-        'test_RayTracing.m'
+        'test_RayTracing.m',
+        'test_GridUtils.m',
+        'test_FFTUtils.m',
+        'test_AnalysisUtils.m',
+        'test_GaussianParameters.m',
+        'test_GaussianBeam.m',
+        'test_HermiteParameters.m',
+        'test_HermiteBeam.m',
+        'test_LaguerreParameters.m',
+        'test_LaguerreBeam.m',
+        'test_ElegantHermiteParameters.m',
+        'test_ElegantHermiteBeam.m',
+        'test_ElegantLaguerreParameters.m',
+        'test_ElegantLaguerreBeam.m'
     };
     
     totalPassed = 0;

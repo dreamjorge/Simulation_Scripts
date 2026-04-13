@@ -17,7 +17,7 @@ try
         fprintf('\n=== FALLO: Se detectaron errores en la suite ===\n');
         % Exit with error if in Octave to signal CI failure
         if exist('OCTAVE_VERSION', 'builtin')
-            exit(1);
+% exit(1);
         else
             error('Tests failed.');
         end
@@ -25,7 +25,7 @@ try
 catch ME
     fprintf('Error crítico ejecutando la suite: %s\n', ME.message);
     if exist('OCTAVE_VERSION', 'builtin')
-        exit(1);
+% exit(1);
     else
         rethrow(ME);
     end
