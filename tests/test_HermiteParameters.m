@@ -214,8 +214,6 @@ end
 
 fprintf('\n=== HermiteParameters: %d/%d passed ===\n', passed, passed + failed);
 
-if (failed == 0)
-% exit(0);
-else
-% exit(1);
+if failed ~= 0
+    error('Tests failed: %d/%d', failed, passed + failed);
 end
