@@ -69,20 +69,49 @@ classdef GridUtils
     end
     
     methods (Static)
-        function [X, Y] = meshgrid2D(N, D)
-            n = -N/2:N/2-1;
-            x = n * (D / N);
-            [X, Y] = meshgrid(x, x);
+        function [X, Y] = meshgrid2D(Nx, Ny, Dx, Dy)
+            % meshgrid2D - Create 2D coordinate grid
+            % Supports asymmetric grids when Nx~=Ny or Dx~=Dy
+            if nargin < 3
+                spacing = Ny; Ny = Nx; Dx = spacing; Dy = spacing;
+            elseif nargin < 4
+                Dy = Dx;
+            end
+            nx = -Nx/2:Nx/2-1;
+            ny = -Ny/2:Ny/2-1;
+            x = nx * (Dx / Nx);
+            y = ny * (Dy / Ny);
+            [X, Y] = meshgrid(x, y);
         end
         
-        function [Kx, Ky] = freqGrid(N, D)
-            n = -N/2:N/2-1;
-            u = n * (1 / D);
-            [Kx, Ky] = meshgrid(2*pi*u, 2*pi*u);
+        function [Kx, Ky] = freqGrid(Nx, Ny, Dx, Dy)
+            % freqGrid - Create frequency domain grid
+            % Supports asymmetric grids when Nx~=Ny or Dx~=Dy
+            if nargin < 4
+                if nargin < 3
+                    spacing = Ny; Ny = Nx; Dx = spacing; Dy = spacing;
+                else
+                    Dy = Dx;
+                end
+            end
+            nx = -Nx/2:Nx/2-1;
+            ny = -Ny/2:Ny/2-1;
+            u = nx * (1 / Dx);
+            v = ny * (1 / Dy);
+            [Kx, Ky] = meshgrid(2*pi*u, 2*pi*v);
         end
         
-        function [r, theta] = polarGrid(N, D)
-            [X, Y] = GridUtils.meshgrid2D(N, D);
+        function [r, theta] = polarGrid(Nx, Ny, Dx, Dy)
+            % polarGrid - Create polar coordinate grid
+            % Supports asymmetric grids when Nx~=Ny or Dx~=Dy
+            if nargin < 4
+                if nargin < 3
+                    spacing = Ny; Ny = Nx; Dx = spacing; Dy = spacing;
+                else
+                    Dy = Dx;
+                end
+            end
+            [X, Y] = GridUtils.meshgrid2D(Nx, Ny, Dx, Dy);
             [r, theta] = cart2pol(X, Y);
         end
     end
