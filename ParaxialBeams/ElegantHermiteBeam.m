@@ -26,7 +26,7 @@ classdef ElegantHermiteBeam
                 Hm = PolynomialUtils.hermitePoly(params.m, argY);
                 
                 % Physical Gaussian Beam (Carrier)
-                [R, ~] = cart2pol(x, y);
+                R = sqrt(x.^2 + y.^2);
                 GB = GaussianBeam(R, params);
                 GField = GB.OpticalField;
                 
