@@ -212,6 +212,56 @@ else
     failed = failed + 1;
 end
 
+% --- Dynamic API tests (Phase 2) ---
+
+% testDynamicPhiPhase
+lp_dyn = LaguerreParameters(0, w0, lambda, 2, 1);
+z2 = 0.1;
+zr_dyn = lp_dyn.RayleighDistance;
+phi_dyn = lp_dyn.phiPhase(z2);
+phi_expected = (abs(2) + 2*1) * atan(z2 / zr_dyn);
+if (abs(phi_dyn - phi_expected) < 1e-10)
+    fprintf('  PASS: dynamic phiPhase(z)\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: dynamic phiPhase(z)\n');
+    failed = failed + 1;
+end
+
+% testDynamicPhiPhaseAtZero
+phi_zero = lp_dyn.phiPhase(0);
+if (abs(phi_zero) < 1e-10)
+    fprintf('  PASS: dynamic phiPhase(0) = 0\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: dynamic phiPhase(0)\n');
+    failed = failed + 1;
+end
+
+% testDynamicLaguerreWaist
+w_dyn2 = lp_dyn.laguerreWaist(z2);
+w_g = lp_dyn.waist(z2);
+w_expected2 = w_g * sqrt(2*1 + abs(2) + 1);
+if (abs(w_dyn2 - w_expected2) / w_expected2 < 1e-10)
+    fprintf('  PASS: dynamic laguerreWaist(z)\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: dynamic laguerreWaist(z)\n');
+    failed = failed + 1;
+end
+
+% testDynamicPhiPhaseNegativeL
+lp_neg = LaguerreParameters(0, w0, lambda, -2, 1);
+phi_neg = lp_neg.phiPhase(z2);
+phi_neg_exp = (abs(-2) + 2*1) * atan(z2 / lp_neg.RayleighDistance);
+if (abs(phi_neg - phi_neg_exp) < 1e-10)
+    fprintf('  PASS: dynamic phiPhase negative l\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: dynamic phiPhase negative l\n');
+    failed = failed + 1;
+end
+
 fprintf('\n=== LaguerreParameters: %d/%d passed ===\n', passed, passed + failed);
 
 if failed ~= 0
