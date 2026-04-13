@@ -1,6 +1,10 @@
 classdef HermiteBeam
     % HermiteBeam - Scalar optical field for a Hermite-Gaussian beam
     % Compatible with GNU Octave and MATLAB
+    %
+    % Coordinate system: CARTESIAN (x, y)
+    % Note: This differs from LaguerreBeam which uses polar (r, theta).
+    % The beam classes do not share a unified coordinate API.
     
     properties
         Parameters      % HermiteParameters object
@@ -42,10 +46,4 @@ classdef HermiteBeam
         end
     end
     
-    methods (Static)
-        function H = hermitePoly(n, x)
-            % Kept for backwards compatibility. Delegates to PolynomialUtils.
-            H = PolynomialUtils.hermitePoly(n, x);
-        end
-    end
 end

@@ -1,6 +1,10 @@
 classdef LaguerreBeam
     % LaguerreBeam - Scalar optical field for a Laguerre-Gaussian beam
     % Compatible with GNU Octave and MATLAB
+    %
+    % Coordinate system: POLAR (r, theta)
+    % Note: This differs from HermiteBeam which uses Cartesian (x, y).
+    % The beam classes do not share a unified coordinate API.
     
     properties
         Parameters      % LaguerreParameters object

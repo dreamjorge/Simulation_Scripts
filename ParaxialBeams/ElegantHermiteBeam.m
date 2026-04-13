@@ -1,5 +1,15 @@
 classdef ElegantHermiteBeam
     % ElegantHermiteBeam - Elegant Hermite-Gaussian beam implementation
+    %
+    % Coordinate system: CARTESIAN (x, y) - same as HermiteBeam.
+    %
+    % Formula differences from standard HermiteBeam:
+    %   Standard HG: H_n(sqrt(2)*x/w), H_m(sqrt(2)*y/w)
+    %   Elegant HG: H_n(sqrt(alpha)*x), H_m(sqrt(alpha)*y)
+    %
+    % The "elegant" variant uses the complex beam parameter alpha (not the waist w)
+    % to define the polynomial scaling. This is the "elegant" Hermite-Gauss convention
+    % from Siegman (1990).
     
     properties
         Parameters      % ElegantHermiteParameters object
