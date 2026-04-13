@@ -55,10 +55,5 @@ classdef LaguerreParameters < GaussianParameters
             w = w0 * sqrt(1 + (z/zr).^2);
             wL = w * sqrt(2*p + abs(l) + 1);
         end
-        
-        function L = getAssociatedLaguerrePolynomial(p, l, x)
-            % Kept for backwards compatibility. Delegates to PolynomialUtils.
-            L = PolynomialUtils.associatedLaguerre(p, l, x);
-        end
     end
 end
