@@ -1,33 +1,49 @@
 classdef HermiteParameters < GaussianParameters
     % HermiteParameters - Parameters for Hermite-Gaussian beams
-    % Inherits from GaussianParameters and adds Hermite-specific properties
-    
+    % Inherits from GaussianParameters and adds Hermite-specific properties.
+    %
+    % Mode indices:
+    %   n  - order in x (horizontal)
+    %   m  - order in y (vertical)
+    %
+    % Dynamic API (Phase 2, preferred for propagators):
+    %   phi = params.phiPhase(z)      -- modal Gouy shift (n+m)*psi(z)
+    %   w   = params.hermiteWaist(z)  -- combined spot size w(z)*sqrt(n+m+1)
+    %   wx  = params.hermiteWaistX(z) -- x spot size      w(z)*sqrt(n+1)
+    %   wy  = params.hermiteWaistY(z) -- y spot size      w(z)*sqrt(m+1)
+    %
+    % Snapshot API (original, preserved):
+    %   params.PhiPhase        -- at stored zCoordinate
+    %   params.HermiteWaist    -- at stored zCoordinate
+    %   params.HermiteWaistX   -- at stored zCoordinate
+    %   params.HermiteWaistY   -- at stored zCoordinate
+
     properties
         n   % Order in x
         m   % Order in y
     end
-    
+
     properties (Dependent)
         HermiteWaistX
         HermiteWaistY
         HermiteWaist
-        PhiPhase        % Total phase shift including Hermite orders
+        PhiPhase        % Modal Gouy phase shift: (n+m)*psi(z) at stored z
     end
-    
+
     methods
         function obj = HermiteParameters(z, w0, lambda, n, m)
             % Constructor
-            % z: propagation distance
-            % w0: initial waist
-            % lambda: wavelength
-            % n, m: Hermite orders
-            
+            % z:      propagation distance (snapshot)
+            % w0:     initial beam waist (m)
+            % lambda: wavelength (m)
+            % n, m:   Hermite mode orders (default 0)
+
             if nargin < 3
                 error('Usage: params = HermiteParameters(z, w0, lambda, n, m)');
             end
-            
+
             obj@GaussianParameters(z, w0, lambda);
-            
+
             if nargin >= 5
                 obj.n = n;
                 obj.m = m;
@@ -36,41 +52,68 @@ classdef HermiteParameters < GaussianParameters
                 obj.m = 0;
             end
         end
-        
-        %% Dependent property getters
+
+        % -----------------------------------------------------------------
+        % Dynamic evaluation methods (Phase 2 API)
+        % -----------------------------------------------------------------
+
+        function phi = phiPhase(obj, z)
+            % phiPhase  Modal Gouy phase shift (n+m)*psi(z) at arbitrary z.
+            %
+            % This is the additional Gouy phase accumulated by mode HG_{nm}
+            % relative to the fundamental Gaussian mode. At z = 0 it is zero.
+            phi = (obj.n + obj.m) .* obj.gouyPhase(z);
+        end
+
+        function w = hermiteWaist(obj, z)
+            % hermiteWaist  Combined HG spot size w(z)*sqrt(n+m+1) at arbitrary z.
+            w = obj.waist(z) .* sqrt(obj.n + obj.m + 1);
+        end
+
+        function wx = hermiteWaistX(obj, z)
+            % hermiteWaistX  HG spot size in x: w(z)*sqrt(n+1) at arbitrary z.
+            wx = obj.waist(z) .* sqrt(obj.n + 1);
+        end
+
+        function wy = hermiteWaistY(obj, z)
+            % hermiteWaistY  HG spot size in y: w(z)*sqrt(m+1) at arbitrary z.
+            wy = obj.waist(z) .* sqrt(obj.m + 1);
+        end
+
+        % -----------------------------------------------------------------
+        % Snapshot Dependent property getters (original API, preserved)
+        % -----------------------------------------------------------------
+
         function phi = get.PhiPhase(obj)
-            % Total phase shift: (n + m + 1) * psi(z)
-            % Note: the +1 is usually handled in the beam formula or by relative phase
-            % Here we return (n + m) * psi(z) to be used as an ADDITIVE shift to the Gaussian Gouy phase
+            % Total phase shift (n+m)*psi at the stored zCoordinate.
             phi = (obj.n + obj.m) .* obj.GouyPhase;
         end
-        
+
         function wH = get.HermiteWaistX(obj)
-            % Standard Hermite spot size in X: w(z) * sqrt(n + 1)
-            % Note: some conventions use sqrt(2n + 1). We'll follow the old code's intent.
+            % Standard Hermite spot size in X: w(z)*sqrt(n+1).
             wH = obj.Waist .* sqrt(obj.n + 1);
         end
-        
+
         function wH = get.HermiteWaistY(obj)
             wH = obj.Waist .* sqrt(obj.m + 1);
         end
-        
+
         function wH = get.HermiteWaist(obj)
-            % Combined waist (RMSE)
+            % Combined spot size (RMSE): w(z)*sqrt(n+m+1).
             wH = obj.Waist .* sqrt(obj.n + obj.m + 1);
         end
     end
-    
+
     methods (Static)
         function wH = getWaistOneDirection(z, w0, zr, n)
-            % Static method for one-dimensional Hermite waist
-            w = w0 * sqrt(1 + (z/zr).^2);
+            % Static: one-dimensional Hermite waist at z.
+            w  = w0 * sqrt(1 + (z/zr).^2);
             wH = w * sqrt(n + 1);
         end
-        
+
         function wH = getWaist(z, w0, zr, n, m)
-            % Static method for two-dimensional Hermite waist
-            w = w0 * sqrt(1 + (z/zr).^2);
+            % Static: two-dimensional Hermite waist at z.
+            w  = w0 * sqrt(1 + (z/zr).^2);
             wH = w * sqrt(n + m + 1);
         end
     end

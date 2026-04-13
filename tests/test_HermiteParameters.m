@@ -212,6 +212,67 @@ else
     failed = failed + 1;
 end
 
+% --- Dynamic API tests (Phase 2) ---
+
+% testDynamicPhiPhase
+hp_dyn = HermiteParameters(0, w0, lambda, 2, 3);
+z2 = 0.1;
+zr_dyn = hp_dyn.RayleighDistance;
+phi_dyn = hp_dyn.phiPhase(z2);
+phi_expected = (2 + 3) * atan(z2 / zr_dyn);
+if (abs(phi_dyn - phi_expected) < 1e-10)
+    fprintf('  PASS: dynamic phiPhase(z)\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: dynamic phiPhase(z)\n');
+    failed = failed + 1;
+end
+
+% testDynamicPhiPhaseAtZero
+phi_zero = hp_dyn.phiPhase(0);
+if (abs(phi_zero) < 1e-10)
+    fprintf('  PASS: dynamic phiPhase(0) = 0\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: dynamic phiPhase(0)\n');
+    failed = failed + 1;
+end
+
+% testDynamicHermiteWaist
+w_dyn2 = hp_dyn.hermiteWaist(z2);
+w_g = hp_dyn.waist(z2);
+w_expected2 = w_g * sqrt(2 + 3 + 1);
+if (abs(w_dyn2 - w_expected2) / w_expected2 < 1e-10)
+    fprintf('  PASS: dynamic hermiteWaist(z)\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: dynamic hermiteWaist(z)\n');
+    failed = failed + 1;
+end
+
+% testDynamicHermiteWaistX
+hp_x = HermiteParameters(0, w0, lambda, 3, 0);
+wx_dyn = hp_x.hermiteWaistX(z2);
+wx_expected = hp_x.waist(z2) * sqrt(3 + 1);
+if (abs(wx_dyn - wx_expected) / wx_expected < 1e-10)
+    fprintf('  PASS: dynamic hermiteWaistX(z)\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: dynamic hermiteWaistX(z)\n');
+    failed = failed + 1;
+end
+
+% testDynamicHermiteWaistY
+wy_dyn = hp_x.hermiteWaistY(z2);
+wy_expected = hp_x.waist(z2) * sqrt(0 + 1);
+if (abs(wy_dyn - wy_expected) / wy_expected < 1e-10)
+    fprintf('  PASS: dynamic hermiteWaistY(z)\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: dynamic hermiteWaistY(z)\n');
+    failed = failed + 1;
+end
+
 fprintf('\n=== HermiteParameters: %d/%d passed ===\n', passed, passed + failed);
 
 if failed ~= 0

@@ -176,6 +176,56 @@ else
     failed = failed + 1;
 end
 
+% --- Dynamic API tests (Phase 2) ---
+
+% testDynamicAlphaAtZ
+ehp_dyn = ElegantHermiteParameters(0, w0, lambda, 1, 1);
+z2 = 0.1;
+al_dyn = ehp_dyn.alphaAtZ(z2);
+k_val = 2*pi/lambda;
+zr_dyn = pi*w0^2/lambda;
+q = z2 + 1i*zr_dyn;
+al_expected = 1i * k_val / (2 * q);
+if (abs(al_dyn - al_expected) < 1e-10)
+    fprintf('  PASS: dynamic alphaAtZ(z)\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: dynamic alphaAtZ(z)\n');
+    failed = failed + 1;
+end
+
+% testDynamicAlphaDiffersFromSnapshot
+al_snapshot = ehp_dyn.alpha;  % at z=0
+al_at_z2 = ehp_dyn.alphaAtZ(z2);
+if (al_snapshot ~= al_at_z2)
+    fprintf('  PASS: dynamic alphaAtZ differs from snapshot\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: dynamic alphaAtZ differs from snapshot\n');
+    failed = failed + 1;
+end
+
+% testDynamicPhiPhase
+phi_dyn = ehp_dyn.phiPhase(z2);
+phi_expected = (1 + 1) * atan(z2 / zr_dyn);
+if (abs(phi_dyn - phi_expected) < 1e-10)
+    fprintf('  PASS: dynamic phiPhase(z)\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: dynamic phiPhase(z)\n');
+    failed = failed + 1;
+end
+
+% testDynamicPhiPhaseAtZero
+phi_zero = ehp_dyn.phiPhase(0);
+if (abs(phi_zero) < 1e-10)
+    fprintf('  PASS: dynamic phiPhase(0) = 0\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: dynamic phiPhase(0)\n');
+    failed = failed + 1;
+end
+
 fprintf('\n=== ElegantHermiteParameters: %d/%d passed ===\n', passed, passed + failed);
 
 if failed ~= 0

@@ -438,6 +438,87 @@ else
     passed = passed + 1;
 end
 
+% --- Dynamic API tests (Phase 2) ---
+
+% testDynamicWaist
+params_dyn = GaussianParameters(0, w0, lambda);
+z2 = 0.1;
+w_dyn = params_dyn.waist(z2);
+w_expected = w0 * sqrt(1 + (z2 / params_dyn.RayleighDistance)^2);
+if (abs(w_dyn - w_expected) / w_expected < 1e-10)
+    fprintf('  PASS: dynamic waist(z)\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: dynamic waist(z)\n');
+    failed = failed + 1;
+end
+
+% testDynamicGouyPhase
+psi_dyn = params_dyn.gouyPhase(z2);
+psi_expected = atan(z2 / params_dyn.RayleighDistance);
+if (abs(psi_dyn - psi_expected) < 1e-10)
+    fprintf('  PASS: dynamic gouyPhase(z)\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: dynamic gouyPhase(z)\n');
+    failed = failed + 1;
+end
+
+% testDynamicRadius
+R_dyn = params_dyn.radius(z2);
+R_expected = z2 * (1 + (params_dyn.RayleighDistance / z2)^2);
+if (abs(R_dyn - R_expected) / R_expected < 1e-10)
+    fprintf('  PASS: dynamic radius(z)\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: dynamic radius(z)\n');
+    failed = failed + 1;
+end
+
+% testDynamicRadiusAtZero
+R_zero = params_dyn.radius(0);
+if (isinf(R_zero))
+    fprintf('  PASS: dynamic radius(0) = Inf\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: dynamic radius(0)\n');
+    failed = failed + 1;
+end
+
+% testDynamicAmplitude
+a_dyn = params_dyn.amplitude(z2);
+if (abs(a_dyn - 1/w_dyn) < 1e-10)
+    fprintf('  PASS: dynamic amplitude(z)\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: dynamic amplitude(z)\n');
+    failed = failed + 1;
+end
+
+% testDynamicComputeAlphaAtZ
+al_dyn = params_dyn.computeAlphaAtZ(z2);
+k_val = 2*pi/lambda;
+q = z2 + 1i * params_dyn.RayleighDistance;
+al_expected = 1i * k_val / (2 * q);
+if (abs(al_dyn - al_expected) < 1e-10)
+    fprintf('  PASS: dynamic computeAlphaAtZ(z)\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: dynamic computeAlphaAtZ(z)\n');
+    failed = failed + 1;
+end
+
+% testDynamicWaistVectorZ
+z_vec2 = linspace(0, 0.2, 5);
+w_vec2 = params_dyn.waist(z_vec2);
+if (numel(w_vec2) == 5 && all(w_vec2 >= w0))
+    fprintf('  PASS: dynamic waist vector z\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: dynamic waist vector z\n');
+    failed = failed + 1;
+end
+
 fprintf('\n=== GaussianParameters: %d/%d passed ===\n', passed, passed + failed);
 
 if failed ~= 0
