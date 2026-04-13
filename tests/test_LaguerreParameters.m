@@ -76,7 +76,7 @@ end
 
 % testAssociatedLaguerrePolynomial
 x_test = [0, 0.5, 1, 2];
-L_test = LaguerreParameters.getAssociatedLaguerrePolynomial(2, 1, x_test);
+L_test = PolynomialUtils.associatedLaguerre(2, 1, x_test);
 if (numel(L_test) == 4 && all(isfinite(L_test)))
     fprintf('  PASS: getAssociatedLaguerrePolynomial\n');
     passed = passed + 1;
@@ -192,7 +192,7 @@ else
 end
 
 % testAssociatedLaguerrePolynomialL0
-L_l0 = LaguerreParameters.getAssociatedLaguerrePolynomial(1, 0, [0 1 2]);
+L_l0 = PolynomialUtils.associatedLaguerre(1, 0, [0 1 2]);
 if (all(isfinite(L_l0)))
     fprintf('  PASS: Laguerre polynomial L=0\n');
     passed = passed + 1;
@@ -214,8 +214,6 @@ end
 
 fprintf('\n=== LaguerreParameters: %d/%d passed ===\n', passed, passed + failed);
 
-if (failed == 0)
-    exit(0);
-else
-    exit(1);
+if failed ~= 0
+    error('Tests failed: %d/%d', failed, passed + failed);
 end
