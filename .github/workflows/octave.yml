@@ -2,7 +2,7 @@ name: Octave Tests
 
 on:
   push:
-    branches: [master, refactor/*]
+    branches: [master, integration/*, refactor/*]
   pull_request:
     branches: [master]
 
