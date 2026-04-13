@@ -1,4 +1,4 @@
-#!/usr/bin/env octave
+% Compatible with GNU Octave and MATLAB
 % Coverage Report - Simulation_Scripts
 % Calculates approximate coverage based on functions tested
 
