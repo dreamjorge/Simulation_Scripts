@@ -46,7 +46,7 @@ else
 end
 
 % testCoordinatesStored
-if (isequal(size(ehb.X), [64, 64]) && isequal(size(ehb.Y), [64, 64]))
+if (isequal(size(ehb.x), [64, 64]) && isequal(size(ehb.y), [64, 64]))
     fprintf('  PASS: coordinates stored\n');
     passed = passed + 1;
 else
@@ -180,7 +180,7 @@ else
 end
 
 % testElegantCoordinatesNotEmpty
-if (~isempty(ehb.X) && ~isempty(ehb.Y))
+if (~isempty(ehb.x) && ~isempty(ehb.y))
     fprintf('  PASS: elegant coordinates not empty\n');
     passed = passed + 1;
 else
