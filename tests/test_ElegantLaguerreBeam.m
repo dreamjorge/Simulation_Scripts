@@ -1,5 +1,5 @@
 #!/usr/bin/env octave
-% Tests for ElegantLaguerreBeam
+% Tests for ElegantLaguerreBeam (Phase 3 API: ElegantLaguerreBeam(w0, lambda, l, p))
 
 addpath(fullfile(fileparts(fileparts(mfilename('fullpath'))), 'ParaxialBeams'));
 
@@ -11,12 +11,12 @@ w0 = 100e-6;
 lambda = 632.8e-9;
 grid = GridUtils(64, 64, 1e-3, 1e-3);
 [X, Y] = grid.create2DGrid();
-[R, Theta] = cart2pol(X, Y);
+
+elb = ElegantLaguerreBeam(w0, lambda, 1, 0);
 
 % testFieldGeneration
-elp = ElegantLaguerreParameters(0.01, w0, lambda, 1, 0);
-elb = ElegantLaguerreBeam(R, Theta, elp);
-if (size(elb.OpticalField) == [64, 64])
+field = elb.opticalField(X, Y, 0.01);
+if (size(field) == [64, 64])
     fprintf('  PASS: field generation\n');
     passed = passed + 1;
 else
@@ -25,9 +25,8 @@ else
 end
 
 % testAtWaist
-elp_z0 = ElegantLaguerreParameters(0, w0, lambda, 1, 0);
-elb_z0 = ElegantLaguerreBeam(R, Theta, elp_z0);
-if (all(all(isfinite(elb_z0.OpticalField))))
+field_z0 = elb.opticalField(X, Y, 0);
+if (all(all(isfinite(field_z0))))
     fprintf('  PASS: at waist finite\n');
     passed = passed + 1;
 else
@@ -36,9 +35,8 @@ else
 end
 
 % testAtZgt0
-elp_z = ElegantLaguerreParameters(0.05, w0, lambda, 1, 0);
-elb_z = ElegantLaguerreBeam(R, Theta, elp_z);
-if (all(all(isfinite(elb_z.OpticalField))))
+field_z = elb.opticalField(X, Y, 0.05);
+if (all(all(isfinite(field_z))))
     fprintf('  PASS: at z>0 finite\n');
     passed = passed + 1;
 else
@@ -46,19 +44,38 @@ else
     failed = failed + 1;
 end
 
-% testParametersStored
-if (elb.Parameters.l == 1 && elb.Parameters.p == 0)
-    fprintf('  PASS: parameters stored\n');
+% testModeIndicesStored
+if (elb.l == 1 && elb.p == 0)
+    fprintf('  PASS: mode indices stored\n');
     passed = passed + 1;
 else
-    fprintf('  FAIL: parameters\n');
+    fprintf('  FAIL: mode indices\n');
+    failed = failed + 1;
+end
+
+% testInitialWaistStored
+if (elb.InitialWaist == w0)
+    fprintf('  PASS: InitialWaist stored\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: InitialWaist\n');
+    failed = failed + 1;
+end
+
+% testGetParameters
+params = elb.getParameters(0.05);
+if (abs(params.zCoordinate - 0.05) < 1e-15 && params.InitialWaist == w0)
+    fprintf('  PASS: getParameters(z)\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: getParameters(z)\n');
     failed = failed + 1;
 end
 
 % testHigherOrderModes
-elp_high = ElegantLaguerreParameters(0.01, w0, lambda, 2, 1);
-elb_high = ElegantLaguerreBeam(R, Theta, elp_high);
-if (all(all(isfinite(elb_high.OpticalField))))
+elb_high = ElegantLaguerreBeam(w0, lambda, 2, 1);
+field_high = elb_high.opticalField(X, Y, 0.01);
+if (all(all(isfinite(field_high))))
     fprintf('  PASS: higher order modes\n');
     passed = passed + 1;
 else
@@ -66,23 +83,8 @@ else
     failed = failed + 1;
 end
 
-% testAlphaStored
-try
-    alpha_val = elb.Parameters.alpha;
-    if (~isempty(alpha_val))
-        fprintf('  PASS: alpha stored\n');
-        passed = passed + 1;
-    else
-        fprintf('  FAIL: alpha\n');
-        failed = failed + 1;
-    end
-catch
-    fprintf('  PASS: alpha accessible\n');
-    passed = passed + 1;
-end
-
 % testValidOutputSize
-if (size(elb.OpticalField,1) == 64 && size(elb.OpticalField,2) == 64)
+if (size(field_z0, 1) == 64 && size(field_z0, 2) == 64)
     fprintf('  PASS: valid output size\n');
     passed = passed + 1;
 else
@@ -91,11 +93,11 @@ else
 end
 
 % testDifferentLandP
-elp_10 = ElegantLaguerreParameters(0.01, w0, lambda, 1, 0);
-elp_01 = ElegantLaguerreParameters(0.01, w0, lambda, 0, 1);
-elb_10 = ElegantLaguerreBeam(R, Theta, elp_10);
-elb_01 = ElegantLaguerreBeam(R, Theta, elp_01);
-if (size(elb_10.OpticalField) == size(elb_01.OpticalField))
+elb_10 = ElegantLaguerreBeam(w0, lambda, 1, 0);
+elb_01 = ElegantLaguerreBeam(w0, lambda, 0, 1);
+f_10 = elb_10.opticalField(X, Y, 0.01);
+f_01 = elb_01.opticalField(X, Y, 0.01);
+if (size(f_10) == size(f_01))
     fprintf('  PASS: different l p valid\n');
     passed = passed + 1;
 else
@@ -104,9 +106,9 @@ else
 end
 
 % testZeroOrderElegantLaguerre
-elp_00 = ElegantLaguerreParameters(0, w0, lambda, 0, 0);
-elb_00 = ElegantLaguerreBeam(R, Theta, elp_00);
-if (all(all(isfinite(elb_00.OpticalField))))
+elb_00 = ElegantLaguerreBeam(w0, lambda, 0, 0);
+field_00 = elb_00.opticalField(X, Y, 0);
+if (all(all(isfinite(field_00))))
     fprintf('  PASS: zero order elegant LG valid\n');
     passed = passed + 1;
 else
@@ -114,20 +116,20 @@ else
     failed = failed + 1;
 end
 
-% testComplexFieldElegantLaguerre
-elb_complex = ElegantLaguerreBeam(R, Theta, ElegantLaguerreParameters(0.05, w0, lambda, 1, 0));
-if (elb_complex.Parameters.GouyPhase ~= 0)
-    fprintf('  PASS: complex field elegant LG\n');
+% testGouyPhaseIncluded
+params_z = elb.getParameters(0.05);
+if (params_z.GouyPhase > 0)
+    fprintf('  PASS: Gouy phase included\n');
     passed = passed + 1;
 else
-    fprintf('  FAIL: complex field elegant LG\n');
+    fprintf('  FAIL: Gouy phase\n');
     failed = failed + 1;
 end
 
 % testHigherPOrder
-elp_p2 = ElegantLaguerreParameters(0, w0, lambda, 0, 2);
-elb_p2 = ElegantLaguerreBeam(R, Theta, elp_p2);
-if (all(all(isfinite(elb_p2.OpticalField))))
+elb_p2 = ElegantLaguerreBeam(w0, lambda, 0, 2);
+field_p2 = elb_p2.opticalField(X, Y, 0);
+if (all(all(isfinite(field_p2))))
     fprintf('  PASS: higher p order elegant\n');
     passed = passed + 1;
 else
@@ -136,9 +138,9 @@ else
 end
 
 % testNegativeLElegant
-elp_neg = ElegantLaguerreParameters(0, w0, lambda, -1, 0);
-elb_neg = ElegantLaguerreBeam(R, Theta, elp_neg);
-if (all(all(isfinite(elb_neg.OpticalField))))
+elb_neg = ElegantLaguerreBeam(w0, lambda, -1, 0);
+field_neg = elb_neg.opticalField(X, Y, 0);
+if (all(all(isfinite(field_neg))))
     fprintf('  PASS: negative l elegant valid\n');
     passed = passed + 1;
 else
@@ -157,37 +159,19 @@ else
     failed = failed + 1;
 end
 
-% testElegantLGWaistInheritance
-elp_w = ElegantLaguerreParameters(0.1, w0, lambda, 1, 1);
-if (elp_w.Waist > 0)
-    fprintf('  PASS: elegant LG waist inheritance\n');
+% testWaistFromParameters
+params_w = elb.getParameters(0.1);
+if (params_w.Waist > 0)
+    fprintf('  PASS: waist from parameters\n');
     passed = passed + 1;
 else
-    fprintf('  FAIL: elegant LG waist\n');
-    failed = failed + 1;
-end
-
-% testElegantLGKInheritance
-if (elp.k > 0)
-    fprintf('  PASS: elegant LG k inheritance\n');
-    passed = passed + 1;
-else
-    fprintf('  FAIL: elegant LG k\n');
-    failed = failed + 1;
-end
-
-% testElegantLGGouyInheritance
-if (elp_z.GouyPhase > 0)
-    fprintf('  PASS: elegant LG Gouy inheritance\n');
-    passed = passed + 1;
-else
-    fprintf('  FAIL: elegant LG Gouy\n');
+    fprintf('  FAIL: waist from parameters\n');
     failed = failed + 1;
 end
 
 % testElegantLGNegativeZ
-elb_neg_z = ElegantLaguerreBeam(R, Theta, ElegantLaguerreParameters(-0.05, w0, lambda, 1, 0));
-if (all(all(isfinite(elb_neg_z.OpticalField))))
+field_neg_z = elb.opticalField(X, Y, -0.05);
+if (all(all(isfinite(field_neg_z))))
     fprintf('  PASS: elegant LG negative z\n');
     passed = passed + 1;
 else
@@ -196,9 +180,11 @@ else
 end
 
 % testElegantLGDifferentWavelengths
-elb_wl1 = ElegantLaguerreBeam(R, Theta, ElegantLaguerreParameters(0, w0, 532e-9, 1, 0));
-elb_wl2 = ElegantLaguerreBeam(R, Theta, ElegantLaguerreParameters(0, w0, 1064e-9, 1, 0));
-if (all(all(isfinite(elb_wl1.OpticalField))) && all(all(isfinite(elb_wl2.OpticalField))))
+elb_wl1 = ElegantLaguerreBeam(w0, 532e-9, 1, 0);
+elb_wl2 = ElegantLaguerreBeam(w0, 1064e-9, 1, 0);
+f_wl1 = elb_wl1.opticalField(X, Y, 0);
+f_wl2 = elb_wl2.opticalField(X, Y, 0);
+if (all(all(isfinite(f_wl1))) && all(all(isfinite(f_wl2))))
     fprintf('  PASS: elegant LG different wavelengths\n');
     passed = passed + 1;
 else
@@ -207,8 +193,9 @@ else
 end
 
 % testElegantLGCombinedLP
-elb_comb = ElegantLaguerreBeam(R, Theta, ElegantLaguerreParameters(0, w0, lambda, 2, 3));
-if (all(all(isfinite(elb_comb.OpticalField))))
+elb_comb = ElegantLaguerreBeam(w0, lambda, 2, 3);
+f_comb = elb_comb.opticalField(X, Y, 0);
+if (all(all(isfinite(f_comb))))
     fprintf('  PASS: elegant LG combined l p\n');
     passed = passed + 1;
 else
@@ -217,8 +204,8 @@ else
 end
 
 % testElegantLGFieldAmplitude
-elb_amp = ElegantLaguerreBeam(R, Theta, ElegantLaguerreParameters(0, w0, lambda, 0, 0));
-max_amp_el = max(max(abs(elb_amp.OpticalField)));
+field_amp = elb_00.opticalField(X, Y, 0);
+max_amp_el = max(max(abs(field_amp)));
 if (max_amp_el > 0)
     fprintf('  PASS: elegant LG field amplitude\n');
     passed = passed + 1;
@@ -228,12 +215,33 @@ else
 end
 
 % testElegantLGNegativeLWithP
-elb_negp = ElegantLaguerreBeam(R, Theta, ElegantLaguerreParameters(0, w0, lambda, -2, 1));
-if (all(all(isfinite(elb_negp.OpticalField))))
+elb_negp = ElegantLaguerreBeam(w0, lambda, -2, 1);
+f_negp = elb_negp.opticalField(X, Y, 0);
+if (all(all(isfinite(f_negp))))
     fprintf('  PASS: elegant LG negative l with p\n');
     passed = passed + 1;
 else
     fprintf('  FAIL: elegant LG negative l with p\n');
+    failed = failed + 1;
+end
+
+% testFieldAtDifferentZ
+f_z1 = elb.opticalField(X, Y, 0.01);
+f_z2 = elb.opticalField(X, Y, 0.1);
+if (all(all(isfinite(f_z1))) && all(all(isfinite(f_z2))))
+    fprintf('  PASS: field at different z\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: field at different z\n');
+    failed = failed + 1;
+end
+
+% testBeamName
+if (strcmp(elb.beamName(), 'elegant_laguerre_1_0'))
+    fprintf('  PASS: beamName\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: beamName\n');
     failed = failed + 1;
 end
 
