@@ -11,8 +11,8 @@ function [rayOuput]= copyElementRay(rayInput,...
   
   if (index_point>1)
     rayOuput.zxSlope        (index_point) = rayInput.zxSlope        (index_point);
-    rayOuput.zySlope        (index_point) = rayInput.zxSlope        (index_point);
-    rayOuput.xySlope        (index_point) = rayInput.zxSlope        (index_point);
+    rayOuput.zySlope        (index_point) = rayInput.zySlope        (index_point);
+    rayOuput.xySlope        (index_point) = rayInput.xySlope        (index_point);
   else
     rayOuput.zxSlope        (index_point) = Inf;
     rayOuput.zySlope        (index_point) = Inf;
