@@ -1,4 +1,4 @@
-#!/usr/bin/env octave
+% Compatible with GNU Octave and MATLAB
 % Tests for HermiteBeam (Phase 3 API: HermiteBeam(w0, lambda, n, m))
 
 addpath(fullfile(fileparts(fileparts(mfilename('fullpath'))), 'ParaxialBeams'));

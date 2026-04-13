@@ -1,4 +1,4 @@
-#!/usr/bin/env octave
+% Compatible with GNU Octave and MATLAB
 % Tests for ElegantLaguerreBeam (Phase 3 API: ElegantLaguerreBeam(w0, lambda, l, p))
 
 addpath(fullfile(fileparts(fileparts(mfilename('fullpath'))), 'ParaxialBeams'));

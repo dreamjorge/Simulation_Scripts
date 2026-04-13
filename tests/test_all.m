@@ -1,4 +1,4 @@
-#!/usr/bin/env octave
+% Compatible with GNU Octave and MATLAB
 % Test Suite Runner - Simulation_Scripts (CI & Local Wrapper)
 % Uses portable_runner.m to ensure Octave 11 and MATLAB compatibility.
 

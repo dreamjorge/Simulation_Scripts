@@ -1,4 +1,4 @@
-#!/usr/bin/env octave
+% Compatible with GNU Octave and MATLAB
 % Tests for IPropagator, AnalyticPropagator, FFTPropagator, RayTracePropagator
 
 addpath(fullfile(fileparts(fileparts(mfilename('fullpath'))), 'ParaxialBeams'));
