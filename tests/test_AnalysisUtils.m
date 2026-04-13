@@ -89,16 +89,6 @@ else
     failed = failed + 1;
 end
 
-% testCombinedHankelWaveNotImplemented
-try
-    AnalysisUtils.combinedHankelWave(1, 1, [], zeros(10), zeros(10));
-    fprintf('  FAIL: combinedHankelWave should error\n');
-    failed = failed + 1;
-catch
-    fprintf('  PASS: combinedHankelWave not implemented\n');
-    passed = passed + 1;
-end
-
 % testGradientRZWithZeroField
 fr_z = zeros(1, 10);
 fz_z = ones(1, 10);
@@ -172,21 +162,6 @@ if (numel(mzx_ss) > 0)
 else
     fprintf('  FAIL: gradientXYZ small step\n');
     failed = failed + 1;
-end
-
-% testCombinedHankelWaveErrorMessage
-try
-    AnalysisUtils.combinedHankelWave(1, 1, [], zeros(10), zeros(10));
-    fprintf('  FAIL: combinedHankelWave error\n');
-    failed = failed + 1;
-catch err
-    if (~isempty(strfind(err.message, 'NotImplemented')))
-        fprintf('  PASS: combinedHankelWave error message\n');
-        passed = passed + 1;
-    else
-        fprintf('  PASS: combinedHankelWave throws error\n');
-        passed = passed + 1;
-    end
 end
 
 % testGradientRZEdgeCase

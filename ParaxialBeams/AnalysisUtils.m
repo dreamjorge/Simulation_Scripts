@@ -41,16 +41,5 @@ classdef AnalysisUtils
             mxy = gx(idxX) / gy(idxY);
         end
         
-        function HH = combinedHankelWave(nu, mu, params, X, Y)
-            % combinedHankelWave - Assemble complex Hankel wave from Hermite solutions
-            % Legacy formula: Combined = (HGy + i*NHGy) * (HGx + i*NHGx)
-            % where NHG is the pi/2-phase-shifted (Hilbert-transformed) counterpart.
-            %
-            % NOT_IMPLEMENTED: The NHG (Hilbert-transform) term is not yet ported
-            % from legacy code. Calling this function will produce incorrect results.
-            % Port the NHG computation from the legacy HankelHermiteSlices.m before use.
-            error('AnalysisUtils:combinedHankelWave:NotImplemented', ...
-                'combinedHankelWave requires the NHG Hilbert-transform term which is not yet implemented. See HankelHermiteSlices.m for the legacy implementation.');
-        end
     end
 end
