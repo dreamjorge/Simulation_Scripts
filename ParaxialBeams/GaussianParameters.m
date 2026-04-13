@@ -15,6 +15,10 @@ classdef GaussianParameters
         DivergenceAngle
     end
     
+    properties (Dependent)
+        Wavelength      % Alias for Lambda for backward compatibility
+    end
+    
     methods
         function obj = GaussianParameters(z, w0, lambda)
             if nargin > 0
@@ -46,6 +50,15 @@ classdef GaussianParameters
                   abs(obj.InitialWaist - other.InitialWaist) < 1e-12 && ...
                   abs(obj.Lambda - other.Lambda) < 1e-12;
             res = all(res);
+        end
+
+        %% Dependent property accessors
+        function val = get.Wavelength(obj)
+            val = obj.Lambda;
+        end
+        
+        function obj = set.Wavelength(obj, val)
+            obj.Lambda = val;
         end
     end
     

@@ -13,12 +13,14 @@ classdef GaussianBeam < ParaxialBeam
             % r: radial coordinate (matrix or array)
             % params: GaussianParameters object
             
-            % Call superclass constructor
-            obj = obj@ParaxialBeam(params.Lambda);
-            
             if nargin > 0
+                % Call superclass constructor
+                obj = obj@ParaxialBeam(params.Lambda);
                 obj.Parameters = params;
                 obj.OpticalField = obj.computeFieldFromR(r, params);
+            else
+                % Default constructor for handle class requirements
+                obj = obj@ParaxialBeam();
             end
         end
         

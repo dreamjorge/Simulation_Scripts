@@ -1,14 +1,26 @@
 classdef HankelLaguerre
-    % HankelLaguerre - Hankel-type Laguerre-Gaussian beam field
+   % HankelLaguerre - Hankel-type Laguerre-Gaussian beam field
     % Used in Hankel-based ray tracing (HankelLaguerrePropagation.m, etc.)
     %
-    % The legacy @HankelLaguerre class folder was removed during refactoring.
-    % This stub re-introduces the class as classdef for Octave compatibility.
+    % Theoretical Context (Contexto Academico):
+    % Hankel beams are specialized solutions to the paraxial wave equation 
+    % that represent "conical" waves. Unlike standard LG modes, these beams 
+    % possess a net radial energy flow, making them ideal for modeling 
+    % diverging or converging wavefronts in complex media.
+    %
+    % Mathematical Definition:
+    % They are constructed through the superposition of a paraxial mode 
+    % and its quadrature (Hilbert transform) companion:
+    %   $$ H_{lp}^{(1,2)} (r, \phi, z) = LG_{lp} (r, \phi, z) \pm i \cdot XLG_{lp} (r, \phi, z) $$
+    %
+    % Physical Significance:
+    % - $H^{(1)}$: Outward propagating wave (away from axis).
+    % - $H^{(2)}$: Inward propagating wave (towards axis).
     %
     % STATUS: NOT_IMPLEMENTED
     % The OpticalFieldLaguerre computation requires porting the legacy Hankel
     % combination logic from HankelLaguerrePropagation.m.
-    % See also: AnalysisUtils.combinedHankelWave (error stub with reference)
+    % See also: AnalysisUtils.combinedHankelWave.
 
     properties
         OpticalFieldLaguerre  % Complex field array (not yet computed)

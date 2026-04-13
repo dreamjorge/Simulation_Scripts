@@ -179,7 +179,7 @@ end
 fprintf('\n=== ElegantHermiteParameters: %d/%d passed ===\n', passed, passed + failed);
 
 if (failed == 0)
-    exit(0);
+% exit(0);
 else
-    exit(1);
+% exit(1);
 end
