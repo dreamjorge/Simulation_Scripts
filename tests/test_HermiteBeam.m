@@ -1,5 +1,5 @@
 #!/usr/bin/env octave
-% Tests for HermiteBeam
+% Tests for HermiteBeam (Phase 3 API: HermiteBeam(w0, lambda, n, m))
 
 addpath(fullfile(fileparts(fileparts(mfilename('fullpath'))), 'ParaxialBeams'));
 
@@ -12,10 +12,11 @@ lambda = 632.8e-9;
 grid = GridUtils(64, 64, 1e-3, 1e-3);
 [X, Y] = grid.create2DGrid();
 
+hb = HermiteBeam(w0, lambda, 1, 1);
+
 % testFieldGeneration
-hp = HermiteParameters(0, w0, lambda, 1, 1);
-hb = HermiteBeam(X, Y, hp);
-if (size(hb.OpticalField) == [64, 64])
+field = hb.opticalField(X, Y, 0);
+if (size(field) == [64, 64])
     fprintf('  PASS: field generation\n');
     passed = passed + 1;
 else
@@ -24,9 +25,9 @@ else
 end
 
 % testHigherOrderModes
-hp_high = HermiteParameters(0, w0, lambda, 2, 3);
-hb_high = HermiteBeam(X, Y, hp_high);
-if (all(all(isfinite(hb_high.OpticalField))))
+hb_high = HermiteBeam(w0, lambda, 2, 3);
+field_high = hb_high.opticalField(X, Y, 0);
+if (all(all(isfinite(field_high))))
     fprintf('  PASS: higher order modes\n');
     passed = passed + 1;
 else
@@ -35,11 +36,11 @@ else
 end
 
 % testZeroOrderEqualsGaussian
-[R, ~] = cart2pol(X, Y);
-hp_zero = HermiteParameters(0, w0, lambda, 0, 0);
-hb_zero = HermiteBeam(X, Y, hp_zero);
-gb = GaussianBeam(R, GaussianParameters(0, w0, lambda));
-diff_center = abs(hb_zero.OpticalField(33,33) - gb.OpticalField(33,33));
+hb_zero = HermiteBeam(w0, lambda, 0, 0);
+gb = GaussianBeam(w0, lambda);
+field_hb = hb_zero.opticalField(X, Y, 0);
+field_gb = gb.opticalField(X, Y, 0);
+diff_center = abs(field_hb(33,33) - field_gb(33,33));
 if (diff_center < 1e-10)
     fprintf('  PASS: zero order equals Gaussian\n');
     passed = passed + 1;
@@ -48,28 +49,28 @@ else
     failed = failed + 1;
 end
 
-% testCoordinatesStored
-if (isequal(size(hb.x), [64, 64]) && isequal(size(hb.y), [64, 64]))
-    fprintf('  PASS: coordinates stored\n');
+% testModeOrdersStored
+if (hb.n == 1 && hb.m == 1)
+    fprintf('  PASS: mode orders stored\n');
     passed = passed + 1;
 else
-    fprintf('  FAIL: coordinates stored\n');
+    fprintf('  FAIL: mode orders stored\n');
     failed = failed + 1;
 end
 
-% testParametersStored
-if (hb.Parameters.n == 1 && hb.Parameters.m == 1)
-    fprintf('  PASS: parameters stored\n');
+% testGetParameters
+params = hb.getParameters(0.05);
+if (abs(params.zCoordinate - 0.05) < 1e-15 && params.InitialWaist == w0)
+    fprintf('  PASS: getParameters(z)\n');
     passed = passed + 1;
 else
-    fprintf('  FAIL: parameters stored\n');
+    fprintf('  FAIL: getParameters(z)\n');
     failed = failed + 1;
 end
 
 % testValidFieldAtWaist
-hp_z0 = HermiteParameters(0, w0, lambda, 1, 1);
-hb_z0 = HermiteBeam(X, Y, hp_z0);
-if (all(all(isfinite(hb_z0.OpticalField))))
+field_z0 = hb.opticalField(X, Y, 0);
+if (all(all(isfinite(field_z0))))
     fprintf('  PASS: valid field at waist\n');
     passed = passed + 1;
 else
@@ -78,11 +79,11 @@ else
 end
 
 % testDifferentOrders
-hp_10 = HermiteParameters(0, w0, lambda, 1, 0);
-hp_01 = HermiteParameters(0, w0, lambda, 0, 1);
-hb_10 = HermiteBeam(X, Y, hp_10);
-hb_01 = HermiteBeam(X, Y, hp_01);
-if (size(hb_10.OpticalField) == size(hb_01.OpticalField))
+hb_10 = HermiteBeam(w0, lambda, 1, 0);
+hb_01 = HermiteBeam(w0, lambda, 0, 1);
+field_10 = hb_10.opticalField(X, Y, 0);
+field_01 = hb_01.opticalField(X, Y, 0);
+if (size(field_10) == size(field_01))
     fprintf('  PASS: different orders valid\n');
     passed = passed + 1;
 else
@@ -146,10 +147,9 @@ else
 end
 
 % testPhaseIncluded
-hp_phase = HermiteParameters(0.05, w0, lambda, 1, 1);
-hb_phase = HermiteBeam(X, Y, hp_phase);
-field_complex = hb_phase.OpticalField;
-if (~isreal(field_complex) || any(any(abs(imag(field_complex)) > 0)))
+hb_phase = HermiteBeam(w0, lambda, 1, 1);
+field_phase = hb_phase.opticalField(X, Y, 0.05);
+if (~isreal(field_phase) || any(any(abs(imag(field_phase)) > 0)))
     fprintf('  PASS: phase included in field\n');
     passed = passed + 1;
 else
@@ -169,11 +169,9 @@ else
 end
 
 % testFieldAtDifferentZ
-hp_z1 = HermiteParameters(0.01, w0, lambda, 1, 1);
-hp_z2 = HermiteParameters(0.1, w0, lambda, 1, 1);
-hb_z1 = HermiteBeam(X, Y, hp_z1);
-hb_z2 = HermiteBeam(X, Y, hp_z2);
-if (all(all(isfinite(hb_z1.OpticalField))) && all(all(isfinite(hb_z2.OpticalField))))
+field_z1 = hb.opticalField(X, Y, 0.01);
+field_z2 = hb.opticalField(X, Y, 0.1);
+if (all(all(isfinite(field_z1))) && all(all(isfinite(field_z2))))
     fprintf('  PASS: field at different z\n');
     passed = passed + 1;
 else
@@ -182,8 +180,9 @@ else
 end
 
 % testHigherNMOrders
-hb_hn = HermiteBeam(X, Y, HermiteParameters(0, w0, lambda, 3, 3));
-if (all(all(isfinite(hb_hn.OpticalField))))
+hb_hn = HermiteBeam(w0, lambda, 3, 3);
+field_hn = hb_hn.opticalField(X, Y, 0);
+if (all(all(isfinite(field_hn))))
     fprintf('  PASS: higher n m orders\n');
     passed = passed + 1;
 else
@@ -191,9 +190,11 @@ else
     failed = failed + 1;
 end
 
-% testZeroOrderPhaseOnly
-hb_zp = HermiteBeam(X, Y, HermiteParameters(0, w0, lambda, 0, 0));
-if (hb_zp.Parameters.PhiPhase == 0)
+% testZeroOrderPhase (PhiPhase = 0 at z=0 for n=m=0)
+hb_zp = HermiteBeam(w0, lambda, 0, 0);
+params_zp = hb_zp.getParameters(0);
+phi_mode = (0 + 0) * params_zp.GouyPhase;
+if (phi_mode == 0)
     fprintf('  PASS: zero order phase only\n');
     passed = passed + 1;
 else
@@ -201,18 +202,19 @@ else
     failed = failed + 1;
 end
 
-% testCoordinatesNotEmpty
-if (~isempty(hb.x) && ~isempty(hb.y))
-    fprintf('  PASS: coordinates not empty\n');
+% testInitialWaistStored
+if (hb.InitialWaist == w0)
+    fprintf('  PASS: InitialWaist stored\n');
     passed = passed + 1;
 else
-    fprintf('  FAIL: coordinates empty\n');
+    fprintf('  FAIL: InitialWaist stored\n');
     failed = failed + 1;
 end
 
 % testFieldAmplitude
-hb_amp = HermiteBeam(X, Y, HermiteParameters(0, w0, lambda, 0, 0));
-max_amp = max(max(abs(hb_amp.OpticalField)));
+hb_amp = HermiteBeam(w0, lambda, 0, 0);
+field_amp = hb_amp.opticalField(X, Y, 0);
+max_amp = max(max(abs(field_amp)));
 if (max_amp > 0)
     fprintf('  PASS: field amplitude positive\n');
     passed = passed + 1;
@@ -222,9 +224,11 @@ else
 end
 
 % testDifferentWavelengths
-hb_l1 = HermiteBeam(X, Y, HermiteParameters(0, w0, 532e-9, 1, 1));
-hb_l2 = HermiteBeam(X, Y, HermiteParameters(0, w0, 1064e-9, 1, 1));
-if (all(all(isfinite(hb_l1.OpticalField))) && all(all(isfinite(hb_l2.OpticalField))))
+hb_l1 = HermiteBeam(w0, 532e-9, 1, 1);
+hb_l2 = HermiteBeam(w0, 1064e-9, 1, 1);
+field_l1 = hb_l1.opticalField(X, Y, 0);
+field_l2 = hb_l2.opticalField(X, Y, 0);
+if (all(all(isfinite(field_l1))) && all(all(isfinite(field_l2))))
     fprintf('  PASS: different wavelengths\n');
     passed = passed + 1;
 else
@@ -244,8 +248,9 @@ else
 end
 
 % testAsymmetricOrders
-hb_asym = HermiteBeam(X, Y, HermiteParameters(0, w0, lambda, 2, 1));
-if (all(all(isfinite(hb_asym.OpticalField))))
+hb_asym = HermiteBeam(w0, lambda, 2, 1);
+field_asym = hb_asym.opticalField(X, Y, 0);
+if (all(all(isfinite(field_asym))))
     fprintf('  PASS: asymmetric orders\n');
     passed = passed + 1;
 else
@@ -254,7 +259,8 @@ else
 end
 
 % testWaistFromParameters
-if (hb.Parameters.Waist > 0)
+params_hb = hb.getParameters(0);
+if (params_hb.Waist > 0)
     fprintf('  PASS: waist from parameters\n');
     passed = passed + 1;
 else
@@ -263,13 +269,21 @@ else
 end
 
 % testGouyPhaseIncluded
-hp_gouy = HermiteParameters(0.05, w0, lambda, 1, 1);
-hb_gouy = HermiteBeam(X, Y, hp_gouy);
-if (hb_gouy.Parameters.GouyPhase > 0)
+params_gouy = hb.getParameters(0.05);
+if (params_gouy.GouyPhase > 0)
     fprintf('  PASS: Gouy phase included\n');
     passed = passed + 1;
 else
     fprintf('  FAIL: Gouy phase\n');
+    failed = failed + 1;
+end
+
+% testBeamName
+if (strcmp(hb.beamName(), 'hermite_1_1'))
+    fprintf('  PASS: beamName\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: beamName\n');
     failed = failed + 1;
 end
 

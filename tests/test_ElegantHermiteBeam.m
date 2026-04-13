@@ -1,5 +1,5 @@
 #!/usr/bin/env octave
-% Tests for ElegantHermiteBeam
+% Tests for ElegantHermiteBeam (Phase 3 API: ElegantHermiteBeam(w0, lambda, n, m))
 
 addpath(fullfile(fileparts(fileparts(mfilename('fullpath'))), 'ParaxialBeams'));
 
@@ -12,10 +12,11 @@ lambda = 632.8e-9;
 grid = GridUtils(64, 64, 1e-3, 1e-3);
 [X, Y] = grid.create2DGrid();
 
+ehb = ElegantHermiteBeam(w0, lambda, 1, 1);
+
 % testFieldGeneration
-ehp = ElegantHermiteParameters(0.01, w0, lambda, 1, 1);
-ehb = ElegantHermiteBeam(X, Y, ehp);
-if (size(ehb.OpticalField) == [64, 64])
+field = ehb.opticalField(X, Y, 0.01);
+if (size(field) == [64, 64])
     fprintf('  PASS: field generation\n');
     passed = passed + 1;
 else
@@ -24,9 +25,8 @@ else
 end
 
 % testAtWaist
-ehp_z0 = ElegantHermiteParameters(0, w0, lambda, 1, 1);
-ehb_z0 = ElegantHermiteBeam(X, Y, ehp_z0);
-if (all(all(isfinite(ehb_z0.OpticalField))))
+field_z0 = ehb.opticalField(X, Y, 0);
+if (all(all(isfinite(field_z0))))
     fprintf('  PASS: at waist finite\n');
     passed = passed + 1;
 else
@@ -35,9 +35,8 @@ else
 end
 
 % testAtZgt0
-ehp_z = ElegantHermiteParameters(0.05, w0, lambda, 1, 1);
-ehb_z = ElegantHermiteBeam(X, Y, ehp_z);
-if (all(all(isfinite(ehb_z.OpticalField))))
+field_z = ehb.opticalField(X, Y, 0.05);
+if (all(all(isfinite(field_z))))
     fprintf('  PASS: at z>0 finite\n');
     passed = passed + 1;
 else
@@ -45,28 +44,38 @@ else
     failed = failed + 1;
 end
 
-% testCoordinatesStored
-if (isequal(size(ehb.x), [64, 64]) && isequal(size(ehb.y), [64, 64]))
-    fprintf('  PASS: coordinates stored\n');
+% testModeOrdersStored
+if (ehb.n == 1 && ehb.m == 1)
+    fprintf('  PASS: mode orders stored\n');
     passed = passed + 1;
 else
-    fprintf('  FAIL: coordinates\n');
+    fprintf('  FAIL: mode orders\n');
     failed = failed + 1;
 end
 
-% testParametersStored
-if (ehb.Parameters.n == 1 && ehb.Parameters.m == 1)
-    fprintf('  PASS: parameters stored\n');
+% testInitialWaistStored
+if (ehb.InitialWaist == w0)
+    fprintf('  PASS: InitialWaist stored\n');
     passed = passed + 1;
 else
-    fprintf('  FAIL: parameters\n');
+    fprintf('  FAIL: InitialWaist\n');
+    failed = failed + 1;
+end
+
+% testGetParameters
+params = ehb.getParameters(0.05);
+if (abs(params.zCoordinate - 0.05) < 1e-15 && params.InitialWaist == w0)
+    fprintf('  PASS: getParameters(z)\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: getParameters(z)\n');
     failed = failed + 1;
 end
 
 % testHigherOrderModes
-ehp_high = ElegantHermiteParameters(0.01, w0, lambda, 2, 2);
-ehb_high = ElegantHermiteBeam(X, Y, ehp_high);
-if (all(all(isfinite(ehb_high.OpticalField))))
+ehb_high = ElegantHermiteBeam(w0, lambda, 2, 2);
+field_high = ehb_high.opticalField(X, Y, 0.01);
+if (all(all(isfinite(field_high))))
     fprintf('  PASS: higher order modes\n');
     passed = passed + 1;
 else
@@ -74,23 +83,8 @@ else
     failed = failed + 1;
 end
 
-% testAlphaStored
-try
-    alpha_val = ehb.Parameters.alpha;
-    if (~isempty(alpha_val))
-        fprintf('  PASS: alpha stored\n');
-        passed = passed + 1;
-    else
-        fprintf('  FAIL: alpha\n');
-        failed = failed + 1;
-    end
-catch
-    fprintf('  PASS: alpha accessible\n');
-    passed = passed + 1;
-end
-
 % testValidOutputSize
-if (size(ehb.OpticalField,1) == 64 && size(ehb.OpticalField,2) == 64)
+if (size(field_z0, 1) == 64 && size(field_z0, 2) == 64)
     fprintf('  PASS: valid output size\n');
     passed = passed + 1;
 else
@@ -99,9 +93,9 @@ else
 end
 
 % testZeroOrderElegant
-ehp_00 = ElegantHermiteParameters(0, w0, lambda, 0, 0);
-ehb_00 = ElegantHermiteBeam(X, Y, ehp_00);
-if (all(all(isfinite(ehb_00.OpticalField))))
+ehb_00 = ElegantHermiteBeam(w0, lambda, 0, 0);
+field_00 = ehb_00.opticalField(X, Y, 0);
+if (all(all(isfinite(field_00))))
     fprintf('  PASS: zero order elegant valid\n');
     passed = passed + 1;
 else
@@ -109,20 +103,22 @@ else
     failed = failed + 1;
 end
 
-% testComplexFieldElegant
-ehb_complex = ElegantHermiteBeam(X, Y, ElegantHermiteParameters(0.05, w0, lambda, 1, 1));
-if (ehb_complex.Parameters.GouyPhase ~= 0)
-    fprintf('  PASS: complex field elegant\n');
+% testGouyPhaseIncluded
+params_z = ehb.getParameters(0.05);
+if (params_z.GouyPhase > 0)
+    fprintf('  PASS: Gouy phase included\n');
     passed = passed + 1;
 else
-    fprintf('  FAIL: complex field elegant\n');
+    fprintf('  FAIL: Gouy phase\n');
     failed = failed + 1;
 end
 
 % testDifferentNM
-ehb_n1 = ElegantHermiteBeam(X, Y, ElegantHermiteParameters(0, w0, lambda, 2, 0));
-ehb_m1 = ElegantHermiteBeam(X, Y, ElegantHermiteParameters(0, w0, lambda, 0, 2));
-if (all(all(isfinite(ehb_n1.OpticalField))) && all(all(isfinite(ehb_m1.OpticalField))))
+ehb_n2 = ElegantHermiteBeam(w0, lambda, 2, 0);
+ehb_m2 = ElegantHermiteBeam(w0, lambda, 0, 2);
+f_n2 = ehb_n2.opticalField(X, Y, 0);
+f_m2 = ehb_m2.opticalField(X, Y, 0);
+if (all(all(isfinite(f_n2))) && all(all(isfinite(f_m2))))
     fprintf('  PASS: different n m orders\n');
     passed = passed + 1;
 else
@@ -130,7 +126,7 @@ else
     failed = failed + 1;
 end
 
-% testElegantAlphaFormula
+% testElegantAlphaFormula (alpha via ElegantHermiteParameters)
 ehp_alpha = ElegantHermiteParameters(0.05, w0, lambda, 1, 1);
 alpha_calc = ehp_alpha.alpha;
 if (isfinite(alpha_calc))
@@ -141,37 +137,19 @@ else
     failed = failed + 1;
 end
 
-% testElegantWaistInheritance
-ehp_w = ElegantHermiteParameters(0.1, w0, lambda, 1, 1);
-if (ehp_w.Waist > 0)
-    fprintf('  PASS: elegant waist inheritance\n');
+% testWaistFromParameters
+params_w = ehb.getParameters(0.1);
+if (params_w.Waist > 0)
+    fprintf('  PASS: waist from parameters\n');
     passed = passed + 1;
 else
-    fprintf('  FAIL: elegant waist\n');
-    failed = failed + 1;
-end
-
-% testElegantKInheritance
-if (ehp.k > 0)
-    fprintf('  PASS: elegant k inheritance\n');
-    passed = passed + 1;
-else
-    fprintf('  FAIL: elegant k\n');
-    failed = failed + 1;
-end
-
-% testElegantGouyInheritance
-if (ehp_z.GouyPhase > 0)
-    fprintf('  PASS: elegant Gouy inheritance\n');
-    passed = passed + 1;
-else
-    fprintf('  FAIL: elegant Gouy\n');
+    fprintf('  FAIL: waist from parameters\n');
     failed = failed + 1;
 end
 
 % testElegantNegativeZ
-ehb_neg = ElegantHermiteBeam(X, Y, ElegantHermiteParameters(-0.05, w0, lambda, 1, 1));
-if (all(all(isfinite(ehb_neg.OpticalField))))
+field_neg = ehb.opticalField(X, Y, -0.05);
+if (all(all(isfinite(field_neg))))
     fprintf('  PASS: elegant negative z\n');
     passed = passed + 1;
 else
@@ -179,19 +157,12 @@ else
     failed = failed + 1;
 end
 
-% testElegantCoordinatesNotEmpty
-if (~isempty(ehb.x) && ~isempty(ehb.y))
-    fprintf('  PASS: elegant coordinates not empty\n');
-    passed = passed + 1;
-else
-    fprintf('  FAIL: elegant coordinates\n');
-    failed = failed + 1;
-end
-
 % testElegantDifferentWavelengths
-ehb_wl1 = ElegantHermiteBeam(X, Y, ElegantHermiteParameters(0, w0, 532e-9, 1, 1));
-ehb_wl2 = ElegantHermiteBeam(X, Y, ElegantHermiteParameters(0, w0, 1064e-9, 1, 1));
-if (all(all(isfinite(ehb_wl1.OpticalField))) && all(all(isfinite(ehb_wl2.OpticalField))))
+ehb_wl1 = ElegantHermiteBeam(w0, 532e-9, 1, 1);
+ehb_wl2 = ElegantHermiteBeam(w0, 1064e-9, 1, 1);
+f_wl1 = ehb_wl1.opticalField(X, Y, 0);
+f_wl2 = ehb_wl2.opticalField(X, Y, 0);
+if (all(all(isfinite(f_wl1))) && all(all(isfinite(f_wl2))))
     fprintf('  PASS: elegant different wavelengths\n');
     passed = passed + 1;
 else
@@ -200,8 +171,9 @@ else
 end
 
 % testElegantHigherNM
-ehb_hnm = ElegantHermiteBeam(X, Y, ElegantHermiteParameters(0, w0, lambda, 3, 3));
-if (all(all(isfinite(ehb_hnm.OpticalField))))
+ehb_hnm = ElegantHermiteBeam(w0, lambda, 3, 3);
+f_hnm = ehb_hnm.opticalField(X, Y, 0);
+if (all(all(isfinite(f_hnm))))
     fprintf('  PASS: elegant higher n m\n');
     passed = passed + 1;
 else
@@ -210,8 +182,8 @@ else
 end
 
 % testElegantFieldAmplitude
-ehb_amp = ElegantHermiteBeam(X, Y, ElegantHermiteParameters(0, w0, lambda, 0, 0));
-max_amp_e = max(max(abs(ehb_amp.OpticalField)));
+field_amp = ehb_00.opticalField(X, Y, 0);
+max_amp_e = max(max(abs(field_amp)));
 if (max_amp_e > 0)
     fprintf('  PASS: elegant field amplitude\n');
     passed = passed + 1;
@@ -221,12 +193,43 @@ else
 end
 
 % testElegantAsymmetricNM
-ehb_asym = ElegantHermiteBeam(X, Y, ElegantHermiteParameters(0, w0, lambda, 2, 1));
-if (all(all(isfinite(ehb_asym.OpticalField))))
+ehb_asym = ElegantHermiteBeam(w0, lambda, 2, 1);
+f_asym = ehb_asym.opticalField(X, Y, 0);
+if (all(all(isfinite(f_asym))))
     fprintf('  PASS: elegant asymmetric n m\n');
     passed = passed + 1;
 else
     fprintf('  FAIL: elegant asymmetric\n');
+    failed = failed + 1;
+end
+
+% testPhaseIncluded
+field_phase = ehb.opticalField(X, Y, 0.05);
+if (~isreal(field_phase) || any(any(abs(imag(field_phase)) > 0)))
+    fprintf('  PASS: phase included in field\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: phase included in field\n');
+    failed = failed + 1;
+end
+
+% testFieldAtDifferentZ
+f_z1 = ehb.opticalField(X, Y, 0.01);
+f_z2 = ehb.opticalField(X, Y, 0.1);
+if (all(all(isfinite(f_z1))) && all(all(isfinite(f_z2))))
+    fprintf('  PASS: field at different z\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: field at different z\n');
+    failed = failed + 1;
+end
+
+% testBeamName
+if (strcmp(ehb.beamName(), 'elegant_hermite_1_1'))
+    fprintf('  PASS: beamName\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: beamName\n');
     failed = failed + 1;
 end
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env octave
-% Tests for LaguerreBeam
+% Tests for LaguerreBeam (Phase 3 API: LaguerreBeam(w0, lambda, l, p))
 
 addpath(fullfile(fileparts(fileparts(mfilename('fullpath'))), 'ParaxialBeams'));
 
@@ -11,12 +11,12 @@ w0 = 100e-6;
 lambda = 632.8e-9;
 grid = GridUtils(64, 64, 1e-3, 1e-3);
 [X, Y] = grid.create2DGrid();
-[R, Theta] = cart2pol(X, Y);
+
+lb = LaguerreBeam(w0, lambda, 1, 0);
 
 % testFieldGeneration
-lp = LaguerreParameters(0, w0, lambda, 1, 0);
-lb = LaguerreBeam(R, Theta, lp);
-if (size(lb.OpticalField) == [64, 64])
+field = lb.opticalField(X, Y, 0);
+if (size(field) == [64, 64])
     fprintf('  PASS: field generation\n');
     passed = passed + 1;
 else
@@ -25,9 +25,9 @@ else
 end
 
 % testHigherOrderModes
-lp_high = LaguerreParameters(0, w0, lambda, 2, 1);
-lb_high = LaguerreBeam(R, Theta, lp_high);
-if (all(all(isfinite(lb_high.OpticalField))))
+lb_high = LaguerreBeam(w0, lambda, 2, 1);
+field_high = lb_high.opticalField(X, Y, 0);
+if (all(all(isfinite(field_high))))
     fprintf('  PASS: higher order modes\n');
     passed = passed + 1;
 else
@@ -35,28 +35,28 @@ else
     failed = failed + 1;
 end
 
-% testCoordinatesStored
-if (isequal(size(lb.r), [64, 64]) && isequal(size(lb.theta), [64, 64]))
-    fprintf('  PASS: coordinates stored\n');
+% testModeIndicesStored
+if (lb.l == 1 && lb.p == 0)
+    fprintf('  PASS: mode indices stored\n');
     passed = passed + 1;
 else
-    fprintf('  FAIL: coordinates stored\n');
+    fprintf('  FAIL: mode indices stored\n');
     failed = failed + 1;
 end
 
-% testParametersStored
-if (lb.Parameters.l == 1 && lb.Parameters.p == 0)
-    fprintf('  PASS: parameters stored\n');
+% testGetParameters
+params = lb.getParameters(0.1);
+if (abs(params.zCoordinate - 0.1) < 1e-15 && params.InitialWaist == w0)
+    fprintf('  PASS: getParameters(z)\n');
     passed = passed + 1;
 else
-    fprintf('  FAIL: parameters stored\n');
+    fprintf('  FAIL: getParameters(z)\n');
     failed = failed + 1;
 end
 
 % testValidFieldAtWaist
-lp_z0 = LaguerreParameters(0, w0, lambda, 1, 0);
-lb_z0 = LaguerreBeam(R, Theta, lp_z0);
-if (all(all(isfinite(lb_z0.OpticalField))))
+field_z0 = lb.opticalField(X, Y, 0);
+if (all(all(isfinite(field_z0))))
     fprintf('  PASS: valid field at waist\n');
     passed = passed + 1;
 else
@@ -65,11 +65,11 @@ else
 end
 
 % testDifferentLandP
-lp_10 = LaguerreParameters(0, w0, lambda, 1, 0);
-lp_01 = LaguerreParameters(0, w0, lambda, 0, 1);
-lb_10 = LaguerreBeam(R, Theta, lp_10);
-lb_01 = LaguerreBeam(R, Theta, lp_01);
-if (size(lb_10.OpticalField) == size(lb_01.OpticalField))
+lb_10 = LaguerreBeam(w0, lambda, 1, 0);
+lb_01 = LaguerreBeam(w0, lambda, 0, 1);
+field_10 = lb_10.opticalField(X, Y, 0);
+field_01 = lb_01.opticalField(X, Y, 0);
+if (size(field_10) == size(field_01))
     fprintf('  PASS: different l p valid\n');
     passed = passed + 1;
 else
@@ -77,11 +77,10 @@ else
     failed = failed + 1;
 end
 
-% testLaguerreZeroPZero
-lp_00 = LaguerreParameters(0, w0, lambda, 0, 0);
-lb_00 = LaguerreBeam(R, Theta, lp_00);
-gb = GaussianBeam(R, GaussianParameters(0, w0, lambda));
-if (size(lb_00.OpticalField) == size(gb.OpticalField))
+% testL0P0Valid
+lb_00 = LaguerreBeam(w0, lambda, 0, 0);
+field_00 = lb_00.opticalField(X, Y, 0);
+if (size(field_00) == [64, 64])
     fprintf('  PASS: l=0 p=0 valid\n');
     passed = passed + 1;
 else
@@ -90,9 +89,9 @@ else
 end
 
 % testNegativeL
-lp_neg = LaguerreParameters(0, w0, lambda, -1, 0);
-lb_neg = LaguerreBeam(R, Theta, lp_neg);
-if (all(all(isfinite(lb_neg.OpticalField))))
+lb_neg = LaguerreBeam(w0, lambda, -1, 0);
+field_neg = lb_neg.opticalField(X, Y, 0);
+if (all(all(isfinite(field_neg))))
     fprintf('  PASS: negative l valid\n');
     passed = passed + 1;
 else
@@ -101,9 +100,9 @@ else
 end
 
 % testHigherP
-lp_p2 = LaguerreParameters(0, w0, lambda, 0, 2);
-lb_p2 = LaguerreBeam(R, Theta, lp_p2);
-if (all(all(isfinite(lb_p2.OpticalField))))
+lb_p2 = LaguerreBeam(w0, lambda, 0, 2);
+field_p2 = lb_p2.opticalField(X, Y, 0);
+if (all(all(isfinite(field_p2))))
     fprintf('  PASS: higher p order valid\n');
     passed = passed + 1;
 else
@@ -112,9 +111,9 @@ else
 end
 
 % testPhaseVariation
-lp_phase = LaguerreParameters(0.05, w0, lambda, 1, 0);
-lb_phase = LaguerreBeam(R, Theta, lp_phase);
-if (lp_phase.PhiPhase ~= 0)
+field_prop = lb.opticalField(X, Y, 0.05);
+params_prop = lb.getParameters(0.05);
+if (params_prop.GouyPhase ~= 0)
     fprintf('  PASS: phase variation included\n');
     passed = passed + 1;
 else
@@ -123,12 +122,11 @@ else
 end
 
 % testAzimuthalPhase
-lp_az = LaguerreParameters(0, w0, lambda, 1, 0);
-lb_az = LaguerreBeam(R, Theta, lp_az);
+[Theta, ~] = cart2pol(X, Y);
+field_az = lb.opticalField(X, Y, 0);
 theta_sample = Theta(32, 32);
-phase_at_theta = angle(lb_az.OpticalField(32,32));
-expected_phase_contrib = 1 * theta_sample;
-if (abs(phase_at_theta - expected_phase_contrib) < pi)
+phase_at_theta = angle(field_az(32,32));
+if (abs(phase_at_theta - 1*theta_sample) < pi)
     fprintf('  PASS: azimuthal phase contribution\n');
     passed = passed + 1;
 else
@@ -137,9 +135,8 @@ else
 end
 
 % testAtPropagation
-lp_prop = LaguerreParameters(0.1, w0, lambda, 1, 0);
-lb_prop = LaguerreBeam(R, Theta, lp_prop);
-if (all(all(isfinite(lb_prop.OpticalField))))
+field_p = lb.opticalField(X, Y, 0.1);
+if (all(all(isfinite(field_p))))
     fprintf('  PASS: field at propagation valid\n');
     passed = passed + 1;
 else
@@ -148,9 +145,9 @@ else
 end
 
 % testCombinedLandP
-lp_comb = LaguerreParameters(0, w0, lambda, 2, 3);
-lb_comb = LaguerreBeam(R, Theta, lp_comb);
-if (all(all(isfinite(lb_comb.OpticalField))))
+lb_comb = LaguerreBeam(w0, lambda, 2, 3);
+field_comb = lb_comb.opticalField(X, Y, 0);
+if (all(all(isfinite(field_comb))))
     fprintf('  PASS: combined l p valid\n');
     passed = passed + 1;
 else
@@ -159,8 +156,9 @@ else
 end
 
 % testFieldAmplitude
-lb_amp = LaguerreBeam(R, Theta, LaguerreParameters(0, w0, lambda, 0, 0));
-max_amp = max(max(abs(lb_amp.OpticalField)));
+lb_amp = LaguerreBeam(w0, lambda, 0, 0);
+field_amp = lb_amp.opticalField(X, Y, 0);
+max_amp = max(max(abs(field_amp)));
 if (max_amp > 0)
     fprintf('  PASS: field amplitude positive\n');
     passed = passed + 1;
@@ -170,7 +168,8 @@ else
 end
 
 % testWaistFromParameters
-if (lb.Parameters.Waist > 0)
+params_lb = lb.getParameters(0);
+if (params_lb.Waist > 0)
     fprintf('  PASS: waist from parameters\n');
     passed = passed + 1;
 else
@@ -178,10 +177,9 @@ else
     failed = failed + 1;
 end
 
-% testLaguerreWaist
-lp_lw = LaguerreParameters(0, w0, lambda, 1, 1);
-lb_lw = LaguerreBeam(R, Theta, lp_lw);
-if (lb_lw.Parameters.LaguerreWaist > 0)
+% testLaguerreWaistFormula
+lp_dyn = LaguerreParameters(0, w0, lambda, 1, 0);
+if (lp_dyn.LaguerreWaist > 0)
     fprintf('  PASS: Laguerre waist valid\n');
     passed = passed + 1;
 else
@@ -190,9 +188,11 @@ else
 end
 
 % testDifferentWavelengths
-lb_l1 = LaguerreBeam(R, Theta, LaguerreParameters(0, w0, 532e-9, 1, 0));
-lb_l2 = LaguerreBeam(R, Theta, LaguerreParameters(0, w0, 1064e-9, 1, 0));
-if (all(all(isfinite(lb_l1.OpticalField))) && all(all(isfinite(lb_l2.OpticalField))))
+lb_l1 = LaguerreBeam(w0, 532e-9, 1, 0);
+lb_l2 = LaguerreBeam(w0, 1064e-9, 1, 0);
+f_l1  = lb_l1.opticalField(X, Y, 0);
+f_l2  = lb_l2.opticalField(X, Y, 0);
+if (all(all(isfinite(f_l1))) && all(all(isfinite(f_l2))))
     fprintf('  PASS: different wavelengths\n');
     passed = passed + 1;
 else
@@ -200,21 +200,19 @@ else
     failed = failed + 1;
 end
 
-% testCoordinatesNotEmpty
-if (~isempty(lb.r) && ~isempty(lb.theta))
-    fprintf('  PASS: coordinates not empty\n');
+% testInitialWaistStored
+if (lb.InitialWaist == w0)
+    fprintf('  PASS: InitialWaist stored\n');
     passed = passed + 1;
 else
-    fprintf('  FAIL: coordinates empty\n');
+    fprintf('  FAIL: InitialWaist stored\n');
     failed = failed + 1;
 end
 
 % testFieldAtDifferentZ
-lp_z1 = LaguerreParameters(0.01, w0, lambda, 1, 0);
-lp_z2 = LaguerreParameters(0.1, w0, lambda, 1, 0);
-lb_z1 = LaguerreBeam(R, Theta, lp_z1);
-lb_z2 = LaguerreBeam(R, Theta, lp_z2);
-if (all(all(isfinite(lb_z1.OpticalField))) && all(all(isfinite(lb_z2.OpticalField))))
+f_z1 = lb.opticalField(X, Y, 0.01);
+f_z2 = lb.opticalField(X, Y, 0.1);
+if (all(all(isfinite(f_z1))) && all(all(isfinite(f_z2))))
     fprintf('  PASS: field at different z\n');
     passed = passed + 1;
 else
@@ -223,9 +221,9 @@ else
 end
 
 % testNegativeLWithP
-lp_negp = LaguerreParameters(0, w0, lambda, -2, 1);
-lb_negp = LaguerreBeam(R, Theta, lp_negp);
-if (all(all(isfinite(lb_negp.OpticalField))))
+lb_negp = LaguerreBeam(w0, lambda, -2, 1);
+field_negp = lb_negp.opticalField(X, Y, 0);
+if (all(all(isfinite(field_negp))))
     fprintf('  PASS: negative l with p\n');
     passed = passed + 1;
 else
@@ -244,13 +242,22 @@ else
 end
 
 % testHigherLLargerWaist
-lp_ll = LaguerreParameters(0, w0, lambda, 2, 0);
-lb_ll = LaguerreBeam(R, Theta, lp_ll);
-if (lb_ll.Parameters.LaguerreWaist > lb.Parameters.LaguerreWaist)
+lp_l1 = LaguerreParameters(0, w0, lambda, 1, 0);
+lp_l2 = LaguerreParameters(0, w0, lambda, 2, 0);
+if (lp_l2.LaguerreWaist > lp_l1.LaguerreWaist)
     fprintf('  PASS: higher l larger waist\n');
     passed = passed + 1;
 else
     fprintf('  FAIL: higher l waist\n');
+    failed = failed + 1;
+end
+
+% testBeamName
+if (strcmp(lb.beamName(), 'laguerre_1_0'))
+    fprintf('  PASS: beamName\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: beamName\n');
     failed = failed + 1;
 end
 

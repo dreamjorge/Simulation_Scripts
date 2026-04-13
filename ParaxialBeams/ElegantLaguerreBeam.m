@@ -2,9 +2,13 @@ classdef ElegantLaguerreBeam < ParaxialBeam
     % ElegantLaguerreBeam - Elegant Laguerre-Gaussian beam implementation
     % Compatible with GNU Octave and MATLAB
     %
-    % Coordinate system: internally POLAR (r, theta) - same as LaguerreBeam.
-    % The unified API opticalField(X, Y, z) accepts Cartesian and converts
-    % internally via cart2pol.
+    % Constructor (Phase 3 API):
+    %   beam = ElegantLaguerreBeam(w0, lambda, l, p)
+    %
+    % Usage:
+    %   field = beam.opticalField(X, Y, z)    % complex field on Cartesian grid
+    %   params = beam.getParameters(z)         % GaussianParameters at z
+    %   name   = beam.beamName()               % e.g. 'elegant_laguerre_2_1'
     %
     % Mathematical differences from standard LaguerreBeam:
     %
@@ -15,37 +19,47 @@ classdef ElegantLaguerreBeam < ParaxialBeam
     %
     % Full field definition (elegant Laguerre-Gaussian, ELG_{lp}):
     %
-    %   u_{lp}(r,theta,z) = (sqrt(alpha)*r)^|l| * L_p^|l|(alpha*r^2) *
-    %                       u_0(r,z) * exp(i*l*theta) * exp(i*(|l|+2p)*psi(z))
+    %   u_{lp}(r,theta,z) = (sqrt(alpha)*r)^|l| * L_p^|l|(alpha*r^2)
+    %                       * u_0(r,z) * exp(i*l*theta) * exp(i*(|l|+2p)*psi(z))
     %
     % Physical consequence: using the complex beam parameter alpha instead of
     % the real waist w changes both the radial amplitude profile and the
     % polynomial argument, producing the "elegant" amplitude-phase coupling.
     %
+    % The class accepts Cartesian (X, Y) in opticalField and converts to polar
+    % internally. Stores only w0, lambda, l, p — no grid or field.
+    %
     % Reference: Siegman, "Lasers", University Science Books (1986), Ch. 17;
     %            Siegman, J. Opt. Soc. Am. A 13, 952 (1996).
 
     properties
-        Parameters      % ElegantLaguerreParameters object
-        OpticalField    % 2D array representing the field (at constructor z)
-        r               % radial coordinate matrix (stored for reference)
-        theta           % angular coordinate matrix (stored for reference)
+        InitialWaist    % Beam waist at z = 0 (m)
+        l               % Topological charge (azimuthal index)
+        p               % Radial order
     end
 
     methods
-        function obj = ElegantLaguerreBeam(r, theta, params)
+        function obj = ElegantLaguerreBeam(w0, lambda, l, p)
             % Constructor
-            % r, theta: polar coordinate matrices
-            % params:   ElegantLaguerreParameters object
+            % w0:     initial beam waist at z = 0 (m)
+            % lambda: wavelength (m)
+            % l:      topological charge (default 0)
+            % p:      radial order (default 0)
 
             if nargin > 0
-                obj = obj@ParaxialBeam(params.Lambda);
-                obj.Parameters   = params;
-                obj.r            = r;
-                obj.theta        = theta;
-                obj.OpticalField = obj.computeField(r, theta, params);
+                obj = obj@ParaxialBeam(lambda);
+                obj.InitialWaist = w0;
+                if nargin >= 4
+                    obj.l = l;
+                    obj.p = p;
+                else
+                    obj.l = 0;
+                    obj.p = 0;
+                end
             else
                 obj = obj@ParaxialBeam();
+                obj.l = 0;
+                obj.p = 0;
             end
         end
 
@@ -56,27 +70,19 @@ classdef ElegantLaguerreBeam < ParaxialBeam
         function field = opticalField(obj, X, Y, z)
             % opticalField - Complex optical field on Cartesian grid (X,Y) at depth z.
             %
-            % Converts Cartesian to polar, reconstructs ElegantLaguerreParameters
-            % at z (recomputes alpha(z)), then evaluates the ELG field.
-            [TH, R]  = cart2pol(X, Y);
-            w0       = obj.Parameters.InitialWaist;
-            lambda   = obj.Lambda;
-            l        = obj.Parameters.l;
-            p        = obj.Parameters.p;
-            params_z = ElegantLaguerreParameters(z, w0, lambda, l, p);
-            field    = obj.computeField(R, TH, params_z);
+            % Converts Cartesian to polar internally, then evaluates the ELG field.
+            [TH, R] = cart2pol(X, Y);
+            field   = obj.computeField(R, TH, z);
         end
 
         function params = getParameters(obj, z)
             % getParameters - GaussianParameters evaluated at axial position z.
-            w0     = obj.Parameters.InitialWaist;
-            lambda = obj.Lambda;
-            params = GaussianParameters(z, w0, lambda);
+            params = GaussianParameters(z, obj.InitialWaist, obj.Lambda);
         end
 
         function name = beamName(obj)
             % beamName - Returns identifier string, e.g. 'elegant_laguerre_2_1'.
-            name = sprintf('elegant_laguerre_%d_%d', obj.Parameters.l, obj.Parameters.p);
+            name = sprintf('elegant_laguerre_%d_%d', obj.l, obj.p);
         end
     end
 
@@ -84,22 +90,43 @@ classdef ElegantLaguerreBeam < ParaxialBeam
     % Private helpers
     % -----------------------------------------------------------------
     methods (Access = private)
-        function field = computeField(obj, r, theta, params)
-            % Compute ELG field from polar grids and parameters.
-            alpha_val = params.alpha;
+        function field = computeField(obj, r, theta, z)
+            % Compute ELG_{lp} field from polar grids (r, theta) and depth z.
+            w0     = obj.InitialWaist;
+            lambda = obj.Lambda;
+            k      = obj.k;
+            l      = obj.l;
+            p      = obj.p;
+            zr     = pi * w0^2 / lambda;
 
-            % Polynomial argument: alpha*r^2 (complex, unlike 2*r^2/w^2 in standard LG)
-            xArg = alpha_val .* r.^2;
-            Lpl  = PolynomialUtils.associatedLaguerre(params.p, params.l, xArg);
+            w   = w0 * sqrt(1 + (z/zr)^2);
+            Rc  = z  * (1 + (zr/z)^2);
+            if z == 0, Rc = Inf; end
+            psi = atan2(z, zr);
 
-            GB = GaussianBeam(r, params);
+            % Gaussian carrier field u_0(r,z)
+            amplitude  = (w0 ./ w) .* exp(-r.^2 ./ w.^2);
+            phase_z    = -1i * k * z;
+            phase_curv = 1i * k * r.^2 ./ (2 * Rc);
+            phase_curv(isinf(Rc)) = 0;
+            phase_gouy = -1i * psi;
+            carrier    = amplitude .* exp(phase_z + phase_curv + phase_gouy);
 
-            % Radial amplitude: (sqrt(alpha)*r)^|l|  — note: alpha is complex
-            amplitudeTerm = (sqrt(alpha_val) .* r).^abs(params.l);
+            % Complex beam parameter: alpha(z) = i*k / (2*q(z))
+            q         = z + 1i * zr;
+            alpha_val = 1i * k / (2 * q);
 
-            % PhiPhase = (|l|+2p)*psi(z) — same Gouy shift as standard LG
-            field = amplitudeTerm .* Lpl .* exp(1i * params.l * theta) ...
-                    .* exp(1i * params.PhiPhase) .* GB.OpticalField;
+            % Polynomial argument: alpha*r^2  (complex, unlike 2*r^2/w^2 in standard LG)
+            Lpl = PolynomialUtils.associatedLaguerre(p, l, alpha_val .* r.^2);
+
+            % Radial amplitude: (sqrt(alpha)*r)^|l|  -- note: alpha is complex
+            amp_el = (sqrt(alpha_val) .* r).^abs(l);
+
+            % Modal Gouy phase shift: (|l|+2p)*psi
+            phi_mode = (abs(l) + 2*p) * psi;
+
+            field = amp_el .* Lpl .* exp(1i * l * theta) ...
+                    .* exp(1i * phi_mode) .* carrier;
         end
     end
 end
