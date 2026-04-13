@@ -386,10 +386,80 @@ else
     failed = failed + 1;
 end
 
+% testAsymmetricMeshgrid2D
+[Xa, Ya] = GridUtils.meshgrid2D(32, 64, 1e-3, 2e-3);
+if (size(Xa,1) == 64 && size(Xa,2) == 32 && size(Ya,1) == 64 && size(Ya,2) == 32)
+    fprintf('  PASS: asymmetric meshgrid2D\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: asymmetric meshgrid2D\n');
+    failed = failed + 1;
+end
+
+% testAsymmetricFreqGrid
+[Kxa, Kya] = GridUtils.freqGrid(32, 64, 1e-3, 2e-3);
+if (size(Kxa,1) == 64 && size(Kxa,2) == 32 && size(Kya,1) == 64 && size(Kya,2) == 32)
+    fprintf('  PASS: asymmetric freqGrid\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: asymmetric freqGrid\n');
+    failed = failed + 1;
+end
+
+% testAsymmetricPolarGrid
+[rpa, tpa] = GridUtils.polarGrid(32, 64, 1e-3, 2e-3);
+if (size(rpa,1) == 64 && size(rpa,2) == 32)
+    fprintf('  PASS: asymmetric polarGrid\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: asymmetric polarGrid\n');
+    failed = failed + 1;
+end
+
+% testAsymmetricMeshgrid2D_3args
+[Xa3, Ya3] = GridUtils.meshgrid2D(32, 64, 1e-3);
+if (size(Xa3,1) == 64 && size(Xa3,2) == 32)
+    fprintf('  PASS: asymmetric meshgrid2D 3 args\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: asymmetric meshgrid2D 3 args\n');
+    failed = failed + 1;
+end
+
+% testAsymmetricFreqGrid_3args
+[Kxa3, Kya3] = GridUtils.freqGrid(32, 64, 1e-3);
+if (size(Kxa3,1) == 64 && size(Kxa3,2) == 32)
+    fprintf('  PASS: asymmetric freqGrid 3 args\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: asymmetric freqGrid 3 args\n');
+    failed = failed + 1;
+end
+
+% testAsymmetricPolarGrid_3args
+[rpa3, tpa3] = GridUtils.polarGrid(32, 64, 1e-3);
+if (size(rpa3,1) == 64 && size(rpa3,2) == 32)
+    fprintf('  PASS: asymmetric polarGrid 3 args\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: asymmetric polarGrid 3 args\n');
+    failed = failed + 1;
+end
+
+% testAsymmetricGridValues
+[Xav, Yav] = GridUtils.meshgrid2D(4, 8, 1e-3, 2e-3);
+x_range_ok = (min(min(Xav)) < 0) && (max(max(Xav)) > 0);
+y_range_ok = (min(min(Yav)) < 0) && (max(max(Yav)) > 0);
+if x_range_ok && y_range_ok
+    fprintf('  PASS: asymmetric grid values range\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: asymmetric grid values range\n');
+    failed = failed + 1;
+end
+
 fprintf('\n=== GridUtils: %d/%d passed ===\n', passed, passed + failed);
 
-if (failed == 0)
-% exit(0);
-else
-% exit(1);
+if failed ~= 0
+    error('Tests failed: %d/%d', failed, passed + failed);
 end

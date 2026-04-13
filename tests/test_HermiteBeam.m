@@ -92,7 +92,7 @@ end
 
 % testHermitePolyN0
 x_test = linspace(-2, 2, 10);
-H0 = HermiteBeam.hermitePoly(0, x_test);
+H0 = PolynomialUtils.hermitePoly(0, x_test);
 if (all(abs(H0 - 1) < 1e-10))
     fprintf('  PASS: hermitePoly n=0\n');
     passed = passed + 1;
@@ -102,7 +102,7 @@ else
 end
 
 % testHermitePolyN1
-H1 = HermiteBeam.hermitePoly(1, x_test);
+H1 = PolynomialUtils.hermitePoly(1, x_test);
 expected_H1 = 2 * x_test;
 if (all(abs(H1 - expected_H1) < 1e-10))
     fprintf('  PASS: hermitePoly n=1\n');
@@ -113,7 +113,7 @@ else
 end
 
 % testHermitePolyN2
-H2 = HermiteBeam.hermitePoly(2, x_test);
+H2 = PolynomialUtils.hermitePoly(2, x_test);
 expected_H2 = 4 * x_test.^2 - 2;
 if (all(abs(H2 - expected_H2) < 1e-10))
     fprintf('  PASS: hermitePoly n=2\n');
@@ -124,7 +124,7 @@ else
 end
 
 % testHermitePolyN3
-H3 = HermiteBeam.hermitePoly(3, x_test);
+H3 = PolynomialUtils.hermitePoly(3, x_test);
 expected_H3 = 8 * x_test.^3 - 12 * x_test;
 if (all(abs(H3 - expected_H3) < 1e-10))
     fprintf('  PASS: hermitePoly n=3\n');
@@ -136,7 +136,7 @@ end
 
 % testHermitePolyMatrixInput
 x_mat = rand(5, 5);
-H_mat = HermiteBeam.hermitePoly(2, x_mat);
+H_mat = PolynomialUtils.hermitePoly(2, x_mat);
 if (size(H_mat) == size(x_mat))
     fprintf('  PASS: hermitePoly matrix input\n');
     passed = passed + 1;
@@ -158,7 +158,7 @@ else
 end
 
 % testHermitePolyN4
-H4 = HermiteBeam.hermitePoly(4, x_test);
+H4 = PolynomialUtils.hermitePoly(4, x_test);
 expected_H4 = 16 * x_test.^4 - 48 * x_test.^2 + 12;
 if (all(abs(H4 - expected_H4) < 1e-10))
     fprintf('  PASS: hermitePoly n=4\n');
@@ -234,7 +234,7 @@ end
 
 % testHermitePolyNegativeValues
 x_neg = linspace(-1, 1, 5);
-H_neg = HermiteBeam.hermitePoly(2, x_neg);
+H_neg = PolynomialUtils.hermitePoly(2, x_neg);
 if (all(isfinite(H_neg)))
     fprintf('  PASS: hermitePoly negative values\n');
     passed = passed + 1;
@@ -275,8 +275,6 @@ end
 
 fprintf('\n=== HermiteBeam: %d/%d passed ===\n', passed, passed + failed);
 
-if (failed == 0)
-% exit(0);
-else
-% exit(1);
+if failed ~= 0
+    error('Tests failed: %d/%d', failed, passed + failed);
 end

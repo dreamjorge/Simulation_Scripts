@@ -12,8 +12,8 @@ function [rayOutput]= copy2Ray(rayInput,...
   
   if (index_output_point>1)
     rayOutput.zxSlope        (index_output_point) = rayInput.zxSlope(index_point)        ;
-    rayOutput.zySlope        (index_output_point) = rayInput.zxSlope(index_point)        ;
-    rayOutput.xySlope        (index_output_point) = rayInput.zxSlope(index_point)        ;
+    rayOutput.zySlope        (index_output_point) = rayInput.zySlope(index_point)        ;
+    rayOutput.xySlope        (index_output_point) = rayInput.xySlope(index_point)        ;
   else
     rayOutput.zxSlope        (index_output_point) = Inf;
     rayOutput.zySlope        (index_output_point) = Inf;

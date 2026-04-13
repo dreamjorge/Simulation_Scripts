@@ -81,41 +81,6 @@ classdef AnalysisUtils
             mzx = (phase_dx - phase) / (delta * k);
             mzy = (phase_dy - phase) / (delta * k);
         end
-
-        function HH = combinedHankelWave(beam, X, Y, z, type)
-            % combinedHankelWave - Assemble complex Hankel wave
-            % type: 1 for H1 (outward), 2 for H2 (inward)
-            %
-            % Academic Note:
-            % Hankel waves (ondas de Hankel) are conical solutions to the paraxial 
-            % wave equation. They are constructed as a complex linear combination 
-            % of the standard mode (e.g., Laguerre-Gaussian) and its quadrature 
-            % companion (X-Laguerre or Hilbert-companion).
-            %
-            % $$ H^{(1,2)} = LG \pm i \cdot XLG $$
-            %
-            % Physical meaning:
-            % - H1 ($H^{(1)}$): Represents an outward propagating wave (diverging).
-            % - H2 ($H^{(2)}$): Represents an inward propagating wave (converging).
-            %
-            % Logic: Hankel beams are combinations of modes with quadrature phase.
-            % For Laguerre-Gaussian, H = LG + i*XLG where XLG is the 
-            % 'quadrature' mode.
-            
-            field = beam.computeField(X, Y, z);
-            
-            % For now, we use the standard field. 
-            % Real implementation would involve the Hilbert transform companion.
-            % Since the Hilbert companion logic is complex, we provide 
-            % the field as a baseline.
-            HH = field; 
-            
-            if nargin < 5 || type == 1
-                % Outward propagation component
-            else
-                % Inward propagation component
-                HH = conj(field);
-            end
-        end
+        
     end
 end
