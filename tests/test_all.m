@@ -23,6 +23,7 @@ testFiles = {
     'test_ElegantLaguerreBeam.m'
     'test_HankelLaguerre.m'
     'test_CylindricalRay.m'
+    'test_OpticalRay.m'
     'test_AnalysisUtils.m'
 };
 
@@ -40,3 +41,4 @@ for i = 1:numel(testFiles)
 end
 
 fprintf('\n=== All Tests Complete ===\n');
+fprintf('Review output above for pass/fail counts per test file\n');
