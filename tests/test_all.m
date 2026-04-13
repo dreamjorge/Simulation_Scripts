@@ -28,6 +28,8 @@ testFiles = {
     'test_CylindricalRay.m'
     'test_OpticalRay.m'
     'test_AnalysisUtils.m'
+    'test_BeamFactory.m'
+    'test_Propagators.m'
 };
 
 try
