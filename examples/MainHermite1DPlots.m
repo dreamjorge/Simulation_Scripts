@@ -1,4 +1,4 @@
-%%                      Main Hermite
+%% Legacy:                      Main Hermite
 % Ugalde-Ontiveros J.A. 
 % This script generate plots 1D of Hermite
 %% add path for classes and functions

@@ -1,4 +1,4 @@
-%% Main Elegant Hermite Simulation (Thesis Version Refactored)
+%% Legacy: Main Elegant Hermite Simulation (Thesis Version Refactored)
 % Refactored to use the new classdef architecture
 % Ugalde-Ontiveros J.A.
 

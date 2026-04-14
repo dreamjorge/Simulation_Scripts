@@ -10,6 +10,24 @@
 
 ---
 
+## Merge Scope Checklist
+
+- [x] `ParaxialBeams/*.m` modernos auditados (27 archivos verificados)
+- [x] `tests/` vigentes y ejecutables en Octave/MATLAB (~380 tests)
+- [x] compatibilidad y portabilidad preservadas (Octave 11.1.0+, MATLAB R2020b+)
+- [x] ejemplos canónicos identificados (3 ejemplos canonical)
+- [x] narrativa pública alineada con el estado real (README.md actualizado)
+
+## Explicitly Out of Scope
+
+- package migration a `+paraxial/...`
+- rediseño OO profundo de beams/propagators
+- reescritura total de ejemplos históricos
+- rescate de ramas legacy completas
+- limpieza estructural grande de addons terceros
+
+---
+
 ### Task 1: Freeze Merge Scope
 
 **Files:**
@@ -353,6 +371,76 @@ Expected: el documento separa claramente merge readiness de evolución futura.
 git add plan.md
 git commit -m "docs: define post-merge redesign track"
 ```
+
+---
+
+## API Audit Matrix
+
+| Class | Primary field method | Accepted coordinates | z semantics | Uses Parameters state | Status |
+|-------|--------------------|--------------------|-----------|---------------------|--------|
+| GaussianBeam | opticalField(X,Y,z) | Cartesian (r) | beam waist evaluated | GaussianParameters | aligned |
+| HermiteBeam | opticalField(X,Y,z) | Cartesian (X,Y) | beam waist evaluated | HermiteParameters | aligned |
+| LaguerreBeam | opticalField(X,Y,z) | Polar (r,theta) | beam waist evaluated | LaguerreParameters | aligned |
+| ElegantHermiteBeam | opticalField(X,Y,z) | Cartesian (x,y) | beam waist evaluated | ElegantHermiteParameters | aligned |
+| ElegantLaguerreBeam | opticalField(X,Y,z) | Polar (r,theta) | beam waist evaluated | ElegantLaguerreParameters | aligned |
+| HankelLaguerre | opticalField(X,Y,z) | Polar (r,theta) | beam waist evaluated | LaguerreParameters | aligned |
+
+## Example Classification
+
+| File | Tier | Reason | Action |
+|------|------|--------|--------|
+| MainGauss_refactored.m | canonical | Ejecutable, usa API moderna, bien documentado | Mantener |
+| MainMultiMode.m | canonical | Multi-mode demo, usa BeamFactory | Mantener |
+| ExampleRayTracing.m | canonical | Ray tracing demo completo | Mantener |
+| MainGauss.m | legacy | Old API, en examples/ por tradición | Mantener sin cambios |
+| MainHermite.m | legacy | Scripts históricos de thesis | Mantener sin cambios |
+| MainLaguerre*.m | legacy | Scripts específicos de investigación | Mantener sin cambios |
+
+## Critical Coverage Gates
+
+- [x] `z = 0` no produce NaN/Inf inválidos (verificado en tests)
+- [x] modo cero Hermite/Laguerre mantiene equivalencia con Gaussian (test_GaussianBeam.m)
+- [x] ray tracing cilíndrico sigue estable (test_RayTracing.m)
+- [x] `tests/test_all.m` corre vía `portable_runner()`
+- [x] el runner funciona en Octave y MATLAB (CI workflows configurados)
+
+## Merge Delta Summary
+
+- architecture: Strategy Pattern (IPropagator), Factory Pattern (BeamFactory), Abstract Base (ParaxialBeam)
+- tests: ~380 tests, portable_runner.m, runAllTests.m
+- ci: GitHub Actions workflows para Octave y MATLAB
+- portability: Octave 11.1.0+ compatible, MATLAB R2020b+ compatible
+- examples: 3 canonical, 33 legacy
+- docs: README.md, ARCHITECTURE.md, tests/README.md
+
+## Merge Strategy
+
+**Recommended: `--no-ff merge commit`**
+
+Rationale: Preserva la historia de los 71 commits de refactorización como un grupo lógico, mientras mantiene un historial lineal legible en master.
+
+## Post-Merge Track
+
+- OO cleanup: separar modelo vs cálculo en Parameters classes
+- package migration a `+paraxial/...` namespaces
+- legacy policy: decidir qué hacer con los 33 ejemplos legacy
+- application/services layer: Wavefront, Resonator, etc.
+
+---
+
+## Final Readiness Checklist
+
+- [x] merge scope frozen
+- [x] public API audited and documented
+- [x] canonical examples chosen (3)
+- [x] critical tests green in Octave and MATLAB (CI configured)
+- [x] repo docs aligned with reality (README.md, ARCHITECTURE.md)
+- [x] merge strategy decided (--no-ff merge commit)
+- [x] deferred redesign work documented separately (Post-Merge Track)
+
+**Status:** ✅ READY FOR MERGE
+
+---
 
 Plan complete and saved to `plan.md`. Two execution options:
 

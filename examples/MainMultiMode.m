@@ -1,4 +1,5 @@
-%% Multi-Mode Beam Demonstration (Hermite & Laguerre)
+%% Canonical Example: Multi-Mode Beam Demonstration
+%% This script demonstrates multi-mode Hermite and Laguerre beams.
 % Using refactored class architecture
 % Ugalde-Ontiveros J.A.
 

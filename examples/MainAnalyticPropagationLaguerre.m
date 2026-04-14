@@ -1,4 +1,4 @@
-%%          Script of Laguerre Beam (properties and propagation)
+%% Legacy:          Script of Laguerre Beam (properties and propagation)
 % adding path for classes and functions
 addpath(fullfile('ParaxialBeams'))
 addpath(fullfile('ParaxialBeams', 'Addons'))

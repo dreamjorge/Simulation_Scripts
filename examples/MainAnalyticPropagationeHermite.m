@@ -1,4 +1,4 @@
-%%                      Main Analytic Hermite
+%% Legacy:                      Main Analytic Hermite
 % Ugalde-Ontiveros J.A. 
 %% add path for classes and functions
 clear all

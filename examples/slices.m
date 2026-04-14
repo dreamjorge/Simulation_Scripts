@@ -1,3 +1,4 @@
+% Legacy: slices.m
 % slices aproach
 znorm = z;
 xnorm = x;
