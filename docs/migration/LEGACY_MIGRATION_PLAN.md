@@ -50,9 +50,9 @@ This plan is the Week 1 baseline for an incremental migration. It does not redes
 
 ### Canonical (entrypoint for new users)
 
-- `examples/MainGauss_refactored.m` (requires API cleanup in Week 2)
-- `examples/MainMultiMode.m`
-- `ExampleRayTracing.m` (requires API cleanup in Week 2)
+- `examples/MainGauss_refactored.m` - uses modern API ✅
+- `examples/MainMultiMode.m` - uses modern API ✅
+- `ExampleRayTracing.m` - migrated to modern API ✅
 
 ### Legacy (kept for reproducibility)
 
