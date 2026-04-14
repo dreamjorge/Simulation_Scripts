@@ -3,8 +3,10 @@
 % Using refactored class architecture
 % Ugalde-Ontiveros J.A.
 
-addpath('src/beams', 'src/parameters', 'src/propagation/field', 'src/propagation/rays', 'src/visualization');
-addpath('ParaxialBeams', 'ParaxialBeams/Addons');
+scriptPath = fileparts(mfilename('fullpath'));
+repoRoot = fullfile(scriptPath, '..', '..');
+addpath(repoRoot);
+setpaths();
 
 %% Parameters
 w0 = 100e-6;

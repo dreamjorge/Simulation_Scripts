@@ -252,6 +252,28 @@ else
     failed = failed + 1;
 end
 
+% testModalGouyRelativePhase (LG10 vs LG00)
+z_rel = pi * w0^2 / lambda;
+psi_rel = atan2(z_rel, pi * w0^2 / lambda);
+x_rel = 0.7 * w0;
+y_rel = 0;
+r_rel = abs(x_rel);
+lg00_rel = LaguerreBeam(w0, lambda, 0, 0);
+lg10_rel = LaguerreBeam(w0, lambda, 1, 0);
+f00_rel = lg00_rel.opticalField(x_rel, y_rel, z_rel);
+f10_rel = lg10_rel.opticalField(x_rel, y_rel, z_rel);
+w_rel = lg00_rel.getParameters(z_rel).Waist;
+amp_rel = sqrt(2) * r_rel / w_rel;
+ratio_rel = f10_rel / (amp_rel * f00_rel);
+phase_err_rel = angle(ratio_rel * exp(1i * psi_rel));
+if (abs(phase_err_rel) < 1e-8)
+    fprintf('  PASS: modal Gouy relative phase\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: modal Gouy relative phase\n');
+    failed = failed + 1;
+end
+
 % testBeamName
 if (strcmp(lb.beamName(), 'laguerre_1_0'))
     fprintf('  PASS: beamName\n');

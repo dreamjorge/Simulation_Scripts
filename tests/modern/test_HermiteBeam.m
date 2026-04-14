@@ -278,6 +278,27 @@ else
     failed = failed + 1;
 end
 
+% testModalGouyRelativePhase (HG10 vs HG00)
+z_rel = pi * w0^2 / lambda;
+psi_rel = atan2(z_rel, pi * w0^2 / lambda);
+x_rel = 0.7 * w0;
+y_rel = 0;
+hb00_rel = HermiteBeam(w0, lambda, 0, 0);
+hb10_rel = HermiteBeam(w0, lambda, 1, 0);
+f00_rel = hb00_rel.opticalField(x_rel, y_rel, z_rel);
+f10_rel = hb10_rel.opticalField(x_rel, y_rel, z_rel);
+w_rel = hb00_rel.getParameters(z_rel).Waist;
+H1_rel = PolynomialUtils.hermitePoly(1, sqrt(2) * x_rel / w_rel);
+ratio_rel = f10_rel / (H1_rel * f00_rel);
+phase_err_rel = angle(ratio_rel * exp(1i * psi_rel));
+if (abs(phase_err_rel) < 1e-8)
+    fprintf('  PASS: modal Gouy relative phase\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: modal Gouy relative phase\n');
+    failed = failed + 1;
+end
+
 % testBeamName
 if (strcmp(hb.beamName(), 'hermite_1_1'))
     fprintf('  PASS: beamName\n');

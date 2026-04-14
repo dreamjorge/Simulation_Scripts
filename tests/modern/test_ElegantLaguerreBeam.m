@@ -236,6 +236,30 @@ else
     failed = failed + 1;
 end
 
+% testModalGouyRelativePhase (ELG10 vs ELG00)
+z_rel = pi * w0^2 / lambda;
+psi_rel = atan2(z_rel, pi * w0^2 / lambda);
+x_rel = 0.7 * w0;
+y_rel = 0;
+r_rel = abs(x_rel);
+elb00_rel = ElegantLaguerreBeam(w0, lambda, 0, 0);
+elb10_rel = ElegantLaguerreBeam(w0, lambda, 1, 0);
+f00_rel = elb00_rel.opticalField(x_rel, y_rel, z_rel);
+f10_rel = elb10_rel.opticalField(x_rel, y_rel, z_rel);
+k_rel = 2 * pi / lambda;
+q_rel = z_rel + 1i * (pi * w0^2 / lambda);
+alpha_rel = 1i * k_rel / (2 * q_rel);
+amp_rel = sqrt(alpha_rel) * r_rel;
+ratio_rel = f10_rel / (amp_rel * f00_rel);
+phase_err_rel = angle(ratio_rel * exp(1i * psi_rel));
+if (abs(phase_err_rel) < 1e-8)
+    fprintf('  PASS: modal Gouy relative phase\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: modal Gouy relative phase\n');
+    failed = failed + 1;
+end
+
 % testBeamName
 if (strcmp(elb.beamName(), 'elegant_laguerre_1_0'))
     fprintf('  PASS: beamName\n');

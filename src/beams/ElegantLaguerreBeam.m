@@ -151,7 +151,7 @@ classdef ElegantLaguerreBeam < ParaxialBeam
             phi_mode = (abs(l) + 2*p) * psi;
 
             field = amp_el .* Lpl .* exp(1i * l * theta) ...
-                    .* exp(1i * phi_mode) .* carrier;
+                    .* exp(-1i * phi_mode) .* carrier;
         end
     end
 end

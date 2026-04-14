@@ -145,7 +145,7 @@ classdef ElegantHermiteBeam < ParaxialBeam
             % Modal Gouy phase shift: (n+m)*psi
             phi_mode = (obj.n + obj.m) * psi;
 
-            field = Hn .* Hm .* exp(1i * phi_mode) .* carrier;
+            field = Hn .* Hm .* exp(-1i * phi_mode) .* carrier;
         end
     end
 end

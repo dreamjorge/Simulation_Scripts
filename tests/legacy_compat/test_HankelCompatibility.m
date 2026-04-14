@@ -1,7 +1,11 @@
 % Compatible with GNU Octave and MATLAB
 % Legacy compatibility tests for Hankel Hermite/Laguerre wrappers.
 
-addpath(fullfile(fileparts(fileparts(fileparts(mfilename('fullpath')))), 'ParaxialBeams'));
+repoRoot = fileparts(fileparts(fileparts(mfilename('fullpath'))));
+addpath(repoRoot);
+setpaths();
+addpath(fullfile(repoRoot, 'ParaxialBeams'));
+addpath(fullfile(repoRoot, 'legacy', 'compat'));
 
 fprintf('=== Hankel Compatibility Tests ===\n\n');
 passed = 0;
@@ -64,6 +68,15 @@ if (max(abs(hle1.OpticalFieldLaguerre - hl1.OpticalFieldLaguerre)) < 1e-12)
     passed = passed + 1;
 else
     fprintf('  FAIL: HankeleLaguerre alias\n');
+    failed = failed + 1;
+end
+
+% testLegacyAliasStaticMethodsExposed
+if (ismethod('HankeleHermite', 'getPropagateCartesianRays') && ismethod('HankeleLaguerre', 'getPropagateCylindricalRays'))
+    fprintf('  PASS: legacy alias static methods exposed\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: legacy alias static methods exposed\n');
     failed = failed + 1;
 end
 

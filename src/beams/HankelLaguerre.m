@@ -228,10 +228,10 @@ function field = hankelField(r, theta, w0, lambda, l, p, z, hankelType)
     phi_mode = (abs(l) + 2*p) * psi;
 
     % Standard LG field
-    LB_field  = amp .* Lpl .* exp( 1i * l * theta) .* exp(1i * phi_mode) .* carrier;
+    LB_field  = amp .* Lpl .* exp( 1i * l * theta) .* exp(-1i * phi_mode) .* carrier;
 
     % XLG (Hilbert-transformed) field — same amplitude, phase uses -p instead of l
-    XLG_field = amp .* Lpl .* exp(-1i * p * theta) .* exp(1i * phi_mode) .* carrier;
+    XLG_field = amp .* Lpl .* exp(-1i * p * theta) .* exp(-1i * phi_mode) .* carrier;
 
     % Hankel superposition
     if hankelType == 1
