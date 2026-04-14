@@ -1,4 +1,5 @@
-%% Gaussian Beam Script (Refactored)
+%% Canonical Example: Gaussian Beam Propagation
+%% This script demonstrates the recommended workflow for beam simulation.
 % Gaussian Beam propagation using new utility classes
 % Ugalde-Ontiveros J.A.
 %

@@ -1,4 +1,4 @@
-%% Generate Lateral View of Hermite-Gaussian Beams with Rays
+%% Legacy: Generate Lateral View of Hermite-Gaussian Beams with Rays
 % Refactored version using classdef architecture
 % original scripts by: dreamjorge
 

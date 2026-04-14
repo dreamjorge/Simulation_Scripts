@@ -2,45 +2,136 @@
 
 Scripts for simulation of optical beam propagation (Gaussian, Hermite-Gauss, Laguerre-Gauss beams).
 
-Author: Ugalde-Ontiveros J.A.
+**Author:** Ugalde-Ontiveros J.A.
 
 ## Estructura
 
 ```
 Simulation_Scripts/
-├── ParaxialBeams/
-│   ├── @GaussianParameters/    % Clase de parámetros Gaussian
-│   ├── @HermiteParameters/     % Clase de parámetros Hermite
-│   ├── @LaguerreParameters/    % Clase de parámetros Laguerre
-│   ├── @GaussianBeam/          % haz Gaussiano
-│   ├── @HermiteBeam/           % haz Hermite-Gauss
-│   ├── @LaguerreBeam/          % haz Laguerre-Gauss
-│   ├── @PhysicalConstants/    % ⭐ Constantes físicas
-│   ├── @GridUtils/             % ⭐ Utilidades de grid
-│   ├── @FFTUtils/              % ⭐ Utilidades FFT
-│   ├── @BeamSimulation/        % ⭐ Clase base para simulaciones
+├── ParaxialBeams/           % Core library (27 .m files)
+│   ├── ParaxialBeam.m      % ⭐ Abstract base class
+│   ├── BeamFactory.m       % ⭐ Factory for beam creation
+│   ├── IPropagator.m      % ⭐ Strategy interface
+│   ├── GaussianBeam.m
+│   ├── HermiteBeam.m
+│   ├── LaguerreBeam.m
+│   ├── ElegantHermiteBeam.m
+│   ├── ElegantLaguerreBeam.m
+│   ├── HankelLaguerre.m
+│   ├── GaussianParameters.m
+│   ├── HermiteParameters.m
+│   ├── LaguerreParameters.m
+│   ├── ElegantHermiteParameters.m
+│   ├── ElegantLaguerreParameters.m
+│   ├── FFTPropagator.m     % Propagation via FFT
+│   ├── AnalyticPropagator.m
+│   ├── RayTracePropagator.m
+│   ├── PhysicalConstants.m
+│   ├── GridUtils.m
+│   ├── FFTUtils.m
+│   ├── AnalysisUtils.m
+│   ├── PolynomialUtils.m
+│   ├── VisualizationUtils.m
+│   ├── OpticalRay.m
+│   ├── CylindricalRay.m
+│   ├── RayBundle.m
+│   ├── RayTracer.m
 │   └── Addons/
-├── MainGauss.m                 % Script Gauss original
-├── MainHermite.m               % Script Hermite original
-├── MainLaguerre.m              % Script Laguerre original
-└── MainGauss_refactored.m      # ⭐ Versión refactorizada
+├── examples/               % Usage examples
+│   ├── MainGauss_refactored.m  %% canonical
+│   ├── MainMultiMode.m         %% canonical
+│   ├── ExampleRayTracing.m      %% canonical
+│   └── ...
+├── tests/                  % Test suite (~380 tests)
+├── docs/
+│   └── ARCHITECTURE.md    % Architecture documentation
+└── README.md
 ```
 
-## ⭐ Nuevas Clases (v2.0)
+## Beam API Contract
+
+Every beam type inherits from `ParaxialBeam` and implements:
+
+| Method | Returns | Description |
+|--------|---------|-------------|
+| `opticalField(X, Y, z)` | `[Ny x Nx] complex` | Complex field on Cartesian grid |
+| `getParameters(z)` | `GaussianParameters` | Beam params at position z |
+| `beamName()` | `char` | String identifier like 'hermite_3_2' |
+
+## Uso Rápido
+
+### MATLAB/Octave
+
+```matlab
+addpath ParaxialBeams
+addpath ParaxialBeams\Addons
+
+% Crear beam via Factory
+beam = BeamFactory.create('gaussian', 100e-6, 632.8e-9);
+
+% Usar beam directamente
+grid = GridUtils(1024, 1024, 1e-3, 1e-3);
+[X, Y] = grid.create2DGrid();
+field = beam.opticalField(X, Y, 0);
+
+% O propagar via FFT
+prop = FFTPropagator(grid, 632.8e-9);
+field_at_z = prop.propagate(beam, 0.1);
+```
+
+## Patrones de Diseño
+
+### Strategy Pattern — Propagators
+
+Tres métodos de propagación intercambiables:
+
+```matlab
+% FFT (angular spectrum)
+prop = FFTPropagator(grid, lambda);
+field = prop.propagate(beam, z);
+
+% Analytic (direct formula)
+prop = AnalyticPropagator(grid);
+field = prop.propagate(beam, z);
+
+% Ray tracing
+prop = RayTracePropagator(grid, 'RK4', 1e-3);
+bundle = prop.propagate(beam, z);
+```
+
+### Factory Pattern — BeamFactory
+
+```matlab
+% Todos los beams vía Factory
+g  = BeamFactory.create('gaussian', 100e-6, 632.8e-9);
+hg = BeamFactory.create('hermite', 100e-6, 632.8e-9, 'n', 2, 'm', 1);
+lg = BeamFactory.create('laguerre', 100e-6, 632.8e-9, 'l', 1, 'p', 0);
+```
+
+## Canonical Examples
+
+Ejemplos recomendados para nuevos usuarios:
+
+| File | Description |
+|------|-------------|
+| `examples/MainGauss_refactored.m` | Gaussian beam propagation |
+| `examples/MainMultiMode.m` | Multi-mode Hermite/Laguerre |
+| `ExampleRayTracing.m` | Ray tracing visualization |
+
+## Constantes y Utilidades
 
 ### PhysicalConstants
-Constantes físicas y métodos utilitarios:
+
 ```matlab
 PC = PhysicalConstants;
 k = PC.waveNumber(lambda);
 zr = PC.rayleighDistance(w0, lambda);
-w = PC.waistAtZ(w0, z, lambda, zr);
 R = PC.radiusOfCurvature(z, zr);
 gouy = PC.gouyPhase(z, zr);
 ```
 
 ### GridUtils
-Generación de grids computacionales:
+
 ```matlab
 grid = GridUtils(Nx, Ny, Dx, Dy);
 [X, Y] = grid.create2DGrid();
@@ -49,44 +140,31 @@ grid = GridUtils(Nx, Ny, Dx, Dy);
 ```
 
 ### FFTUtils
-Operaciones FFT normalizadas:
+
 ```matlab
 fftOps = FFTUtils(true, true);  % normalize, shift
-G = fftOps.fft2(g);              % FFT hacia adelante
-g = fftOps.ifft2(G);              % FFT inversa
-H = fftOps.transferFunction(kx, ky, z, lambda);  % Función de transferencia
-gProp = fftOps.propagate(g, kx, ky, z, lambda);  % Propagación angular
+G = fftOps.fft2(g);
+g = fftOps.ifft2(G);
 ```
 
-### BeamSimulation
-Clase base para simulaciones:
-```matlab
-sim = BeamSimulation();
-sim.setPhysicalParameters('w0', 100e-6, 'lambda', 632.e-9);
-sim.createGrid();
-```
+## Compatibilidad
 
-## Uso
+- **GNU Octave 11.1.0+**
+- **MATLAB R2020b+**
 
-### MATLAB
-```matlab
-addpath ParaxialBeams
-addpath ParaxialBeams\Addons
+No se usan `classdef` folders. Todos los archivos son `.m` individuales.
 
-% Usar constantes físicas
-PC = PhysicalConstants;
-zr = PC.rayleighDistance(100e-6, 632.8e-9);
+## Tests
 
-% Crear grid
-grid = GridUtils(1024, 1024, 1e-3, 1e-3);
-[X, Y] = grid.create2DGrid();
+```bash
+# Octave
+octave --no-gui --eval "run('tests/test_all.m')"
 
-% FFT normalizado
-fftOps = FFTUtils;
-G = fftOps.fft2(field);
+# MATLAB
+matlab -batch "run('tests/test_all.m')"
 ```
 
 ## Referencias
 
-- Kogelnik, H., & Li, T. (1966). Laser beams and resonators. Applied Optics.
-- Siegman, A. E. (1986). Lasers. University Science Books.
+- Kogelnik, H., & Li, T. (1966). Laser beams and resonators. *Applied Optics*.
+- Siegman, A. E. (1986). *Lasers*. University Science Books.

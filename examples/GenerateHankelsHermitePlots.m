@@ -1,4 +1,4 @@
-%% hermite
+%% Legacy: hermite
 
 distances = 2*[25/12,10/2,inf];
 

@@ -1,4 +1,4 @@
-%%                              Gaussian Beam Script
+%% Legacy:                              Gaussian Beam Script
 
 % add path for classes and functions
 

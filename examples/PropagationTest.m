@@ -1,4 +1,4 @@
-%% add path for classes and functions
+%% Legacy: add path for classes and functions
 addpath(fullfile('ParaxialBeams'))
 %% elegant normalization 
 %principal 2 parameters of paraxial beams

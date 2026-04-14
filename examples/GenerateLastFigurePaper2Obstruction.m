@@ -1,4 +1,4 @@
-%% figure 3d of selfhealing without obstruction
+%% Legacy: figure 3d of selfhealing without obstruction
 %field without obstruction
 fieldf  = (Wo(:,floor(Nz),:));
 fieldf  = reshape(fieldf,[Nx,Nx]);

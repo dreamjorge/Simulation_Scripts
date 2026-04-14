@@ -1,4 +1,4 @@
-%% add path for classes and functions
+%% Legacy: add path for classes and functions
 addpath(fullfile('ParaxialBeams'))
 addpath(fullfile('ParaxialBeams', 'Addons'))
 mapgreen = AdvancedColormap('kgg',256,[0 100 255]/255);  %color of beam

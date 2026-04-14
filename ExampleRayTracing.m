@@ -1,3 +1,5 @@
+%% Canonical Example: Ray Tracing Integration
+%% This script demonstrates ray tracing propagation via phase gradients.
 % Example script for Ray Tracing Integration
 addpath('ParaxialBeams');
 
