@@ -183,6 +183,7 @@ matlab -batch "run('tests/test_all.m')"
 
 - Kogelnik, H., & Li, T. (1966). Laser beams and resonators. *Applied Optics*.
 - Siegman, A. E. (1986). *Lasers*. University Science Books.
+- Referencias detalladas por implementacion (Gaussian/Hermite/Laguerre/Elegant/Hankel): `docs/ARCHITECTURE.md` -> `Referencias Bibliograficas por Implementacion`.
 
 ## Migracion Legacy
 

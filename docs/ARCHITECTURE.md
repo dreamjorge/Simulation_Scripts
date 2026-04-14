@@ -83,6 +83,14 @@ Every `ParaxialBeam` subclass MUST implement:
 | `getParameters(z)` | `GaussianParameters` | Beam params evaluated at z |
 | `beamName()` | `char` | String identifier like 'hermite_3_2' |
 
+## Phase Convention
+
+- The beam implementations use the phasor convention `exp(-i*k*z)`.
+- Gaussian carrier phase terms are `exp(-i*psi(z))` for Gouy and `exp(+i*k*r^2/(2R(z)))` for curvature.
+- Higher-order modal terms use the same sign convention as the carrier Gouy term (`exp(-i*phi_mode)`), where:
+  - Hermite: `phi_mode = (n+m)*psi(z)`
+  - Laguerre/Hankel: `phi_mode = (|l|+2p)*psi(z)`
+
 ## Data Flow
 
 ```
@@ -220,3 +228,49 @@ No `classdef` folders (@Folder). All classes in single `.m` files.
 
 - Kogelnik, H., & Li, T. (1966). Laser beams and resonators. *Applied Optics*.
 - Siegman, A. E. (1986). *Lasers*. University Science Books.
+
+## Referencias Bibliograficas por Implementacion
+
+### GaussianBeam (`src/beams/GaussianBeam.m`)
+
+- Kogelnik, H., & Li, T. (1966). *Laser Beams and Resonators*. Applied Optics, 5(10), 1550-1567.
+  - Base para el formalismo paraxial: waist `w(z)`, radio de curvatura `R(z)`, fase de Gouy `psi(z)`.
+- Siegman, A. E. (1986). *Lasers*. University Science Books.
+  - Referencia clasica para notacion y convenciones de fase de haces gaussianos.
+
+### HermiteBeam / LaguerreBeam (`src/beams/HermiteBeam.m`, `src/beams/LaguerreBeam.m`)
+
+- Saleh, B. E. A., & Teich, M. C. (2007). *Fundamentals of Photonics* (2nd ed.). Wiley.
+  - Derivacion de modos transversales HG/LG y estructura modal en coordenadas cartesianas/polares.
+- Allen, L., Beijersbergen, M. W., Spreeuw, R. J. C., & Woerdman, J. P. (1992).
+  *Orbital angular momentum of light and the transformation of Laguerre-Gaussian laser modes*.
+  Physical Review A, 45(11), 8185-8189.
+  - Marco para indice azimutal `l`, orden radial `p` y fase azimutal `exp(i*l*theta)`.
+
+### ElegantHermiteBeam / ElegantLaguerreBeam (`src/beams/ElegantHermiteBeam.m`, `src/beams/ElegantLaguerreBeam.m`)
+
+- Siegman, A. E. (1996). *Defining and measuring laser beam quality*. JOSA A, 13(5), 952-964.
+  - Uso del parametro complejo `q(z)` y formulacion "elegant" con argumentos complejos.
+- Siegman, A. E. (1986). *Lasers*. University Science Books.
+  - Contexto teorico para el acople amplitud-fase en familias elegant.
+
+### HankelLaguerre (`src/beams/HankelLaguerre.m`)
+
+- Kotlyar, V. V., Kovalev, A. A., & Porfirev, A. P. (2012). *Hankel beams and their properties*.
+  Optics Letters / JOSA A literature on Hankel-type structured beams.
+  - Base conceptual para la combinacion `H^(1,2) = LG +/- i*XLG` usada en la implementacion.
+
+### Soporte MATLAB/Octave (semantica numerica)
+
+- MathWorks. `cart2pol` documentation.
+  - Verifica orden de salida `[theta, rho]`, usado al mapear `(X,Y)->(theta,r)`.
+- MathWorks. Symbolic Math Toolbox `laguerreL` documentation.
+  - Convencion de polinomios de Laguerre asociados consistente con `L_p^{|l|}`.
+
+### Nota de Convenciones
+
+- Distintas fuentes usan convenciones de fasor distintas (`exp(+i*k*z)` vs `exp(-i*k*z)`).
+- Este repositorio fija `exp(-i*k*z)` y mantiene coherencia interna en:
+  - carrier gaussiano,
+  - fase de curvatura,
+  - fase de Gouy modal (`exp(-i*phi_mode)`).
