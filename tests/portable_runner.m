@@ -4,9 +4,20 @@ function totalFailed = portable_runner()
     
     fprintf('=== Inicilizando Portable Test Runner ===\n\n');
     
-    % Get test directory
+    % Get test directory and repo root
     testDir = fileparts(mfilename('fullpath'));
-    addpath(fullfile(testDir, '..', 'ParaxialBeams'));
+    repoRoot = fullfile(testDir, '..');
+    
+    % Add modern library paths (src/)
+    addpath(fullfile(repoRoot, 'src', 'beams'));
+    addpath(fullfile(repoRoot, 'src', 'parameters'));
+    addpath(fullfile(repoRoot, 'src', 'propagation', 'field'));
+    addpath(fullfile(repoRoot, 'src', 'propagation', 'rays'));
+    addpath(fullfile(repoRoot, 'src', 'visualization'));
+    
+    % Add utilities (ParaxialBeams/)
+    addpath(fullfile(repoRoot, 'ParaxialBeams'));
+    addpath(fullfile(repoRoot, 'ParaxialBeams', 'Addons'));
     
     % Canonical list of tests to run
     testFiles = {

@@ -3,7 +3,8 @@
 % Using refactored class architecture
 % Ugalde-Ontiveros J.A.
 
-addpath(fullfile('ParaxialBeams'))
+addpath('src/beams', 'src/parameters', 'src/propagation/field', 'src/propagation/rays', 'src/visualization');
+addpath('ParaxialBeams', 'ParaxialBeams/Addons');
 
 %% Parameters
 w0 = 100e-6;

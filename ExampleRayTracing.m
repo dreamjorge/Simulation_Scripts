@@ -1,7 +1,10 @@
 %% Canonical Example: Ray Tracing Integration
 %% This script demonstrates ray tracing propagation via phase gradients.
 % Example script for Ray Tracing Integration
-addpath('ParaxialBeams');
+
+% Add library paths (use setpaths() for convenience)
+addpath('src/beams', 'src/parameters', 'src/propagation/field', 'src/propagation/rays', 'src/visualization');
+addpath('ParaxialBeams', 'ParaxialBeams/Addons');
 
 % 1. Create a Gaussian Beam
 lambda = 632.8e-9;
