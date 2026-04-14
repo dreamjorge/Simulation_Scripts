@@ -17,19 +17,50 @@ classdef GaussianBeam < ParaxialBeam
 
     properties
         InitialWaist    % Beam waist at z = 0 (m)
+        OpticalField    % Legacy snapshot field compatibility
     end
 
     methods
-        function obj = GaussianBeam(w0, lambda)
+        function obj = GaussianBeam(arg1, arg2, varargin)
             % Constructor
-            % w0:     initial beam waist at z = 0 (m)
-            % lambda: wavelength (m)
+            % Modern API:
+            %   GaussianBeam(w0, lambda)
+            %
+            % Legacy-compatible APIs:
+            %   GaussianBeam(R, gaussianParams)
+            %   GaussianBeam(X, Y, gaussianParams)
 
-            if nargin > 0
+            if nargin == 0
+                obj = obj@ParaxialBeam();
+                obj.OpticalField = [];
+                return;
+            end
+
+            if nargin == 2 && isa(arg2, 'GaussianParameters')
+                params = arg2;
+                obj = obj@ParaxialBeam(params.Lambda);
+                obj.InitialWaist = params.InitialWaist;
+                obj.OpticalField = obj.opticalFieldLegacy(arg1, [], params.zCoordinate);
+                return;
+            end
+
+            if nargin == 3 && isa(varargin{1}, 'GaussianParameters')
+                params = varargin{1};
+                obj = obj@ParaxialBeam(params.Lambda);
+                obj.InitialWaist = params.InitialWaist;
+                obj.OpticalField = obj.opticalFieldLegacy(arg1, arg2, params.zCoordinate);
+                return;
+            end
+
+            if nargin >= 2
+                w0 = arg1;
+                lambda = arg2;
                 obj = obj@ParaxialBeam(lambda);
                 obj.InitialWaist = w0;
+                obj.OpticalField = [];
             else
                 obj = obj@ParaxialBeam();
+                obj.OpticalField = [];
             end
         end
 
@@ -82,6 +113,19 @@ classdef GaussianBeam < ParaxialBeam
 
         function name = beamName(obj)
             name = 'gaussian';
+        end
+    end
+
+    methods (Access = private)
+        function field = opticalFieldLegacy(obj, coordA, coordB, z)
+            if isempty(coordB)
+                X = coordA;
+                Y = zeros(size(coordA));
+            else
+                X = coordA;
+                Y = coordB;
+            end
+            field = obj.opticalField(X, Y, z);
         end
     end
 end

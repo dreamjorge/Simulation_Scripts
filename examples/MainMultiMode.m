@@ -15,26 +15,25 @@ Nx = 512;
 Dx = 1.5e-3;
 grid = GridUtils(Nx, Nx, Dx, Dx);
 [X, Y] = grid.create2DGrid();
-[R, Theta] = cart2pol(X, Y);
 
 %% Hermite-Gaussian (1,1)
 fprintf('Calculating Hermite-Gaussian (1,1)...\n');
-hp = HermiteParameters(z, w0, lambda, 1, 1);
-hb = HermiteBeam(X, Y, hp);
+hb = BeamFactory.create('hermite', w0, lambda, 'n', 1, 'm', 1);
+fieldHG = hb.opticalField(X, Y, z);
 
 %% Laguerre-Gaussian (0,1)
 fprintf('Calculating Laguerre-Gaussian (0,1)...\n');
-lp = LaguerreParameters(z, w0, lambda, 1, 0); % l=1, p=0
-lb = LaguerreBeam(R, Theta, lp);
+lb = BeamFactory.create('laguerre', w0, lambda, 'l', 1, 'p', 0); % l=1, p=0
+fieldLG = lb.opticalField(X, Y, z);
 
 %% Visualization
 figure(1);
 subplot(1,2,1);
-imagesc(abs(hb.OpticalField).^2);
+imagesc(abs(fieldHG).^2);
 colormap('hot'); axis square; title('HG (1,1) Intensity');
 
 subplot(1,2,2);
-imagesc(abs(lb.OpticalField).^2);
+imagesc(abs(fieldLG).^2);
 colormap('hot'); axis square; title('LG (0,1) Intensity');
 
 fprintf('Done.\n');
