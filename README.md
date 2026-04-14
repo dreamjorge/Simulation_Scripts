@@ -8,41 +8,51 @@ Scripts for simulation of optical beam propagation (Gaussian, Hermite-Gauss, Lag
 
 ```
 Simulation_Scripts/
-├── ParaxialBeams/           % Core library (27 .m files)
-│   ├── ParaxialBeam.m      % ⭐ Abstract base class
-│   ├── BeamFactory.m       % ⭐ Factory for beam creation
-│   ├── IPropagator.m      % ⭐ Strategy interface
-│   ├── GaussianBeam.m
-│   ├── HermiteBeam.m
-│   ├── LaguerreBeam.m
-│   ├── ElegantHermiteBeam.m
-│   ├── ElegantLaguerreBeam.m
-│   ├── HankelLaguerre.m
-│   ├── GaussianParameters.m
-│   ├── HermiteParameters.m
-│   ├── LaguerreParameters.m
-│   ├── ElegantHermiteParameters.m
-│   ├── ElegantLaguerreParameters.m
-│   ├── FFTPropagator.m     % Propagation via FFT
-│   ├── AnalyticPropagator.m
-│   ├── RayTracePropagator.m
+├── src/                        % Modern library (organized by responsibility)
+│   ├── beams/                  % Beam classes
+│   │   ├── ParaxialBeam.m      % ⭐ Abstract base class
+│   │   ├── GaussianBeam.m
+│   │   ├── HermiteBeam.m
+│   │   ├── LaguerreBeam.m
+│   │   ├── ElegantHermiteBeam.m
+│   │   ├── ElegantLaguerreBeam.m
+│   │   ├── HankelHermite.m
+│   │   ├── HankelLaguerre.m
+│   │   └── HankeleHermite.m, HankeleLaguerre.m (legacy aliases)
+│   ├── parameters/             % Beam parameter classes
+│   │   ├── GaussianParameters.m
+│   │   ├── HermiteParameters.m
+│   │   ├── LaguerreParameters.m
+│   │   ├── ElegantHermiteParameters.m
+│   │   └── ElegantLaguerreParameters.m
+│   ├── propagation/
+│   │   ├── field/              % Field-based propagation
+│   │   │   ├── IPropagator.m   % ⭐ Strategy interface
+│   │   │   ├── FFTPropagator.m
+│   │   │   └── AnalyticPropagator.m
+│   │   └── rays/                % Ray-based propagation
+│   │       ├── RayTracePropagator.m
+│   │       ├── RayBundle.m
+│   │       ├── RayTracer.m
+│   │       ├── OpticalRay.m
+│   │       └── CylindricalRay.m
+│   └── visualization/
+│       └── VisualizationUtils.m
+├── ParaxialBeams/              % Utilities
 │   ├── PhysicalConstants.m
 │   ├── GridUtils.m
 │   ├── FFTUtils.m
 │   ├── AnalysisUtils.m
 │   ├── PolynomialUtils.m
-│   ├── VisualizationUtils.m
-│   ├── OpticalRay.m
-│   ├── CylindricalRay.m
-│   ├── RayBundle.m
-│   ├── RayTracer.m
+│   ├── BeamFactory.m
 │   └── Addons/
 ├── examples/               % Usage examples
 │   ├── MainGauss_refactored.m  %% canonical
 │   ├── MainMultiMode.m         %% canonical
 │   ├── ExampleRayTracing.m      %% canonical
-│   └── ...
+│   └── ... (legacy examples)
 ├── tests/                  % Test suite (~380 tests)
+├── setpaths.m              % Path initialization utility
 ├── docs/
 │   └── ARCHITECTURE.md    % Architecture documentation
 └── README.md
@@ -63,8 +73,12 @@ Every beam type inherits from `ParaxialBeam` and implements:
 ### MATLAB/Octave
 
 ```matlab
-addpath ParaxialBeams
-addpath ParaxialBeams\Addons
+% Option 1: Use setpaths() utility
+setpaths
+
+% Option 2: Add paths manually
+addpath('src/beams', 'src/parameters', 'src/propagation/field', 'src/propagation/rays', 'src/visualization');
+addpath('ParaxialBeams', 'ParaxialBeams/Addons');
 
 % Crear beam via Factory
 beam = BeamFactory.create('gaussian', 100e-6, 632.8e-9);

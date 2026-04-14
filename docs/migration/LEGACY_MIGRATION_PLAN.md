@@ -60,24 +60,25 @@ All other scripts in `examples/` are legacy research or historical variants and 
 
 Known legacy-marked scripts: 32
 
-## Proposed Target Structure (post-migration)
+## Current Structure (post-Week 3)
 
 ```text
 Simulation_Scripts/
   src/
-    beams/
-    parameters/
+    beams/           % ✅ Beam classes (ParaxialBeam, GaussianBeam, etc.)
+    parameters/      % ✅ Parameter classes (GaussianParameters, etc.)
     propagation/
-      field/
-      rays/
-    visualization/
-  legacy/
+      field/         % ✅ Field propagators (FFT, Analytic)
+      rays/          % ✅ Ray propagation (RayTrace, RayBundle, etc.)
+    visualization/   % ✅ VisualizationUtils
+  ParaxialBeams/    % Utilities (PhysicalConstants, GridUtils, FFTUtils, etc.)
+  legacy/            # TODO: Week 4
     compat/
     examples/
   examples/
-    canonical/
+    canonical/       # TODO: Week 5
   tests/
-    modern/
+    modern/          # TODO: Week 6
     legacy_compat/
 ```
 
@@ -89,6 +90,39 @@ Simulation_Scripts/
 - [x] Legacy aliases emit migration warning with replacement path.
 - [x] Plot API ownership defined (single modern entrypoint + legacy wrappers).
 - [x] Migration notes added for users running historical scripts. (See below)
+
+## Week 3: Implement src/ Structure
+
+- [x] Create `src/` directory structure.
+- [x] Move beam classes to `src/beams/`.
+- [x] Move parameter classes to `src/parameters/`.
+- [x] Move field propagators to `src/propagation/field/`.
+- [x] Move ray propagation to `src/propagation/rays/`.
+- [x] Move visualization to `src/visualization/`.
+- [x] Create `setpaths.m` for easy path configuration.
+- [x] Update canonical examples for new structure.
+- [x] Update test runners for new structure.
+
+## Week 4: Create legacy/compat Layer
+
+- [ ] Move legacy adapters to `legacy/compat/`.
+- [ ] Move legacy aliases (HankeleHermite, HankeleLaguerre) to `legacy/compat/`.
+- [ ] Update addpath references in legacy examples.
+
+## Week 5: Canonical Examples Folder
+
+- [ ] Move canonical examples to `examples/canonical/`.
+- [ ] Update README with new examples path.
+
+## Week 6: Test Folder Reorganization
+
+- [ ] Create `tests/modern/` for new tests.
+- [ ] Create `tests/legacy_compat/` for compatibility tests.
+
+## Week 7: Package Migration (Future)
+
+- [ ] Prepare `+paraxial/` package structure.
+- [ ] This is the final goal but is explicitly out of scope for current migration.
 
 ## Risks and Mitigations
 
