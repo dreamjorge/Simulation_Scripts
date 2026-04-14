@@ -1,7 +1,7 @@
 % Compatible with GNU Octave and MATLAB
 % Tests for ElegantLaguerreBeam (Phase 3 API: ElegantLaguerreBeam(w0, lambda, l, p))
 
-addpath(fullfile(fileparts(fileparts(mfilename('fullpath'))), 'ParaxialBeams'));
+addpath(fullfile(fileparts(fileparts(fileparts(mfilename('fullpath')))), 'ParaxialBeams'));
 
 fprintf('=== ElegantLaguerreBeam Tests ===\n\n');
 passed = 0;

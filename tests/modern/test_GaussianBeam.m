@@ -1,7 +1,7 @@
 % Compatible with GNU Octave and MATLAB
 % Tests for GaussianBeam (Phase 3 API: GaussianBeam(w0, lambda))
 
-addpath(fullfile(fileparts(fileparts(mfilename('fullpath'))), 'ParaxialBeams'));
+addpath(fullfile(fileparts(fileparts(fileparts(mfilename('fullpath')))), 'ParaxialBeams'));
 
 fprintf('=== GaussianBeam Tests ===\n\n');
 passed = 0;
