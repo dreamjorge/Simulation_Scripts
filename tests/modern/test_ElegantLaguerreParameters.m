@@ -1,7 +1,7 @@
 % Compatible with GNU Octave and MATLAB
 % Tests for ElegantLaguerreParameters
 
-addpath(fullfile(fileparts(fileparts(mfilename('fullpath'))), 'ParaxialBeams'));
+addpath(fullfile(fileparts(fileparts(fileparts(mfilename('fullpath')))), 'ParaxialBeams'));
 
 fprintf('=== ElegantLaguerreParameters Tests ===\n\n');
 passed = 0;

@@ -1,7 +1,7 @@
 % Compatible with GNU Octave and MATLAB
 % Tests for HermiteParameters
 
-addpath(fullfile(fileparts(fileparts(mfilename('fullpath'))), 'ParaxialBeams'));
+addpath(fullfile(fileparts(fileparts(fileparts(mfilename('fullpath')))), 'ParaxialBeams'));
 
 fprintf('=== HermiteParameters Tests ===\n\n');
 passed = 0;

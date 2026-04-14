@@ -1,7 +1,7 @@
 % Compatible with GNU Octave and MATLAB
 % Legacy compatibility tests for Hankel Hermite/Laguerre wrappers.
 
-addpath(fullfile(fileparts(fileparts(mfilename('fullpath'))), 'ParaxialBeams'));
+addpath(fullfile(fileparts(fileparts(fileparts(mfilename('fullpath')))), 'ParaxialBeams'));
 
 fprintf('=== Hankel Compatibility Tests ===\n\n');
 passed = 0;

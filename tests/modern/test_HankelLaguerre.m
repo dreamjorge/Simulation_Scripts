@@ -1,7 +1,7 @@
 % Compatible with GNU Octave and MATLAB
 % Tests for HankelLaguerre (Phase 3 API: HankelLaguerre(w0, lambda, l, p, hankelType))
 
-addpath(fullfile(fileparts(fileparts(mfilename('fullpath'))), 'ParaxialBeams'));
+addpath(fullfile(fileparts(fileparts(fileparts(mfilename('fullpath')))), 'ParaxialBeams'));
 
 fprintf('=== HankelLaguerre Tests ===\n\n');
 passed = 0;

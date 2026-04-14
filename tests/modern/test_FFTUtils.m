@@ -1,7 +1,7 @@
 % Compatible with GNU Octave and MATLAB
 % Tests for FFTUtils
 
-addpath(fullfile(fileparts(fileparts(mfilename('fullpath'))), 'ParaxialBeams'));
+addpath(fullfile(fileparts(fileparts(fileparts(mfilename('fullpath')))), 'ParaxialBeams'));
 
 fprintf('=== FFTUtils Tests ===\n\n');
 passed = 0;

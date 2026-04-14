@@ -1,7 +1,7 @@
 % Compatible with GNU Octave and MATLAB
 % Tests for PhysicalConstants
 
-addpath(fullfile(fileparts(fileparts(mfilename('fullpath'))), 'ParaxialBeams'));
+addpath(fullfile(fileparts(fileparts(fileparts(mfilename('fullpath')))), 'ParaxialBeams'));
 
 fprintf('=== PhysicalConstants Tests ===\n\n');
 passed = 0;

@@ -1,7 +1,7 @@
 % Compatible with GNU Octave and MATLAB
 % Tests for LaguerreBeam (Phase 3 API: LaguerreBeam(w0, lambda, l, p))
 
-addpath(fullfile(fileparts(fileparts(mfilename('fullpath'))), 'ParaxialBeams'));
+addpath(fullfile(fileparts(fileparts(fileparts(mfilename('fullpath')))), 'ParaxialBeams'));
 
 fprintf('=== LaguerreBeam Tests ===\n\n');
 passed = 0;
