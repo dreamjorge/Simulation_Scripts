@@ -25,6 +25,7 @@ testFiles = {
     'test_ElegantHermiteBeam.m'
     'test_ElegantLaguerreBeam.m'
     'test_HankelLaguerre.m'
+    'test_HankelCompatibility.m'
     'test_CylindricalRay.m'
     'test_OpticalRay.m'
     'test_AnalysisUtils.m'
