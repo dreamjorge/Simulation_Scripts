@@ -4,27 +4,51 @@ function totalFailed = portable_runner()
     
     fprintf('=== Inicilizando Portable Test Runner ===\n\n');
     
-    % Get test directory
+    % Get test directory and repo root
     testDir = fileparts(mfilename('fullpath'));
-    addpath(fullfile(testDir, '..', 'ParaxialBeams'));
+    repoRoot = fullfile(testDir, '..');
     
-    % List of tests to run
+    % Add modern library paths (src/)
+    addpath(fullfile(repoRoot, 'src', 'beams'));
+    addpath(fullfile(repoRoot, 'src', 'parameters'));
+    addpath(fullfile(repoRoot, 'src', 'propagation', 'field'));
+    addpath(fullfile(repoRoot, 'src', 'propagation', 'rays'));
+    addpath(fullfile(repoRoot, 'src', 'visualization'));
+    
+    % Add utilities (ParaxialBeams/)
+    addpath(fullfile(repoRoot, 'ParaxialBeams'));
+    addpath(fullfile(repoRoot, 'ParaxialBeams', 'Addons'));
+    
+    % Add legacy compatibility layer
+    addpath(fullfile(repoRoot, 'legacy', 'compat'));
+    
+    % Add test subdirectories
+    addpath(fullfile(testDir, 'modern'));
+    addpath(fullfile(testDir, 'legacy_compat'));
+    
+    % Canonical list of tests to run (from tests/modern/)
     testFiles = {
         'test_PhysicalConstants.m',
-        'test_RayTracing.m',
         'test_GridUtils.m',
         'test_FFTUtils.m',
-        'test_AnalysisUtils.m',
         'test_GaussianParameters.m',
-        'test_GaussianBeam.m',
         'test_HermiteParameters.m',
-        'test_HermiteBeam.m',
         'test_LaguerreParameters.m',
-        'test_LaguerreBeam.m',
         'test_ElegantHermiteParameters.m',
-        'test_ElegantHermiteBeam.m',
         'test_ElegantLaguerreParameters.m',
-        'test_ElegantLaguerreBeam.m'
+        'test_GaussianBeam.m',
+        'test_HermiteBeam.m',
+        'test_LaguerreBeam.m',
+        'test_ElegantHermiteBeam.m',
+        'test_ElegantLaguerreBeam.m',
+        'test_HankelLaguerre.m',
+        'test_CylindricalRay.m',
+        'test_OpticalRay.m',
+        'test_AnalysisUtils.m',
+        'test_BeamFactory.m',
+        'test_Propagators.m',
+        'test_RayTracing.m',
+        fullfile(testDir, 'legacy_compat', 'test_HankelCompatibility.m')
     };
     
     totalPassed = 0;
