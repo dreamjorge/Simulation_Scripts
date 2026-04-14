@@ -60,14 +60,14 @@ fftOps = FFTUtils(true, true);  % normalize=true, shift=true
 % Colormap for visualization
 mapgreen = AdvancedColormap('kgg',256,[0 100 255]/255);
 
-%% Gaussian Beam at z = 0
-GaussianBeamParameters = GaussianParameters(0, InitialWaist, Wavelength);
-[R, ~] = cart2pol(X, Y);
-GB = GaussianBeam(R, GaussianBeamParameters);
+%% Gaussian Beam at z = 0 (modern API)
+GB = BeamFactory.create('gaussian', InitialWaist, Wavelength);
+GaussianBeamParameters = GB.getParameters(0);
+field0 = GB.opticalField(X, Y, 0);
 
 % Plot field
 figure(1)
-plotOpticalField(X, Y, abs(GB.OpticalField).^2, mapgreen, 'microns');
+plotOpticalField(X, Y, abs(field0).^2, mapgreen, 'microns');
 plotCircle(0, 0, GaussianBeamParameters.InitialWaist);
 
 %% Compare old vs new FFT approach
@@ -81,7 +81,7 @@ plotCircle(0, 0, GaussianBeamParameters.InitialWaist);
 
 %% Example: Propagate beam using angular spectrum
 % Create initial field
-g0 = GB.OpticalField;
+g0 = field0;
 
 % Propagate to multiple z planes
 zPlanes = linspace(0, Dz, Nz);
