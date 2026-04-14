@@ -168,3 +168,7 @@ matlab -batch "run('tests/test_all.m')"
 
 - Kogelnik, H., & Li, T. (1966). Laser beams and resonators. *Applied Optics*.
 - Siegman, A. E. (1986). *Lasers*. University Science Books.
+
+## Migracion Legacy
+
+- Plan incremental (Strangler): `docs/migration/LEGACY_MIGRATION_PLAN.md`
