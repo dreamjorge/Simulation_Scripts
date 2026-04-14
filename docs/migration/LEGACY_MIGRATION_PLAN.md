@@ -88,7 +88,7 @@ Simulation_Scripts/
 - [x] `tests/test_all.m` and `tests/portable_runner.m` execute the same suite surface.
 - [x] Legacy aliases emit migration warning with replacement path.
 - [x] Plot API ownership defined (single modern entrypoint + legacy wrappers).
-- [ ] Migration notes added for users running historical scripts. (See below)
+- [x] Migration notes added for users running historical scripts. (See below)
 
 ## Risks and Mitigations
 
