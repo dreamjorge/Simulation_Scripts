@@ -8,23 +8,29 @@ function totalFailed = portable_runner()
     testDir = fileparts(mfilename('fullpath'));
     addpath(fullfile(testDir, '..', 'ParaxialBeams'));
     
-    % List of tests to run
+    % Canonical list of tests to run
     testFiles = {
         'test_PhysicalConstants.m',
-        'test_RayTracing.m',
         'test_GridUtils.m',
         'test_FFTUtils.m',
-        'test_AnalysisUtils.m',
         'test_GaussianParameters.m',
-        'test_GaussianBeam.m',
         'test_HermiteParameters.m',
-        'test_HermiteBeam.m',
         'test_LaguerreParameters.m',
-        'test_LaguerreBeam.m',
         'test_ElegantHermiteParameters.m',
-        'test_ElegantHermiteBeam.m',
         'test_ElegantLaguerreParameters.m',
-        'test_ElegantLaguerreBeam.m'
+        'test_GaussianBeam.m',
+        'test_HermiteBeam.m',
+        'test_LaguerreBeam.m',
+        'test_ElegantHermiteBeam.m',
+        'test_ElegantLaguerreBeam.m',
+        'test_HankelLaguerre.m',
+        'test_HankelCompatibility.m',
+        'test_CylindricalRay.m',
+        'test_OpticalRay.m',
+        'test_AnalysisUtils.m',
+        'test_BeamFactory.m',
+        'test_Propagators.m',
+        'test_RayTracing.m'
     };
     
     totalPassed = 0;
