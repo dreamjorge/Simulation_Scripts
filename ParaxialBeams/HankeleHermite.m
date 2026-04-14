@@ -14,6 +14,14 @@ classdef HankeleHermite
 
     methods
         function obj = HankeleHermite(x, y, hermiteParameters, hankelType)
+            % Deprecated: Use HankelHermite instead.
+            % This alias will be removed in a future release.
+            persistent warnIssued
+            if isempty(warnIssued)
+                warning('HankeleHermite is deprecated. Use HankelHermite instead. See docs/migration/LEGACY_MIGRATION_PLAN.md');
+                warnIssued = true;
+            end
+
             if nargin == 0
                 obj.HankelType = 11;
                 obj.OpticalField = [];

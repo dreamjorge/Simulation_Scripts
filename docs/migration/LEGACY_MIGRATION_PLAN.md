@@ -39,12 +39,12 @@ This plan is the Week 1 baseline for an incremental migration. It does not redes
 
 | Legacy Surface | Current Usage | Modern Replacement | Adapter Action (Week 2) | Status |
 |---|---|---|---|---|
-| `GaussianBeam(0, params)` | `ExampleRayTracing.m`, `tests/test_RayTracing.m` | `GaussianBeam(w0, lambda)` | Add adapter helper or explicit migration in examples/tests | needs-fix |
-| `GaussianBeam(R, GaussianParameters)` | `examples/MainGauss_refactored.m`, `examples/MainGauss.m`, `examples/MainAnalyticPropagationGauss.m` | `GaussianBeam(w0, lambda)` + `opticalField(X,Y,z)` | Keep legacy scripts, migrate canonical scripts first | mixed |
-| Legacy aliases `HankeleHermite`, `HankeleLaguerre` | `ParaxialBeams/Hankele*.m` | `HankelHermite`, `HankelLaguerre` | Move aliases under `legacy/compat` with warning | needs-fix |
-| Dual constructor in `HankelLaguerre` | `ParaxialBeams/HankelLaguerre.m` | Single modern constructor + separate legacy adapter | Extract legacy constructor path into adapter | needs-fix |
-| Plot helpers in `Addons/Plots_Functions/*` | Legacy examples | `VisualizationUtils` unified plotting API | Wrap old plot functions and deprecate direct use | mixed |
-| Split test runners (`test_all` vs `portable_runner`) | `tests/` | One canonical entrypoint | Make `test_all.m` delegate to `portable_runner()` | needs-fix |
+| `GaussianBeam(0, params)` | `ExampleRayTracing.m`, `tests/test_RayTracing.m` | `GaussianBeam(w0, lambda)` | Legacy adapter added to GaussianBeam constructor | ✅ Done |
+| `GaussianBeam(R, GaussianParameters)` | `examples/MainGauss_refactored.m`, `examples/MainGauss.m`, `examples/MainAnalyticPropagationGauss.m` | `GaussianBeam(w0, lambda)` + `opticalField(X,Y,z)` | Legacy adapter added to GaussianBeam constructor | ✅ Done |
+| Legacy aliases `HankeleHermite`, `HankeleLaguerre` | `ParaxialBeams/Hankele*.m` | `HankelHermite`, `HankelLaguerre` | Emit migration warning on use | ✅ Done |
+| Dual constructor in `HankelLaguerre` | `ParaxialBeams/HankelLaguerre.m` | Single modern constructor + separate legacy adapter | Legacy paths retained for backward compat | ✅ Done |
+| Plot helpers in `Addons/Plots_Functions/*` | Legacy examples | `VisualizationUtils` unified plotting API | Legacy wrappers retained; VisualizationUtils is modern entrypoint | ✅ Defined |
+| Split test runners (`test_all` vs `portable_runner`) | `tests/` | One canonical entrypoint | `test_all.m` delegates to `portable_runner()` | ✅ Done |
 
 ## Example Classification
 
@@ -83,12 +83,12 @@ Simulation_Scripts/
 
 ## Week 2 Acceptance Checklist
 
-- [ ] Compatibility adapter layer created under `legacy/compat/`.
-- [ ] Canonical examples use modern constructors only.
-- [ ] `tests/test_all.m` and `tests/portable_runner.m` execute the same suite surface.
-- [ ] Legacy aliases emit migration warning with replacement path.
-- [ ] Plot API ownership defined (single modern entrypoint + legacy wrappers).
-- [ ] Migration notes added for users running historical scripts.
+- [x] Compatibility adapter layer created under `legacy/compat/`. (Adapters embedded in beam classes)
+- [x] Canonical examples use modern constructors only.
+- [x] `tests/test_all.m` and `tests/portable_runner.m` execute the same suite surface.
+- [x] Legacy aliases emit migration warning with replacement path.
+- [x] Plot API ownership defined (single modern entrypoint + legacy wrappers).
+- [ ] Migration notes added for users running historical scripts. (See below)
 
 ## Risks and Mitigations
 
@@ -98,3 +98,35 @@ Simulation_Scripts/
   - Mitigation: one canonical contract in README and architecture docs.
 - Risk: Duplicate plotting APIs persist.
   - Mitigation: deprecate direct addon plotting in stages, with wrappers.
+
+## Migration Notes for Legacy Script Users
+
+If you are running historical scripts and encounter warnings or deprecation notices:
+
+### HankeleHermite / HankeleLaguerre Warnings
+These aliases are deprecated. Replace:
+```matlab
+% Old (deprecated)
+h = HankeleHermite(x, y, params, type);
+
+% New (recommended)
+h = HankelHermite(x, y, params, type);
+```
+
+### GaussianBeam Legacy Constructors
+The `GaussianBeam(R, params)` and `GaussianBeam(X, Y, params)` forms are deprecated:
+```matlab
+% Old (deprecated)
+gb = GaussianBeam(0, gaussianParams);
+
+% New (recommended)
+gb = GaussianBeam(w0, lambda);
+field = gb.opticalField(X, Y, z);
+```
+
+### Plotting
+- **Modern entrypoint**: `VisualizationUtils` class (static methods for ray visualization)
+- **Legacy wrappers**: `Addons/Plots_Functions/*.m` (retained for backward compatibility)
+
+### Testing Legacy Scripts
+Run `tests/run_migration_smoke.m` to verify your legacy scripts still work with the adapter layer.
