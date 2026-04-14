@@ -48,7 +48,10 @@ function totalFailed = portable_runner()
         'test_BeamFactory.m',
         'test_Propagators.m',
         'test_RayTracing.m',
-        fullfile(testDir, 'legacy_compat', 'test_HankelCompatibility.m')
+        fullfile(testDir, 'legacy_compat', 'test_HankelCompatibility.m'),
+        fullfile(testDir, 'legacy_compat', 'test_LegacyBeamConstructors.m'),
+        fullfile(testDir, 'legacy_compat', 'test_HankelAliasStaticDelegation.m'),
+        fullfile(testDir, 'legacy_compat', 'test_HankelAliasEdgeCases.m')
     };
     
     totalPassed = 0;

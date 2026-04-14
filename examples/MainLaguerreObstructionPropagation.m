@@ -2,10 +2,11 @@
 
 %%          Script of Laguerre Beam (properties and propagation)
 % adding path for classes and functions
-addpath(fullfile('ParaxialBeams'))
-addpath(fullfile('ParaxialBeams', 'Addons'))
-addpath(fullfile('ParaxialBeams', 'Addons', 'export_fig-master'))
-addpath(fullfile('ParaxialBeams', 'Addons', 'Plots_Functions'))
+repoRoot = fileparts(fileparts(mfilename('fullpath')));
+addpath(repoRoot);
+setpaths();
+addpath(fullfile(repoRoot, 'ParaxialBeams', 'Addons', 'export_fig-master'));
+addpath(fullfile(repoRoot, 'ParaxialBeams', 'Addons', 'Plots_Functions'));
 
 % video
 GenerateVideo = 'YES';
