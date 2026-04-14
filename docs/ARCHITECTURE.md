@@ -88,9 +88,9 @@ Every `ParaxialBeam` subclass MUST implement:
 ```
 ┌──────────────────────────────────────────────────────────────────────┐
 │                         User Script                                   │
-│   examples/MainGauss_refactored.m, MainMultiMode.m, etc.             │
+│   examples/canonical/MainGauss_refactored.m, etc.                    │
 └──────────────────────────────┬───────────────────────────────────────┘
-                               │ addpath ParaxialBeams
+                               │ setpaths / addpath src + ParaxialBeams
                                ▼
 ┌──────────────────────────────────────────────────────────────────────┐
 │                         BeamFactory                                   │
@@ -141,39 +141,47 @@ Every `ParaxialBeam` subclass MUST implement:
 
 ```
 Simulation_Scripts/
+├── src/
+│   ├── beams/
+│   │   ├── ParaxialBeam.m        ← Abstract base (contract)
+│   │   ├── GaussianBeam.m
+│   │   ├── HermiteBeam.m
+│   │   ├── LaguerreBeam.m
+│   │   ├── ElegantHermiteBeam.m
+│   │   ├── ElegantLaguerreBeam.m
+│   │   └── HankelLaguerre.m
+│   ├── parameters/
+│   │   ├── GaussianParameters.m
+│   │   ├── HermiteParameters.m
+│   │   ├── LaguerreParameters.m
+│   │   ├── ElegantHermiteParameters.m
+│   │   └── ElegantLaguerreParameters.m
+│   ├── propagation/
+│   │   ├── field/
+│   │   │   ├── IPropagator.m         ← Strategy interface
+│   │   │   ├── FFTPropagator.m
+│   │   │   └── AnalyticPropagator.m
+│   │   └── rays/
+│   │       ├── RayTracePropagator.m
+│   │       ├── OpticalRay.m
+│   │       ├── CylindricalRay.m
+│   │       ├── RayBundle.m
+│   │       └── RayTracer.m
+│   └── visualization/
+│       └── VisualizationUtils.m
 ├── ParaxialBeams/
-│   ├── ParaxialBeam.m        ← Abstract base (contract)
-│   ├── GaussianBeam.m
-│   ├── HermiteBeam.m
-│   ├── LaguerreBeam.m
-│   ├── ElegantHermiteBeam.m
-│   ├── ElegantLaguerreBeam.m
-│   ├── HankelLaguerre.m
-│   ├── GaussianParameters.m
-│   ├── HermiteParameters.m
-│   ├── LaguerreParameters.m
-│   ├── ElegantHermiteParameters.m
-│   ├── ElegantLaguerreParameters.m
-│   ├── IPropagator.m         ← Strategy interface
-│   ├── FFTPropagator.m
-│   ├── AnalyticPropagator.m
-│   ├── RayTracePropagator.m
 │   ├── BeamFactory.m         ← Factory
 │   ├── PhysicalConstants.m
 │   ├── GridUtils.m
 │   ├── FFTUtils.m
 │   ├── AnalysisUtils.m
 │   ├── PolynomialUtils.m
-│   ├── VisualizationUtils.m
-│   ├── OpticalRay.m
-│   ├── CylindricalRay.m
-│   ├── RayBundle.m
-│   ├── RayTracer.m
 │   └── Addons/               ← Helper functions
 ├── examples/                  ← Usage examples
-│   ├── MainGauss_refactored.m  %% canonical
-│   ├── MainMultiMode.m         %% canonical
-│   ├── ExampleRayTracing.m      %% canonical
+│   ├── canonical/
+│   │   ├── MainGauss_refactored.m
+│   │   ├── MainMultiMode.m
+│   │   └── ExampleRayTracing.m
 │   └── ... (many legacy scripts)
 ├── tests/                     ← Test suite (~380 tests)
 ├── docs/

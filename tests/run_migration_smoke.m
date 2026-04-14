@@ -5,8 +5,8 @@ scriptPath = fileparts(mfilename('fullpath'));
 repoRoot = fullfile(scriptPath, '..');
 
 examplesToRun = {
-    fullfile(repoRoot, 'examples', 'MainGauss_refactored.m')
-    fullfile(repoRoot, 'examples', 'MainMultiMode.m')
+    fullfile(repoRoot, 'examples', 'canonical', 'MainGauss_refactored.m')
+    fullfile(repoRoot, 'examples', 'canonical', 'MainMultiMode.m')
 };
 
 fprintf('=== Migration Smoke Runner ===\n\n');

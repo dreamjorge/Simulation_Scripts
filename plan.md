@@ -119,9 +119,9 @@ git commit -m "docs: document public beam api contract"
 ### Task 3: Classify Canonical Examples
 
 **Files:**
-- Reference: `examples/MainGauss_refactored.m`
-- Reference: `examples/MainMultiMode.m`
-- Reference: `ExampleRayTracing.m`
+- Reference: `examples/canonical/MainGauss_refactored.m`
+- Reference: `examples/canonical/MainMultiMode.m`
+- Reference: `examples/canonical/ExampleRayTracing.m`
 - Modify: `README.md`
 - Modify: `plan.md`
 
@@ -389,9 +389,9 @@ git commit -m "docs: define post-merge redesign track"
 
 | File | Tier | Reason | Action |
 |------|------|--------|--------|
-| MainGauss_refactored.m | canonical | Ejecutable, usa API moderna, bien documentado | Mantener |
-| MainMultiMode.m | canonical | Multi-mode demo, usa BeamFactory | Mantener |
-| ExampleRayTracing.m | canonical | Ray tracing demo completo | Mantener |
+| examples/canonical/MainGauss_refactored.m | canonical | Ejecutable, usa API moderna, bien documentado | Mantener |
+| examples/canonical/MainMultiMode.m | canonical | Multi-mode demo, usa BeamFactory | Mantener |
+| examples/canonical/ExampleRayTracing.m | canonical | Ray tracing demo completo | Mantener |
 | MainGauss.m | legacy | Old API, en examples/ por tradición | Mantener sin cambios |
 | MainHermite.m | legacy | Scripts históricos de thesis | Mantener sin cambios |
 | MainLaguerre*.m | legacy | Scripts específicos de investigación | Mantener sin cambios |

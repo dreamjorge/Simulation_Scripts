@@ -39,8 +39,8 @@ This plan is the Week 1 baseline for an incremental migration. It does not redes
 
 | Legacy Surface | Current Usage | Modern Replacement | Adapter Action (Week 2) | Status |
 |---|---|---|---|---|
-| `GaussianBeam(0, params)` | `ExampleRayTracing.m`, `tests/test_RayTracing.m` | `GaussianBeam(w0, lambda)` | Legacy adapter added to GaussianBeam constructor | ✅ Done |
-| `GaussianBeam(R, GaussianParameters)` | `examples/MainGauss_refactored.m`, `examples/MainGauss.m`, `examples/MainAnalyticPropagationGauss.m` | `GaussianBeam(w0, lambda)` + `opticalField(X,Y,z)` | Legacy adapter added to GaussianBeam constructor | ✅ Done |
+| `GaussianBeam(0, params)` | `examples/canonical/ExampleRayTracing.m`, `tests/modern/test_RayTracing.m` | `GaussianBeam(w0, lambda)` | Legacy adapter added to GaussianBeam constructor | ✅ Done |
+| `GaussianBeam(R, GaussianParameters)` | `examples/canonical/MainGauss_refactored.m`, `examples/MainGauss.m`, `examples/MainAnalyticPropagationGauss.m` | `GaussianBeam(w0, lambda)` + `opticalField(X,Y,z)` | Legacy adapter added to GaussianBeam constructor | ✅ Done |
 | Legacy aliases `HankeleHermite`, `HankeleLaguerre` | `ParaxialBeams/Hankele*.m` | `HankelHermite`, `HankelLaguerre` | Emit migration warning on use | ✅ Done |
 | Dual constructor in `HankelLaguerre` | `ParaxialBeams/HankelLaguerre.m` | Single modern constructor + separate legacy adapter | Legacy paths retained for backward compat | ✅ Done |
 | Plot helpers in `Addons/Plots_Functions/*` | Legacy examples | `VisualizationUtils` unified plotting API | Legacy wrappers retained; VisualizationUtils is modern entrypoint | ✅ Defined |
@@ -50,9 +50,9 @@ This plan is the Week 1 baseline for an incremental migration. It does not redes
 
 ### Canonical (entrypoint for new users)
 
-- `examples/MainGauss_refactored.m` - uses modern API ✅
-- `examples/MainMultiMode.m` - uses modern API ✅
-- `ExampleRayTracing.m` - migrated to modern API ✅
+- `examples/canonical/MainGauss_refactored.m` - uses modern API ✅
+- `examples/canonical/MainMultiMode.m` - uses modern API ✅
+- `examples/canonical/ExampleRayTracing.m` - migrated to modern API ✅
 
 ### Legacy (kept for reproducibility)
 
