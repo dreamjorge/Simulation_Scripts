@@ -60,7 +60,7 @@ All other scripts in `examples/` are legacy research or historical variants and 
 
 Known legacy-marked scripts: 32
 
-## Current Structure (post-Week 6)
+## Current Structure (post-Week 7)
 
 ```text
 Simulation_Scripts/
@@ -79,6 +79,7 @@ Simulation_Scripts/
   tests/
     modern/          % ✅ Modern API tests
     legacy_compat/   % ✅ Legacy compatibility tests
+  +paraxial/         % 🔜 Future: MATLAB package structure (placeholder)
 ```
 
 ## Week 2 Acceptance Checklist
@@ -125,10 +126,16 @@ Simulation_Scripts/
 - [x] Move `test_HankelCompatibility.m` to `tests/legacy_compat/`.
 - [x] Update `portable_runner.m` for new test structure.
 
-## Week 7: Package Migration (Future)
+## Week 7: Package Migration (Future Work)
 
-- [ ] Prepare `+paraxial/` package structure.
-- [ ] This is the final goal but is explicitly out of scope for current migration.
+- [x] Create `+paraxial/` package directory structure.
+- [x] Add `+paraxial/README.md` with migration notes and planned structure.
+- [ ] **Future**: Migrate classes from `src/` to `+paraxial/` package.
+- [ ] **Future**: Update imports in examples and tests.
+- [ ] **Future**: Deprecate `src/` once `+paraxial/` is stable.
+
+**Note**: Package migration is explicitly **out of scope** for current migration work.
+Full package migration will be done in a future phase after `src/` is stable.
 
 ## Risks and Mitigations
 
