@@ -36,30 +36,55 @@ classdef ElegantLaguerreBeam < ParaxialBeam
         InitialWaist    % Beam waist at z = 0 (m)
         l               % Topological charge (azimuthal index)
         p               % Radial order
+        OpticalField    % Legacy snapshot field compatibility
     end
 
     methods
-        function obj = ElegantLaguerreBeam(w0, lambda, l, p)
+        function obj = ElegantLaguerreBeam(arg1, arg2, varargin)
             % Constructor
-            % w0:     initial beam waist at z = 0 (m)
-            % lambda: wavelength (m)
-            % l:      topological charge (default 0)
-            % p:      radial order (default 0)
+            % Modern API:
+            %   ElegantLaguerreBeam(w0, lambda, l, p)
+            %
+            % Legacy-compatible API:
+            %   ElegantLaguerreBeam(R, Theta, laguerreParams)
 
-            if nargin > 0
+            if nargin == 0
+                obj = obj@ParaxialBeam();
+                obj.l = 0;
+                obj.p = 0;
+                obj.OpticalField = [];
+                return;
+            end
+
+            if nargin == 3 && (isa(varargin{1}, 'ElegantLaguerreParameters') || isa(varargin{1}, 'LaguerreParameters'))
+                params = varargin{1};
+                obj = obj@ParaxialBeam(params.Lambda);
+                obj.InitialWaist = params.InitialWaist;
+                obj.l = params.l;
+                obj.p = params.p;
+                obj.OpticalField = obj.computeField(arg1, arg2, params.zCoordinate);
+                return;
+            end
+
+            if nargin >= 2
+                w0 = arg1;
+                lambda = arg2;
                 obj = obj@ParaxialBeam(lambda);
                 obj.InitialWaist = w0;
-                if nargin >= 4
-                    obj.l = l;
-                    obj.p = p;
+
+                if numel(varargin) >= 2
+                    obj.l = varargin{1};
+                    obj.p = varargin{2};
                 else
                     obj.l = 0;
                     obj.p = 0;
                 end
+                obj.OpticalField = [];
             else
                 obj = obj@ParaxialBeam();
                 obj.l = 0;
                 obj.p = 0;
+                obj.OpticalField = [];
             end
         end
 
