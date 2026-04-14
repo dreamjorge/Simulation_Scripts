@@ -46,10 +46,11 @@ Simulation_Scripts/
 │   ├── PolynomialUtils.m
 │   ├── BeamFactory.m
 │   └── Addons/
-├── examples/               % Usage examples
-│   ├── MainGauss_refactored.m  %% canonical
-│   ├── MainMultiMode.m         %% canonical
-│   ├── ExampleRayTracing.m      %% canonical
+├── examples/
+│   ├── canonical/          % ✅ Canonical examples for new users
+│   │   ├── MainGauss_refactored.m
+│   │   ├── MainMultiMode.m
+│   │   └── ExampleRayTracing.m
 │   └── ... (legacy examples)
 ├── tests/                  % Test suite (~380 tests)
 ├── setpaths.m              % Path initialization utility
@@ -124,13 +125,13 @@ lg = BeamFactory.create('laguerre', 100e-6, 632.8e-9, 'l', 1, 'p', 0);
 
 ## Canonical Examples
 
-Ejemplos recomendados para nuevos usuarios:
+Ejemplos recomendados para nuevos usuarios (en `examples/canonical/`):
 
 | File | Description |
 |------|-------------|
-| `examples/MainGauss_refactored.m` | Gaussian beam propagation |
-| `examples/MainMultiMode.m` | Multi-mode Hermite/Laguerre |
-| `ExampleRayTracing.m` | Ray tracing visualization |
+| `examples/canonical/MainGauss_refactored.m` | Gaussian beam propagation |
+| `examples/canonical/MainMultiMode.m` | Multi-mode Hermite/Laguerre |
+| `examples/canonical/ExampleRayTracing.m` | Ray tracing visualization |
 
 ## Constantes y Utilidades
 

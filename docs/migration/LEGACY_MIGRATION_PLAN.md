@@ -60,7 +60,7 @@ All other scripts in `examples/` are legacy research or historical variants and 
 
 Known legacy-marked scripts: 32
 
-## Current Structure (post-Week 4)
+## Current Structure (post-Week 5)
 
 ```text
 Simulation_Scripts/
@@ -76,7 +76,7 @@ Simulation_Scripts/
     compat/          % ✅ Legacy aliases (HankeleHermite, HankeleLaguerre)
     examples/        # TODO: Week 5
   examples/
-    canonical/       # TODO: Week 5
+    canonical/       % ✅ Canonical examples for new users
   tests/
     modern/          # TODO: Week 6
     legacy_compat/
@@ -112,8 +112,11 @@ Simulation_Scripts/
 
 ## Week 5: Canonical Examples Folder
 
-- [ ] Move canonical examples to `examples/canonical/`.
-- [ ] Update README with new examples path.
+- [x] Create `examples/canonical/` directory.
+- [x] Move `MainGauss_refactored.m` to `examples/canonical/`.
+- [x] Move `MainMultiMode.m` to `examples/canonical/`.
+- [x] Move `ExampleRayTracing.m` to `examples/canonical/`.
+- [x] Update README with new examples path.
 
 ## Week 6: Test Folder Reorganization
 
