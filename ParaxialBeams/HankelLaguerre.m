@@ -39,6 +39,7 @@ classdef HankelLaguerre < ParaxialBeam
         l               % Topological charge (azimuthal index)
         p               % Radial order
         HankelType      % 1 = H^(1) outward, 2 = H^(2) inward
+        OpticalFieldLaguerre % Legacy compatibility field container
     end
 
     methods
@@ -49,27 +50,48 @@ classdef HankelLaguerre < ParaxialBeam
             % l:          topological charge (default 0)
             % p:          radial order (default 0)
             % hankelType: 1 = H^(1) [default], 2 = H^(2)
+            %
+            % Legacy constructor (also supported):
+            %   HankelLaguerre(r, theta, laguerreParameters, hankelType)
+            % Produces .OpticalFieldLaguerre for legacy scripts.
 
             if nargin > 0
-                obj = obj@ParaxialBeam(lambda);
-                obj.InitialWaist = w0;
-                if nargin >= 4
-                    obj.l = l;
-                    obj.p = p;
+                if nargin >= 4 && isa(l, 'LaguerreParameters')
+                    rCoordinate = w0;
+                    thetaCoordinate = lambda;
+                    laguerreParams = l;
+                    obj = obj@ParaxialBeam(laguerreParams.Lambda);
+                    obj.InitialWaist = laguerreParams.InitialWaist;
+                    obj.l = laguerreParams.l;
+                    obj.p = laguerreParams.p;
+                    obj.HankelType = p;
+                    obj.OpticalFieldLaguerre = hankelField(rCoordinate, thetaCoordinate, ...
+                                                           laguerreParams.InitialWaist, laguerreParams.Lambda, ...
+                                                           laguerreParams.l, laguerreParams.p, ...
+                                                           laguerreParams.zCoordinate, obj.HankelType);
                 else
-                    obj.l = 0;
-                    obj.p = 0;
-                end
-                if nargin >= 5
-                    obj.HankelType = hankelType;
-                else
-                    obj.HankelType = 1;
+                    obj = obj@ParaxialBeam(lambda);
+                    obj.InitialWaist = w0;
+                    if nargin >= 4
+                        obj.l = l;
+                        obj.p = p;
+                    else
+                        obj.l = 0;
+                        obj.p = 0;
+                    end
+                    if nargin >= 5
+                        obj.HankelType = hankelType;
+                    else
+                        obj.HankelType = 1;
+                    end
+                    obj.OpticalFieldLaguerre = [];
                 end
             else
                 obj = obj@ParaxialBeam();
                 obj.l          = 0;
                 obj.p          = 0;
                 obj.HankelType = 1;
+                obj.OpticalFieldLaguerre = [];
             end
         end
 
@@ -93,6 +115,78 @@ classdef HankelLaguerre < ParaxialBeam
         function name = beamName(obj)
             % beamName - Returns identifier string, e.g. 'hankel1_laguerre_2_1'.
             name = sprintf('hankel%d_laguerre_%d_%d', obj.HankelType, obj.l, obj.p);
+        end
+    end
+
+    methods (Static)
+        function Rays = getPropagateCylindricalRays(Rays, TotalRays, r, th, difr, LParametersZi, LParametersZ, HankelType)
+            % getPropagateCylindricalRays - Legacy-compatible ray propagation API.
+            tempdr = num2cell(difr);
+            [dr, dtheta, dz] = deal(tempdr{:});
+
+            for point_index = 1:TotalRays
+                ri = Rays.rCoordinate(point_index) + (1 ./ Rays.zrSlope(point_index)) * dz;
+                thi = Rays.thetaCoordinate(point_index) + (1 ./ Rays.zthSlope(point_index)) * dz;
+                zi = Rays.zCoordinate(point_index) + dz;
+
+                rayHankelType = HankelType;
+                if (ri < 0) && (HankelType == 2)
+                    rayHankelType = 1;
+                    ri = abs(ri);
+                end
+
+                Rays.rCoordinate(point_index) = ri;
+                Rays.thetaCoordinate(point_index) = thi;
+                Rays.zCoordinate(point_index) = zi;
+                Rays.hankelType(point_index) = rayHankelType;
+
+                [xi, yi] = pol2cart(thi, ri);
+                if (HankelType == 2) && (rayHankelType == 1)
+                    xi = -xi;
+                    yi = -yi;
+                end
+                Rays.xCoordinate(point_index) = xi;
+                Rays.yCoordinate(point_index) = yi;
+
+                HLr = HankelLaguerre(r, thi, LParametersZi, rayHankelType);
+                HLth = HankelLaguerre(ri, th, LParametersZi, rayHankelType);
+                HLz = HankelLaguerre(ri, thi, LParametersZ, rayHankelType);
+
+                fr = unwrap(angle(HLr.OpticalFieldLaguerre));
+                fth = unwrap(angle(HLth.OpticalFieldLaguerre));
+                fz = unwrap(angle(HLz.OpticalFieldLaguerre));
+
+                [zrSlope, zthSlope, rthSlope] = HankelLaguerre.gradientCylindrical(fr, fth, fz, LParametersZi.k, dr, dtheta, dz, ri, thi, zi);
+                Rays.zrSlope(point_index) = zrSlope;
+                Rays.zthSlope(point_index) = zthSlope;
+                Rays.rthSlope(point_index) = rthSlope;
+            end
+        end
+    end
+
+    methods (Static, Access = private)
+        function [zrSlope, zthSlope, rthSlope] = gradientCylindrical(fr, ftheta, fz, k, dr, dtheta, dz, r, theta, z)
+            gr = gradient(fr) ./ dr;
+            gtheta = (1 ./ r) .* (gradient(ftheta) ./ dtheta);
+            gz = gradient(fz) ./ dz + k;
+
+            n = size(gr, 2);
+            idxZ = HankelLaguerre.clampIndex(floor(z / dz + 1), numel(gz));
+            idxR = HankelLaguerre.clampIndex(n / 2 + 1 + floor(r / dr), numel(gr));
+            idxTheta = HankelLaguerre.clampIndex(n / 2 + 1 + floor(theta / dtheta), numel(gtheta));
+
+            zrSlope = gz(idxZ) / gr(idxR);
+            zthSlope = gz(idxZ) / gtheta(idxTheta);
+            rthSlope = gr(idxR) / gtheta(idxTheta);
+        end
+
+        function idx = clampIndex(raw, maxSize)
+            idx = floor(raw);
+            if idx < 1
+                idx = 1;
+            elseif idx > maxSize
+                idx = maxSize;
+            end
         end
     end
 end
