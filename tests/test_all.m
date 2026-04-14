@@ -1,55 +1,14 @@
 % Compatible with GNU Octave and MATLAB
-% Test Suite Runner - Simulation_Scripts (CI & Local Wrapper)
-% Uses portable_runner.m to ensure Octave 11 and MATLAB compatibility.
+% Test Suite Runner - Simulation_Scripts (wrapper)
+% Delegates to portable_runner() as the canonical implementation.
 
 scriptPath = fileparts(mfilename('fullpath'));
-addpath(fullfile(scriptPath, '..', 'ParaxialBeams'));
-addpath(scriptPath);
 
-fprintf('=== Simulation_Scripts Test Suite (Portable) ===\n\n');
-
-
-% modular test list from utility-classes
-testFiles = {
-    'test_PhysicalConstants.m'
-    'test_GridUtils.m'
-    'test_FFTUtils.m'
-    'test_GaussianParameters.m'
-    'test_HermiteParameters.m'
-    'test_LaguerreParameters.m'
-    'test_ElegantHermiteParameters.m'
-    'test_ElegantLaguerreParameters.m'
-    'test_GaussianBeam.m'
-    'test_HermiteBeam.m'
-    'test_LaguerreBeam.m'
-    'test_ElegantHermiteBeam.m'
-    'test_ElegantLaguerreBeam.m'
-    'test_HankelLaguerre.m'
-    'test_HankelCompatibility.m'
-    'test_CylindricalRay.m'
-    'test_OpticalRay.m'
-    'test_AnalysisUtils.m'
-    'test_BeamFactory.m'
-    'test_Propagators.m'
-};
+fprintf('=== Simulation_Scripts Test Suite (Portable Wrapper) ===\n\n');
 
 try
-    % Uses the modular runner logic
-    scriptPath = fileparts(mfilename('fullpath'));
-    addpath(scriptPath);
-    
-    total_failed = 0;
-    for i = 1:numel(testFiles)
-        testFile = testFiles{i};
-        fprintf('--- Running %s ---\n', testFile);
-        try
-            run(fullfile(scriptPath, testFile));
-        catch ME
-            fprintf('  FAIL: %s\n', ME.message);
-            total_failed = total_failed + 1;
-        end
-    end
-    
+    total_failed = portable_runner();
+
     if total_failed == 0
         fprintf('\n=== ÉXITO: Todos los tests pasaron ===\n');
     else

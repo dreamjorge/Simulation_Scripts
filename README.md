@@ -8,41 +8,52 @@ Scripts for simulation of optical beam propagation (Gaussian, Hermite-Gauss, Lag
 
 ```
 Simulation_Scripts/
-├── ParaxialBeams/           % Core library (27 .m files)
-│   ├── ParaxialBeam.m      % ⭐ Abstract base class
-│   ├── BeamFactory.m       % ⭐ Factory for beam creation
-│   ├── IPropagator.m      % ⭐ Strategy interface
-│   ├── GaussianBeam.m
-│   ├── HermiteBeam.m
-│   ├── LaguerreBeam.m
-│   ├── ElegantHermiteBeam.m
-│   ├── ElegantLaguerreBeam.m
-│   ├── HankelLaguerre.m
-│   ├── GaussianParameters.m
-│   ├── HermiteParameters.m
-│   ├── LaguerreParameters.m
-│   ├── ElegantHermiteParameters.m
-│   ├── ElegantLaguerreParameters.m
-│   ├── FFTPropagator.m     % Propagation via FFT
-│   ├── AnalyticPropagator.m
-│   ├── RayTracePropagator.m
+├── src/                        % Modern library (organized by responsibility)
+│   ├── beams/                  % Beam classes
+│   │   ├── ParaxialBeam.m      % ⭐ Abstract base class
+│   │   ├── GaussianBeam.m
+│   │   ├── HermiteBeam.m
+│   │   ├── LaguerreBeam.m
+│   │   ├── ElegantHermiteBeam.m
+│   │   ├── ElegantLaguerreBeam.m
+│   │   ├── HankelHermite.m
+│   │   ├── HankelLaguerre.m
+│   │   └── HankeleHermite.m, HankeleLaguerre.m (legacy aliases)
+│   ├── parameters/             % Beam parameter classes
+│   │   ├── GaussianParameters.m
+│   │   ├── HermiteParameters.m
+│   │   ├── LaguerreParameters.m
+│   │   ├── ElegantHermiteParameters.m
+│   │   └── ElegantLaguerreParameters.m
+│   ├── propagation/
+│   │   ├── field/              % Field-based propagation
+│   │   │   ├── IPropagator.m   % ⭐ Strategy interface
+│   │   │   ├── FFTPropagator.m
+│   │   │   └── AnalyticPropagator.m
+│   │   └── rays/                % Ray-based propagation
+│   │       ├── RayTracePropagator.m
+│   │       ├── RayBundle.m
+│   │       ├── RayTracer.m
+│   │       ├── OpticalRay.m
+│   │       └── CylindricalRay.m
+│   └── visualization/
+│       └── VisualizationUtils.m
+├── ParaxialBeams/              % Utilities
 │   ├── PhysicalConstants.m
 │   ├── GridUtils.m
 │   ├── FFTUtils.m
 │   ├── AnalysisUtils.m
 │   ├── PolynomialUtils.m
-│   ├── VisualizationUtils.m
-│   ├── OpticalRay.m
-│   ├── CylindricalRay.m
-│   ├── RayBundle.m
-│   ├── RayTracer.m
+│   ├── BeamFactory.m
 │   └── Addons/
-├── examples/               % Usage examples
-│   ├── MainGauss_refactored.m  %% canonical
-│   ├── MainMultiMode.m         %% canonical
-│   ├── ExampleRayTracing.m      %% canonical
-│   └── ...
+├── examples/
+│   ├── canonical/          % ✅ Canonical examples for new users
+│   │   ├── MainGauss_refactored.m
+│   │   ├── MainMultiMode.m
+│   │   └── ExampleRayTracing.m
+│   └── ... (legacy examples)
 ├── tests/                  % Test suite (~380 tests)
+├── setpaths.m              % Path initialization utility
 ├── docs/
 │   └── ARCHITECTURE.md    % Architecture documentation
 └── README.md
@@ -63,8 +74,12 @@ Every beam type inherits from `ParaxialBeam` and implements:
 ### MATLAB/Octave
 
 ```matlab
-addpath ParaxialBeams
-addpath ParaxialBeams\Addons
+% Option 1: Use setpaths() utility
+setpaths
+
+% Option 2: Add paths manually
+addpath('src/beams', 'src/parameters', 'src/propagation/field', 'src/propagation/rays', 'src/visualization');
+addpath('ParaxialBeams', 'ParaxialBeams/Addons');
 
 % Crear beam via Factory
 beam = BeamFactory.create('gaussian', 100e-6, 632.8e-9);
@@ -110,13 +125,13 @@ lg = BeamFactory.create('laguerre', 100e-6, 632.8e-9, 'l', 1, 'p', 0);
 
 ## Canonical Examples
 
-Ejemplos recomendados para nuevos usuarios:
+Ejemplos recomendados para nuevos usuarios (en `examples/canonical/`):
 
 | File | Description |
 |------|-------------|
-| `examples/MainGauss_refactored.m` | Gaussian beam propagation |
-| `examples/MainMultiMode.m` | Multi-mode Hermite/Laguerre |
-| `ExampleRayTracing.m` | Ray tracing visualization |
+| `examples/canonical/MainGauss_refactored.m` | Gaussian beam propagation |
+| `examples/canonical/MainMultiMode.m` | Multi-mode Hermite/Laguerre |
+| `examples/canonical/ExampleRayTracing.m` | Ray tracing visualization |
 
 ## Constantes y Utilidades
 
@@ -168,3 +183,7 @@ matlab -batch "run('tests/test_all.m')"
 
 - Kogelnik, H., & Li, T. (1966). Laser beams and resonators. *Applied Optics*.
 - Siegman, A. E. (1986). *Lasers*. University Science Books.
+
+## Migracion Legacy
+
+- Plan incremental (Strangler): `docs/migration/LEGACY_MIGRATION_PLAN.md`
