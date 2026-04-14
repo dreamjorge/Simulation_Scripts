@@ -60,7 +60,7 @@ All other scripts in `examples/` are legacy research or historical variants and 
 
 Known legacy-marked scripts: 32
 
-## Current Structure (post-Week 5)
+## Current Structure (post-Week 6)
 
 ```text
 Simulation_Scripts/
@@ -74,12 +74,11 @@ Simulation_Scripts/
   ParaxialBeams/    % Utilities (PhysicalConstants, GridUtils, FFTUtils, etc.)
   legacy/
     compat/          % ✅ Legacy aliases (HankeleHermite, HankeleLaguerre)
-    examples/        # TODO: Week 5
   examples/
     canonical/       % ✅ Canonical examples for new users
   tests/
-    modern/          # TODO: Week 6
-    legacy_compat/
+    modern/          % ✅ Modern API tests
+    legacy_compat/   % ✅ Legacy compatibility tests
 ```
 
 ## Week 2 Acceptance Checklist
@@ -120,8 +119,11 @@ Simulation_Scripts/
 
 ## Week 6: Test Folder Reorganization
 
-- [ ] Create `tests/modern/` for new tests.
-- [ ] Create `tests/legacy_compat/` for compatibility tests.
+- [x] Create `tests/modern/` directory.
+- [x] Move modern tests to `tests/modern/`.
+- [x] Create `tests/legacy_compat/` directory.
+- [x] Move `test_HankelCompatibility.m` to `tests/legacy_compat/`.
+- [x] Update `portable_runner.m` for new test structure.
 
 ## Week 7: Package Migration (Future)
 
