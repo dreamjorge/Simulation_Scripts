@@ -42,6 +42,7 @@ This plan is the Week 1 baseline for an incremental migration. It does not redes
 | `GaussianBeam(0, params)` | `examples/canonical/ExampleRayTracing.m`, `tests/modern/test_RayTracing.m` | `GaussianBeam(w0, lambda)` | Legacy adapter added to GaussianBeam constructor | ✅ Done |
 | `GaussianBeam(R, GaussianParameters)` | `examples/canonical/MainGauss_refactored.m`, `examples/MainGauss.m`, `examples/MainAnalyticPropagationGauss.m` | `GaussianBeam(w0, lambda)` + `opticalField(X,Y,z)` | Legacy adapter added to GaussianBeam constructor | ✅ Done |
 | Legacy aliases `HankeleHermite`, `HankeleLaguerre` | `ParaxialBeams/Hankele*.m` | `HankelHermite`, `HankelLaguerre` | Emit migration warning on use | ✅ Done |
+| Legacy alias static propagation API | Historical scripts using `Hankele*.getPropagate*` | `Hankel*.getPropagate*` | Regression tests assert exact delegation parity (normal + edge cases) | ✅ Done |
 | Dual constructor in `HankelLaguerre` | `ParaxialBeams/HankelLaguerre.m` | Single modern constructor + separate legacy adapter | Legacy paths retained for backward compat | ✅ Done |
 | Plot helpers in `Addons/Plots_Functions/*` | Legacy examples | `VisualizationUtils` unified plotting API | Legacy wrappers retained; VisualizationUtils is modern entrypoint | ✅ Defined |
 | Split test runners (`test_all` vs `portable_runner`) | `tests/` | One canonical entrypoint | `test_all.m` delegates to `portable_runner()` | ✅ Done |
@@ -109,6 +110,7 @@ Simulation_Scripts/
 - [x] Move legacy aliases (HankeleHermite, HankeleLaguerre) to `legacy/compat/`.
 - [x] Add `legacy/compat/README.md` with usage instructions.
 - [x] Update addpath references in legacy examples that use Hankele*.
+- [x] Add static alias delegation regression tests (`test_HankelAliasStaticDelegation`, `test_HankelAliasEdgeCases`).
 
 ## Week 5: Canonical Examples Folder
 
