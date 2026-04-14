@@ -3,8 +3,6 @@
 % Delegates to portable_runner() as the canonical implementation.
 
 scriptPath = fileparts(mfilename('fullpath'));
-addpath(fullfile(scriptPath, '..', 'ParaxialBeams'));
-addpath(scriptPath);
 
 fprintf('=== Simulation_Scripts Test Suite (Portable Wrapper) ===\n\n');
 
