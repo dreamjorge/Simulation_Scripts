@@ -44,6 +44,14 @@ run('tests/test_all.m')
 - GaussianBeam, HermiteBeam, LaguerreBeam
 - ElegantHermiteBeam, ElegantLaguerreBeam
 
+### Legacy Compatibility
+- `legacy_compat/test_HankelCompatibility.m`
+- `legacy_compat/test_LegacyBeamConstructors.m`
+- `legacy_compat/test_HankelAliasStaticDelegation.m`
+- `legacy_compat/test_HankelAliasEdgeCases.m`
+
+These suites ensure backward compatibility for historical scripts while modern APIs remain the canonical entrypoint.
+
 ### AnalysisUtils
 - **gradientRZ**: Calculate ray slope in r-z plane
   - Interior point calculation with 10x10 field slices
@@ -71,3 +79,14 @@ Tests follow consistent patterns:
 - Increment `passed` and `failed` counters
 - Tolerance: 1e-5 for physical values, 1e-10 for phase values
 - Octave/MATLAB compatible classdef syntax
+
+## Portable Runner
+
+`tests/portable_runner.m` is the canonical non-interactive runner used by `tests/test_all.m`.
+It executes both modern and legacy compatibility suites.
+
+For a faster legacy-only check during migration work:
+
+```matlab
+run('tests/legacy_compat/run_legacy_compat.m')
+```
