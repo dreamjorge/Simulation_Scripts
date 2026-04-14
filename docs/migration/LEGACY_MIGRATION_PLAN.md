@@ -108,7 +108,7 @@ Simulation_Scripts/
 - [x] Create `legacy/compat/` directory structure.
 - [x] Move legacy aliases (HankeleHermite, HankeleLaguerre) to `legacy/compat/`.
 - [x] Add `legacy/compat/README.md` with usage instructions.
-- [ ] Update addpath references in legacy examples that use Hankele*. (Low priority - can run without this)
+- [x] Update addpath references in legacy examples that use Hankele*.
 
 ## Week 5: Canonical Examples Folder
 
