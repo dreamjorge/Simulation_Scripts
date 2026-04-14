@@ -60,7 +60,7 @@ All other scripts in `examples/` are legacy research or historical variants and 
 
 Known legacy-marked scripts: 32
 
-## Current Structure (post-Week 3)
+## Current Structure (post-Week 4)
 
 ```text
 Simulation_Scripts/
@@ -72,9 +72,9 @@ Simulation_Scripts/
       rays/          % ✅ Ray propagation (RayTrace, RayBundle, etc.)
     visualization/   % ✅ VisualizationUtils
   ParaxialBeams/    % Utilities (PhysicalConstants, GridUtils, FFTUtils, etc.)
-  legacy/            # TODO: Week 4
-    compat/
-    examples/
+  legacy/
+    compat/          % ✅ Legacy aliases (HankeleHermite, HankeleLaguerre)
+    examples/        # TODO: Week 5
   examples/
     canonical/       # TODO: Week 5
   tests/
@@ -105,9 +105,10 @@ Simulation_Scripts/
 
 ## Week 4: Create legacy/compat Layer
 
-- [ ] Move legacy adapters to `legacy/compat/`.
-- [ ] Move legacy aliases (HankeleHermite, HankeleLaguerre) to `legacy/compat/`.
-- [ ] Update addpath references in legacy examples.
+- [x] Create `legacy/compat/` directory structure.
+- [x] Move legacy aliases (HankeleHermite, HankeleLaguerre) to `legacy/compat/`.
+- [x] Add `legacy/compat/README.md` with usage instructions.
+- [ ] Update addpath references in legacy examples that use Hankele*. (Low priority - can run without this)
 
 ## Week 5: Canonical Examples Folder
 

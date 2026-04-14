@@ -19,6 +19,9 @@ function totalFailed = portable_runner()
     addpath(fullfile(repoRoot, 'ParaxialBeams'));
     addpath(fullfile(repoRoot, 'ParaxialBeams', 'Addons'));
     
+    % Add legacy compatibility layer
+    addpath(fullfile(repoRoot, 'legacy', 'compat'));
+    
     % Canonical list of tests to run
     testFiles = {
         'test_PhysicalConstants.m',
