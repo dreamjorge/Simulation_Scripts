@@ -6,9 +6,9 @@ addpath('ParaxialBeams');
 % 1. Create a Gaussian Beam
 lambda = 632.8e-9;
 w0 = 100e-6;
-% NEW API: Use Parameters object
-params = GaussianParameters(0, w0, lambda);
-beam = GaussianBeam(0, params);
+% Modern API: Use BeamFactory or direct constructor
+beam = GaussianBeam(w0, lambda);
+params = beam.getParameters(0);
 zr = params.RayleighDistance;
 
 % 2. Create a Bundle of Rays (Concentric pattern)
