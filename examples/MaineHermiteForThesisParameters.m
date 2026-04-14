@@ -2,10 +2,11 @@
 % Ugalde-Ontiveros J.A. 
 %% add path for classes and functions
 clear all
-addpath(fullfile('ParaxialBeams'))
-addpath(fullfile('ParaxialBeams', 'Addons'))
-addpath(fullfile('ParaxialBeams', 'Addons', 'export_fig-master'))
-addpath(fullfile('ParaxialBeams', 'Addons', 'panel-2.14'))
+repoRoot = fileparts(fileparts(mfilename('fullpath')));
+addpath(repoRoot);
+setpaths();
+addpath(fullfile(repoRoot, 'ParaxialBeams', 'Addons', 'export_fig-master'));
+addpath(fullfile(repoRoot, 'ParaxialBeams', 'Addons', 'panel-2.14'));
 mapgreen = AdvancedColormap('kgg',256,[0 100 255]/255);  %color of beam
 GenerateVideo = 'NO';
 %% indices of Hermite Gaussian Beams 

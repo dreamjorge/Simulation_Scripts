@@ -27,6 +27,9 @@ function setpaths()
     addpath(fullfile(scriptPath, 'ParaxialBeams'));
     addpath(fullfile(scriptPath, 'ParaxialBeams', 'Addons'));
 
+    % Legacy compatibility aliases
+    addpath(fullfile(scriptPath, 'legacy', 'compat'));
+
     % Tests
     addpath(fullfile(scriptPath, 'tests'));
 
