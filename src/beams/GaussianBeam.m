@@ -35,7 +35,7 @@ classdef GaussianBeam < ParaxialBeam
             obj = obj@ParaxialBeam();
 
             % Determine parameters from input using static helper
-            [w0, lambda, legacyCoords, legacyZ] = GaussianBeam.parseArgs(arg1, arg2, varargin);
+            [w0, lambda, legacyCoords, legacyZ] = GaussianBeam.parseArgs(arg1, arg2, varargin{:});
 
             % Initialize parent class state
             if ~isempty(lambda)

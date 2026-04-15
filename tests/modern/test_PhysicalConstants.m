@@ -335,7 +335,7 @@ end
 % testWaveNumberMatrixInput
 lambda_mat = [532e-9 633e-9; 1064e-9 1550e-9];
 k_mat = PhysicalConstants.waveNumber(lambda_mat);
-if (all(all(k_mat > 0)) && size(k_mat) == size(lambda_mat))
+if (all(all(k_mat > 0)) && isequal(size(k_mat), size(lambda_mat)))
     fprintf('  PASS: waveNumber matrix input\n');
     passed = passed + 1;
 else

@@ -22,7 +22,7 @@ end
 
 % testCreateFreqGrid
 [Kx, Ky] = grid.createFreqGrid();
-if (size(Kx) == [Nx, Nx])
+if (isequal(size(Kx), [Nx, Nx]))
     fprintf('  PASS: createFreqGrid\n');
     passed = passed + 1;
 else
@@ -32,7 +32,7 @@ end
 
 % testMeshgrid2D
 [Xm, Ym] = GridUtils.meshgrid2D(32, 1e-3);
-if (size(Xm) == [32, 32])
+if (isequal(size(Xm), [32, 32]))
     fprintf('  PASS: meshgrid2D\n');
     passed = passed + 1;
 else
@@ -42,7 +42,7 @@ end
 
 % testFreqGrid
 [Kxf, Kyf] = GridUtils.freqGrid(32, 1e-3);
-if (size(Kxf) == [32, 32])
+if (isequal(size(Kxf), [32, 32]))
     fprintf('  PASS: freqGrid\n');
     passed = passed + 1;
 else
@@ -52,7 +52,7 @@ end
 
 % testPolarGrid
 [r, theta] = GridUtils.polarGrid(32, 1e-3);
-if (size(r) == [32, 32])
+if (isequal(size(r), [32, 32]))
     fprintf('  PASS: polarGrid\n');
     passed = passed + 1;
 else
@@ -175,7 +175,7 @@ end
 
 % testMeshgrid2DStaticValues
 [Xms, Yms] = GridUtils.meshgrid2D(4, 1e-3);
-if (size(Xms) == [4, 4] && size(Yms) == [4, 4])
+if (isequal(size(Xms), [4, 4]) && isequal(size(Yms), [4, 4]))
     fprintf('  PASS: meshgrid2D static\n');
     passed = passed + 1;
 else
@@ -248,7 +248,7 @@ end
 
 % testStaticMeshgrid2DDifferentN
 [Xmd, Ymd] = GridUtils.meshgrid2D(16, 2e-3);
-if (size(Xmd) == [16, 16])
+if (isequal(size(Xmd), [16, 16]))
     fprintf('  PASS: meshgrid2D different N\n');
     passed = passed + 1;
 else
@@ -258,7 +258,7 @@ end
 
 % testStaticFreqGridDifferentN
 [Kxd, Kyd] = GridUtils.freqGrid(16, 2e-3);
-if (size(Kxd) == [16, 16])
+if (isequal(size(Kxd), [16, 16]))
     fprintf('  PASS: freqGrid different N\n');
     passed = passed + 1;
 else

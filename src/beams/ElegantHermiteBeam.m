@@ -50,7 +50,7 @@ classdef ElegantHermiteBeam < ParaxialBeam
 
             % Determine parameters from input using static helper
             [w0, lambda, n, m, legacyCoords, legacyZ] = ...
-                ElegantHermiteBeam.parseArgs(arg1, arg2, varargin);
+                ElegantHermiteBeam.parseArgs(arg1, arg2, varargin{:});
 
             % Initialize parent class state
             if ~isempty(lambda)

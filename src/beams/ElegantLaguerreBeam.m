@@ -53,7 +53,7 @@ classdef ElegantLaguerreBeam < ParaxialBeam
 
             % Determine parameters from input using static helper
             [w0, lambda, l, p, legacyCoords, legacyZ] = ...
-                ElegantLaguerreBeam.parseArgs(arg1, arg2, varargin);
+                ElegantLaguerreBeam.parseArgs(arg1, arg2, varargin{:});
 
             % Initialize parent class state
             if ~isempty(lambda)

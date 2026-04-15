@@ -16,7 +16,7 @@ lb = LaguerreBeam(w0, lambda, 1, 0);
 
 % testFieldGeneration
 field = lb.opticalField(X, Y, 0);
-if (size(field) == [64, 64])
+if (isequal(size(field), [64, 64]))
     fprintf('  PASS: field generation\n');
     passed = passed + 1;
 else
@@ -69,7 +69,7 @@ lb_10 = LaguerreBeam(w0, lambda, 1, 0);
 lb_01 = LaguerreBeam(w0, lambda, 0, 1);
 field_10 = lb_10.opticalField(X, Y, 0);
 field_01 = lb_01.opticalField(X, Y, 0);
-if (size(field_10) == size(field_01))
+if (isequal(size(field_10), size(field_01)))
     fprintf('  PASS: different l p valid\n');
     passed = passed + 1;
 else
@@ -80,7 +80,7 @@ end
 % testL0P0Valid
 lb_00 = LaguerreBeam(w0, lambda, 0, 0);
 field_00 = lb_00.opticalField(X, Y, 0);
-if (size(field_00) == [64, 64])
+if (isequal(size(field_00), [64, 64]))
     fprintf('  PASS: l=0 p=0 valid\n');
     passed = passed + 1;
 else

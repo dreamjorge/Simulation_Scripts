@@ -49,7 +49,7 @@ classdef LaguerreBeam < ParaxialBeam
 
             % Determine parameters from input using static helper
             [w0, lambda, l, p, legacyCoords, legacyZ] = ...
-                LaguerreBeam.parseArgs(arg1, arg2, varargin);
+                LaguerreBeam.parseArgs(arg1, arg2, varargin{:});
 
             % Initialize parent class state
             if ~isempty(lambda)

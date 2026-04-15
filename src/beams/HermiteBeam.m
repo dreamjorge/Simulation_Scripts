@@ -47,7 +47,7 @@ classdef HermiteBeam < ParaxialBeam
 
             % Determine parameters from input using static helper
             [w0, lambda, n, m, legacyCoords, legacyZ] = ...
-                HermiteBeam.parseArgs(arg1, arg2, varargin);
+                HermiteBeam.parseArgs(arg1, arg2, varargin{:});
 
             % Initialize parent class state
             if ~isempty(lambda)
