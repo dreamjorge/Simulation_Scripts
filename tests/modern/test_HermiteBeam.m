@@ -16,7 +16,7 @@ hb = HermiteBeam(w0, lambda, 1, 1);
 
 % testFieldGeneration
 field = hb.opticalField(X, Y, 0);
-if (size(field) == [64, 64])
+if (isequal(size(field), [64, 64]))
     fprintf('  PASS: field generation\n');
     passed = passed + 1;
 else
@@ -83,7 +83,7 @@ hb_10 = HermiteBeam(w0, lambda, 1, 0);
 hb_01 = HermiteBeam(w0, lambda, 0, 1);
 field_10 = hb_10.opticalField(X, Y, 0);
 field_01 = hb_01.opticalField(X, Y, 0);
-if (size(field_10) == size(field_01))
+if (isequal(size(field_10), size(field_01)))
     fprintf('  PASS: different orders valid\n');
     passed = passed + 1;
 else
@@ -138,7 +138,7 @@ end
 % testHermitePolyMatrixInput
 x_mat = rand(5, 5);
 H_mat = PolynomialUtils.hermitePoly(2, x_mat);
-if (size(H_mat) == size(x_mat))
+if (isequal(size(H_mat), size(x_mat)))
     fprintf('  PASS: hermitePoly matrix input\n');
     passed = passed + 1;
 else
