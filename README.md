@@ -4,6 +4,8 @@ Scripts for simulation of optical beam propagation (Gaussian, Hermite-Gauss, Lag
 
 **Author:** Ugalde-Ontiveros J.A.
 
+[![Octave CI](https://github.com/dreamjorge/Simulation_Scripts/actions/workflows/octave.yml/badge.svg)](https://github.com/dreamjorge/Simulation_Scripts/actions/workflows/octave.yml)
+
 ## Estructura
 
 ```

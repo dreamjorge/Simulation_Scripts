@@ -1,14 +1,19 @@
-name: MATLAB Tests
+name: MATLAB CI
 
 on:
   push:
-    branches: [master, integration/*, refactor/*]
+    branches: [master]
   pull_request:
     branches: [master]
+  workflow_dispatch:
 
 jobs:
-  test:
+  matlab-portable-tests:
+    name: matlab-portable-tests
     runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -19,14 +24,44 @@ jobs:
           release: latest
           cache: true
 
-      - name: Run test suite
+      - name: Run portable suite
         uses: matlab-actions/run-command@v3
         with:
-          command: run('tests/test_all.m')
+          command: diary('matlab-portable-tests.log'); addpath('tests'); status = portable_runner(); diary off; if status ~= 0, error('portable_runner failed with %d failing tests', status); end
 
-      - name: Upload test results
+      - name: Upload portable logs
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: matlab-test-results
-          path: tests/
+          name: matlab-portable-tests-log
+          path: matlab-portable-tests.log
+          retention-days: 14
+
+  matlab-legacy-compat:
+    name: matlab-legacy-compat
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup MATLAB
+        uses: matlab-actions/setup-matlab@v3
+        with:
+          release: latest
+          cache: true
+
+      - name: Run legacy compatibility suite
+        uses: matlab-actions/run-command@v3
+        with:
+          command: diary('matlab-legacy-compat.log'); run('tests/legacy_compat/run_legacy_compat.m'); diary off;
+
+      - name: Upload legacy logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: matlab-legacy-compat-log
+          path: matlab-legacy-compat.log
+          retention-days: 14
