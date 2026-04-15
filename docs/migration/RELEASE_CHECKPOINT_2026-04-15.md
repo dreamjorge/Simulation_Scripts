@@ -33,3 +33,14 @@ It focuses on backward compatibility and testability, not package migration to `
    - full portable suite (`portable_runner`)
    - legacy-only suite (`run_legacy_compat`)
 2. Start a controlled RFC/spec for `+paraxial` packaging with adapter-first rollout.
+
+## Branch Protection Recommendation
+
+For `master`, enable branch protection with:
+
+- Require pull request before merge.
+- Require status checks to pass:
+  - `portable-tests`
+  - `legacy-compat`
+- Require branches to be up to date before merging.
+- Restrict direct pushes to `master`.
