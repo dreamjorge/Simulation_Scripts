@@ -30,36 +30,25 @@ classdef GaussianBeam < ParaxialBeam
             %   GaussianBeam(R, gaussianParams)
             %   GaussianBeam(X, Y, gaussianParams)
 
-            if nargin == 0
-                obj = obj@ParaxialBeam();
-                obj.OpticalField = [];
-                return;
+            % Call superclass constructor first (MATLAB requires this to be the
+            % first statement - no code can appear before it)
+            obj = obj@ParaxialBeam();
+
+            % Determine parameters from input using static helper
+            [w0, lambda, legacyCoords, legacyZ] = GaussianBeam.parseArgs(arg1, arg2, varargin);
+
+            % Initialize parent class state
+            if ~isempty(lambda)
+                obj.Lambda = lambda;
+                obj.k = 2 * pi / lambda;
             end
 
-            if nargin == 2 && isa(arg2, 'GaussianParameters')
-                params = arg2;
-                obj = obj@ParaxialBeam(params.Lambda);
-                obj.InitialWaist = params.InitialWaist;
-                obj.OpticalField = obj.opticalFieldLegacy(arg1, [], params.zCoordinate);
-                return;
-            end
+            % Initialize subclass state
+            obj.InitialWaist = w0;
 
-            if nargin == 3 && isa(varargin{1}, 'GaussianParameters')
-                params = varargin{1};
-                obj = obj@ParaxialBeam(params.Lambda);
-                obj.InitialWaist = params.InitialWaist;
-                obj.OpticalField = obj.opticalFieldLegacy(arg1, arg2, params.zCoordinate);
-                return;
-            end
-
-            if nargin >= 2
-                w0 = arg1;
-                lambda = arg2;
-                obj = obj@ParaxialBeam(lambda);
-                obj.InitialWaist = w0;
-                obj.OpticalField = [];
+            if ~isempty(legacyCoords{1})
+                obj.OpticalField = obj.opticalFieldLegacy(legacyCoords{1}, legacyCoords{2}, legacyZ);
             else
-                obj = obj@ParaxialBeam();
                 obj.OpticalField = [];
             end
         end
@@ -113,6 +102,44 @@ classdef GaussianBeam < ParaxialBeam
 
         function name = beamName(obj)
             name = 'gaussian';
+        end
+    end
+
+    methods (Static)
+        function [w0, lambda, legacyCoords, legacyZ] = parseArgs(arg1, arg2, varargin)
+            % Static helper to parse constructor arguments
+            % Avoids calling instance method before constructor completes
+            w0 = [];
+            lambda = [];
+            legacyCoords = {[], []};
+            legacyZ = 0;
+
+            if nargin < 2
+                return;
+            end
+
+            if nargin == 3 && isa(varargin{1}, 'GaussianParameters')
+                % GaussianBeam(X, Y, gaussianParams)
+                params = varargin{1};
+                lambda = params.Lambda;
+                w0 = params.InitialWaist;
+                legacyCoords{1} = arg1;
+                legacyCoords{2} = arg2;
+                legacyZ = params.zCoordinate;
+
+            elseif nargin == 2 && isa(arg2, 'GaussianParameters')
+                % GaussianBeam(R, gaussianParams)
+                params = arg2;
+                lambda = params.Lambda;
+                w0 = params.InitialWaist;
+                legacyCoords{1} = arg1;
+                legacyZ = params.zCoordinate;
+
+            elseif nargin >= 2
+                % Modern: GaussianBeam(w0, lambda)
+                w0 = arg1;
+                lambda = arg2;
+            end
         end
     end
 
