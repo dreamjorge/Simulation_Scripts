@@ -175,6 +175,9 @@ No se usan `classdef` folders. Todos los archivos son `.m` individuales.
 # Octave
 octave --no-gui --eval "run('tests/test_all.m')"
 
+# Octave (legacy-only fast check)
+octave --no-gui --eval "run('tests/legacy_compat/run_legacy_compat.m')"
+
 # MATLAB
 matlab -batch "run('tests/test_all.m')"
 ```
@@ -188,3 +191,8 @@ matlab -batch "run('tests/test_all.m')"
 ## Migracion Legacy
 
 - Plan incremental (Strangler): `docs/migration/LEGACY_MIGRATION_PLAN.md`
+- Release checkpoint (2026-04-15): `docs/migration/RELEASE_CHECKPOINT_2026-04-15.md`
+
+## Changelog
+
+- `CHANGELOG.md`
