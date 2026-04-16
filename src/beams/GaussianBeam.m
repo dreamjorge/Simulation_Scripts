@@ -30,17 +30,16 @@ classdef GaussianBeam < ParaxialBeam
             %   GaussianBeam(R, gaussianParams)
             %   GaussianBeam(X, Y, gaussianParams)
 
-            % Handle empty constructor
+            % Call superclass constructor first (MATLAB requirement - MUST be
+            % unconditional; cannot be inside a conditional or expression)
+            obj = obj@ParaxialBeam();
+
+            % Handle empty constructor — return early after minimal init
             if nargin == 0
-                obj = obj@ParaxialBeam();
                 obj.InitialWaist = [];
                 obj.OpticalField = [];
                 return;
             end
-
-            % Call superclass constructor first (MATLAB requires this to be the
-            % first statement - no code can appear before it)
-            obj = obj@ParaxialBeam();
 
             % Determine parameters from input using static helper
             [w0, lambda, legacyCoords, legacyZ] = GaussianBeam.parseArgs(arg1, arg2, varargin{:});
