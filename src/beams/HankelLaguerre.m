@@ -65,11 +65,11 @@ classdef HankelLaguerre < ParaxialBeam
             % Legacy: HankelLaguerre(r, theta, laguerreParams, hankelType)
             %   — arg3 is a LaguerreParameters object
             % Modern: HankelLaguerre(w0, lambda, l, p, hankelType)
-            %   — arg3 is numeric (or empty if not provided)
-            % Use inputname(3) to safely detect arg3 without Octave undefined-var errors.
-            if nargin >= 3
-                thirdArgName = inputname(3);
-                isLegacy = ~isempty(thirdArgName) && isa(l, 'LaguerreParameters');
+            %   — arg3 is numeric (topological charge) or empty
+            % Note: inputname(3) is empty when arg3 is a computed expression
+            % (e.g. LaguerreParameters(...)), so we rely on isa() directly.
+            if nargin >= 3 && isa(l, 'LaguerreParameters')
+                isLegacy = true;
             else
                 isLegacy = false;
             end
@@ -82,8 +82,8 @@ classdef HankelLaguerre < ParaxialBeam
                 else
                     raw_hankelType_arg = [];
                 end
-                % hankelType, l, p are from the legacy call signature; set defaults for safety.
-                if nargin < 4, hankelType = 1; end
+                % hankelType is the 4th positional arg in legacy calls; default to 1.
+                if nargin < 4, raw_hankelType_arg = 1; end
             else
                 % Modern API.
                 raw_hankelType_arg = [];
