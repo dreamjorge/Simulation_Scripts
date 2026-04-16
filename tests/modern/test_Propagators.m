@@ -28,7 +28,7 @@ end
 
 % testAnalyticPropagateSize
 field = ap.propagate(beam, 0.1);
-if (size(field) == [64, 64])
+if (isequal(size(field), [64, 64]))
     fprintf('  PASS: AnalyticPropagator field size\n');
     passed = passed + 1;
 else
@@ -69,7 +69,7 @@ end
 % testAnalyticWithHermiteBeam
 hb = HermiteBeam(w0, lambda, 1, 1);
 field_h = ap.propagate(hb, 0.05);
-if (all(all(isfinite(field_h))) && size(field_h) == [64, 64])
+if (all(all(isfinite(field_h))) && isequal(size(field_h), [64, 64]))
     fprintf('  PASS: AnalyticPropagator with HermiteBeam\n');
     passed = passed + 1;
 else
@@ -80,7 +80,7 @@ end
 % testAnalyticWithLaguerreBeam
 lb = LaguerreBeam(w0, lambda, 1, 0);
 field_l = ap.propagate(lb, 0.05);
-if (all(all(isfinite(field_l))) && size(field_l) == [64, 64])
+if (all(all(isfinite(field_l))) && isequal(size(field_l), [64, 64]))
     fprintf('  PASS: AnalyticPropagator with LaguerreBeam\n');
     passed = passed + 1;
 else
@@ -114,7 +114,7 @@ end
 
 % testFFTPropagateSize
 field_fft = fp.propagate(beam, 0.1);
-if (size(field_fft) == [64, 64])
+if (isequal(size(field_fft), [64, 64]))
     fprintf('  PASS: FFTPropagator field size\n');
     passed = passed + 1;
 else
@@ -179,7 +179,7 @@ end
 
 % testFFTWithHermiteBeam
 field_fft_h = fp.propagate(HermiteBeam(w0, lambda, 1, 1), 0.05);
-if (all(all(isfinite(field_fft_h))) && size(field_fft_h) == [64, 64])
+if (all(all(isfinite(field_fft_h))) && isequal(size(field_fft_h), [64, 64]))
     fprintf('  PASS: FFTPropagator with HermiteBeam\n');
     passed = passed + 1;
 else

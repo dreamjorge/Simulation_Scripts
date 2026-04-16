@@ -16,7 +16,7 @@ elb = ElegantLaguerreBeam(w0, lambda, 1, 0);
 
 % testFieldGeneration
 field = elb.opticalField(X, Y, 0.01);
-if (size(field) == [64, 64])
+if (isequal(size(field), [64, 64]))
     fprintf('  PASS: field generation\n');
     passed = passed + 1;
 else
@@ -97,7 +97,7 @@ elb_10 = ElegantLaguerreBeam(w0, lambda, 1, 0);
 elb_01 = ElegantLaguerreBeam(w0, lambda, 0, 1);
 f_10 = elb_10.opticalField(X, Y, 0.01);
 f_01 = elb_01.opticalField(X, Y, 0.01);
-if (size(f_10) == size(f_01))
+if (isequal(size(f_10), size(f_01)))
     fprintf('  PASS: different l p valid\n');
     passed = passed + 1;
 else

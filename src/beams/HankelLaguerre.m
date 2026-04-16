@@ -43,7 +43,7 @@ classdef HankelLaguerre < ParaxialBeam
     end
 
     methods
-        function obj = HankelLaguerre(w0, lambda, l, p, hankelType)
+        function obj = HankelLaguerre(w0, lambda, l, p, hankelType, varargin)
             % Constructor
             % w0:         initial beam waist at z = 0 (m)
             % lambda:     wavelength (m)
@@ -54,43 +54,64 @@ classdef HankelLaguerre < ParaxialBeam
             % Legacy constructor (also supported):
             %   HankelLaguerre(r, theta, laguerreParameters, hankelType)
             % Produces .OpticalFieldLaguerre for legacy scripts.
+            %
+            % Note: uses varargin to capture the raw 4th argument in legacy calls,
+            % avoiding Octave parse errors when hankelType is not passed.
 
-            if nargin > 0
-                if nargin >= 4 && isa(l, 'LaguerreParameters')
-                    rCoordinate = w0;
-                    thetaCoordinate = lambda;
-                    laguerreParams = l;
-                    obj = obj@ParaxialBeam(laguerreParams.Lambda);
-                    obj.InitialWaist = laguerreParams.InitialWaist;
-                    obj.l = laguerreParams.l;
-                    obj.p = laguerreParams.p;
-                    obj.HankelType = p;
-                    obj.OpticalFieldLaguerre = hankelField(rCoordinate, thetaCoordinate, ...
-                                                           laguerreParams.InitialWaist, laguerreParams.Lambda, ...
-                                                           laguerreParams.l, laguerreParams.p, ...
-                                                           laguerreParams.zCoordinate, obj.HankelType);
-                else
-                    obj = obj@ParaxialBeam(lambda);
-                    obj.InitialWaist = w0;
-                    if nargin >= 4
-                        obj.l = l;
-                        obj.p = p;
-                    else
-                        obj.l = 0;
-                        obj.p = 0;
-                    end
-                    if nargin >= 5
-                        obj.HankelType = hankelType;
-                    else
-                        obj.HankelType = 1;
-                    end
-                    obj.OpticalFieldLaguerre = [];
-                end
+            % Call superclass constructor first (MATLAB requirement)
+            obj = obj@ParaxialBeam();
+
+            % Detect legacy API by checking the type of the 3rd argument.
+            % Legacy: HankelLaguerre(r, theta, laguerreParams, hankelType)
+            %   — arg3 is a LaguerreParameters object
+            % Modern: HankelLaguerre(w0, lambda, l, p, hankelType)
+            %   — arg3 is numeric (topological charge) or empty
+            % Note: inputname(3) is empty when arg3 is a computed expression
+            % (e.g. LaguerreParameters(...)), so we rely on isa() directly.
+            if nargin >= 3 && isa(l, 'LaguerreParameters')
+                isLegacy = true;
             else
-                obj = obj@ParaxialBeam();
-                obj.l          = 0;
-                obj.p          = 0;
-                obj.HankelType = 1;
+                isLegacy = false;
+            end
+
+            if isLegacy
+                % Legacy API: HankelLaguerre(r, theta, laguerreParams, hankelType)
+                % The 4th legacy arg maps to 'p' in this signature (not varargin).
+                if nargin >= 4
+                    raw_hankelType_arg = p;
+                else
+                    raw_hankelType_arg = 1;
+                end
+                % parseArgs expects hankelType defined; set from extracted value.
+                hankelType = raw_hankelType_arg;
+            else
+                % Modern API.
+                raw_hankelType_arg = [];
+                if nargin < 5, hankelType = 1; end
+                if nargin < 4, p = 0; end
+                if nargin < 3, l = 0; end
+            end
+
+            % Determine parameters from input using static helper
+            [w0_out, lambda_out, l_out, p_out, hankelType_out, legacyCoords, legacyZ] = ...
+                HankelLaguerre.parseArgs(w0, lambda, l, p, hankelType, raw_hankelType_arg);
+
+            % Initialize parent class state
+            if ~isempty(lambda_out)
+                obj.Lambda = lambda_out;
+                obj.k = 2 * pi / lambda_out;
+            end
+
+            % Initialize subclass state
+            obj.InitialWaist = w0_out;
+            obj.l = l_out;
+            obj.p = p_out;
+            obj.HankelType = hankelType_out;
+
+            if ~isempty(legacyCoords{1})
+                obj.OpticalFieldLaguerre = hankelField(legacyCoords{1}, legacyCoords{2}, ...
+                    w0_out, lambda_out, l_out, p_out, legacyZ, hankelType_out);
+            else
                 obj.OpticalFieldLaguerre = [];
             end
         end
@@ -119,6 +140,41 @@ classdef HankelLaguerre < ParaxialBeam
     end
 
     methods (Static)
+        function [w0, lambda, l, p, hankelType, legacyCoords, legacyZ] = parseArgs(w0, lambda, l, p, hankelType, raw_hankelType_arg)
+            % Static helper to parse constructor arguments
+            % Detects legacy API: when l is a LaguerreParameters object
+            if nargin < 6, raw_hankelType_arg = []; end
+            legacyCoords = {[], []};
+            legacyZ = 0;
+
+            if nargin < 1
+                l = 0; p = 0; hankelType = 1;
+                return;
+            end
+
+            % Legacy path: HankelLaguerre(r, theta, laguerreParams, hankelType)
+            if nargin >= 3 && isa(l, 'LaguerreParameters')
+                laguerreParams = l;
+                legacyCoords{1} = w0;      % r coordinate
+                legacyCoords{2} = lambda;  % theta coordinate
+                legacyZ = laguerreParams.zCoordinate;
+                w0 = laguerreParams.InitialWaist;
+                lambda = laguerreParams.Lambda;
+                l = laguerreParams.l;
+                p = laguerreParams.p;
+                if ~isempty(raw_hankelType_arg)
+                    hankelType = raw_hankelType_arg;
+                else
+                    hankelType = 1;
+                end
+            else
+                % Modern path: HankelLaguerre(w0, lambda, l, p, hankelType)
+                if nargin < 3, l = 0; end
+                if nargin < 4, p = 0; end
+                if nargin < 5, hankelType = 1; end
+            end
+        end
+
         function Rays = getPropagateCylindricalRays(Rays, TotalRays, r, th, difr, LParametersZi, LParametersZ, HankelType)
             % getPropagateCylindricalRays - Legacy-compatible ray propagation API.
             tempdr = num2cell(difr);

@@ -42,42 +42,27 @@ classdef HermiteBeam < ParaxialBeam
             % Legacy-compatible API:
             %   HermiteBeam(X, Y, hermiteParams)
 
-            if nargin == 0
-                obj = obj@ParaxialBeam();
-                obj.n = 0;
-                obj.m = 0;
-                obj.OpticalField = [];
-                return;
+            % Call superclass constructor first (MATLAB requirement)
+            obj = obj@ParaxialBeam();
+
+            % Determine parameters from input using static helper
+            [w0, lambda, n, m, legacyCoords, legacyZ] = ...
+                HermiteBeam.parseArgs(arg1, arg2, varargin{:});
+
+            % Initialize parent class state
+            if ~isempty(lambda)
+                obj.Lambda = lambda;
+                obj.k = 2 * pi / lambda;
             end
 
-            if nargin == 3 && isa(varargin{1}, 'HermiteParameters')
-                params = varargin{1};
-                obj = obj@ParaxialBeam(params.Lambda);
-                obj.InitialWaist = params.InitialWaist;
-                obj.n = params.n;
-                obj.m = params.m;
-                obj.OpticalField = obj.computeField(arg1, arg2, params.zCoordinate);
-                return;
-            end
+            % Initialize subclass state
+            obj.InitialWaist = w0;
+            obj.n = n;
+            obj.m = m;
 
-            if nargin >= 2
-                w0 = arg1;
-                lambda = arg2;
-                obj = obj@ParaxialBeam(lambda);
-                obj.InitialWaist = w0;
-
-                if numel(varargin) >= 2
-                    obj.n = varargin{1};
-                    obj.m = varargin{2};
-                else
-                    obj.n = 0;
-                    obj.m = 0;
-                end
-                obj.OpticalField = [];
+            if ~isempty(legacyCoords{1})
+                obj.OpticalField = obj.computeField(legacyCoords{1}, legacyCoords{2}, legacyZ);
             else
-                obj = obj@ParaxialBeam();
-                obj.n = 0;
-                obj.m = 0;
                 obj.OpticalField = [];
             end
         end
@@ -99,6 +84,43 @@ classdef HermiteBeam < ParaxialBeam
         function name = beamName(obj)
             % beamName - Returns identifier string, e.g. 'hermite_3_2'.
             name = sprintf('hermite_%d_%d', obj.n, obj.m);
+        end
+    end
+
+    methods (Static)
+        function [w0, lambda, n, m, legacyCoords, legacyZ] = parseArgs(arg1, arg2, varargin)
+            % Static helper to parse constructor arguments
+            w0 = [];
+            lambda = [];
+            n = 0;
+            m = 0;
+            legacyCoords = {[], []};
+            legacyZ = 0;
+
+            if nargin < 2
+                return;
+            end
+
+            if nargin == 3 && isa(varargin{1}, 'HermiteParameters')
+                % Legacy: HermiteBeam(X, Y, hermiteParams)
+                params = varargin{1};
+                lambda = params.Lambda;
+                w0 = params.InitialWaist;
+                n = params.n;
+                m = params.m;
+                legacyCoords{1} = arg1;
+                legacyCoords{2} = arg2;
+                legacyZ = params.zCoordinate;
+
+            elseif nargin >= 2
+                % Modern: HermiteBeam(w0, lambda, n, m)
+                w0 = arg1;
+                lambda = arg2;
+                if numel(varargin) >= 2
+                    n = varargin{1};
+                    m = varargin{2};
+                end
+            end
         end
     end
 
