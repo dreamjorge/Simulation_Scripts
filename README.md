@@ -5,8 +5,9 @@ Scripts for simulation of optical beam propagation (Gaussian, Hermite-Gauss, Lag
 **Author:** Ugalde-Ontiveros J.A.
 
 [![Octave CI](https://github.com/dreamjorge/Simulation_Scripts/actions/workflows/octave.yml/badge.svg)](https://github.com/dreamjorge/Simulation_Scripts/actions/workflows/octave.yml)
+[![MATLAB CI](https://github.com/dreamjorge/Simulation_Scripts/actions/workflows/matlab.yml/badge.svg)](https://github.com/dreamjorge/Simulation_Scripts/actions/workflows/matlab.yml)
 
-## Estructura
+## Project Structure
 
 ```
 Simulation_Scripts/
@@ -71,7 +72,7 @@ Every beam type inherits from `ParaxialBeam` and implements:
 | `getParameters(z)` | `GaussianParameters` | Beam params at position z |
 | `beamName()` | `char` | String identifier like 'hermite_3_2' |
 
-## Uso Rápido
+## Quick Start
 
 ### MATLAB/Octave
 
@@ -83,24 +84,24 @@ setpaths
 addpath('src/beams', 'src/parameters', 'src/propagation/field', 'src/propagation/rays', 'src/visualization');
 addpath('ParaxialBeams', 'ParaxialBeams/Addons');
 
-% Crear beam via Factory
+% Create beam via Factory
 beam = BeamFactory.create('gaussian', 100e-6, 632.8e-9);
 
-% Usar beam directamente
+% Use beam directly
 grid = GridUtils(1024, 1024, 1e-3, 1e-3);
 [X, Y] = grid.create2DGrid();
 field = beam.opticalField(X, Y, 0);
 
-% O propagar via FFT
+% Or propagate via FFT
 prop = FFTPropagator(grid, 632.8e-9);
 field_at_z = prop.propagate(beam, 0.1);
 ```
 
-## Patrones de Diseño
+## Design Patterns
 
 ### Strategy Pattern — Propagators
 
-Tres métodos de propagación intercambiables:
+Three interchangeable propagation methods:
 
 ```matlab
 % FFT (angular spectrum)
@@ -119,7 +120,7 @@ bundle = prop.propagate(beam, z);
 ### Factory Pattern — BeamFactory
 
 ```matlab
-% Todos los beams vía Factory
+% All beams via Factory
 g  = BeamFactory.create('gaussian', 100e-6, 632.8e-9);
 hg = BeamFactory.create('hermite', 100e-6, 632.8e-9, 'n', 2, 'm', 1);
 lg = BeamFactory.create('laguerre', 100e-6, 632.8e-9, 'l', 1, 'p', 0);
@@ -127,7 +128,7 @@ lg = BeamFactory.create('laguerre', 100e-6, 632.8e-9, 'l', 1, 'p', 0);
 
 ## Canonical Examples
 
-Ejemplos recomendados para nuevos usuarios (en `examples/canonical/`):
+Recommended examples for new users (in `examples/canonical/`):
 
 | File | Description |
 |------|-------------|
@@ -135,7 +136,7 @@ Ejemplos recomendados para nuevos usuarios (en `examples/canonical/`):
 | `examples/canonical/MainMultiMode.m` | Multi-mode Hermite/Laguerre |
 | `examples/canonical/ExampleRayTracing.m` | Ray tracing visualization |
 
-## Constantes y Utilidades
+## Constants and Utilities
 
 ### PhysicalConstants
 
@@ -164,12 +165,12 @@ G = fftOps.fft2(g);
 g = fftOps.ifft2(G);
 ```
 
-## Compatibilidad
+## Compatibility
 
 - **GNU Octave 11.1.0+**
 - **MATLAB R2020b+**
 
-No se usan `classdef` folders. Todos los archivos son `.m` individuales.
+No `classdef` folders are used. All files are individual `.m` files.
 
 ## Tests
 
@@ -184,15 +185,15 @@ octave --no-gui --eval "run('tests/legacy_compat/run_legacy_compat.m')"
 matlab -batch "run('tests/test_all.m')"
 ```
 
-## Referencias
+## References
 
 - Kogelnik, H., & Li, T. (1966). Laser beams and resonators. *Applied Optics*.
 - Siegman, A. E. (1986). *Lasers*. University Science Books.
-- Referencias detalladas por implementacion (Gaussian/Hermite/Laguerre/Elegant/Hankel): `docs/ARCHITECTURE.md` -> `Referencias Bibliograficas por Implementacion`.
+- Detailed references by implementation (Gaussian/Hermite/Laguerre/Elegant/Hankel): `docs/ARCHITECTURE.md` -> `References by Implementation`.
 
-## Migracion Legacy
+## Legacy Migration
 
-- Plan incremental (Strangler): `docs/migration/LEGACY_MIGRATION_PLAN.md`
+- Incremental plan (Strangler pattern): `docs/migration/LEGACY_MIGRATION_PLAN.md`
 - Release checkpoint (2026-04-15): `docs/migration/RELEASE_CHECKPOINT_2026-04-15.md`
 
 ## Changelog

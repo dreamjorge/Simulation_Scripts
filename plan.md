@@ -2,29 +2,29 @@
 
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
-**Goal:** dejar `integration/pre-master` listo para mergearse a `master/main` con alcance congelado, API pública auditada, ejemplos canónicos definidos y evidencia real de compatibilidad MATLAB/Octave.
+**Goal:** Make `integration/pre-master` ready for merging to `master/main` with frozen scope, audited public API, defined canonical examples, and real evidence of MATLAB/Octave compatibility.
 
-**Architecture:** este trabajo es de hardening, no de rediseño. La implementación se apoya en tres superficies reales del repo: código fuente en `ParaxialBeams/`, pruebas en `tests/` y narrativa pública en `README.md`. Cada cambio tiene que reducir ambiguedad sin reabrir la arquitectura OO.
+**Architecture:** This is hardening work, not a redesign. The implementation relies on three real surfaces of the repo: source code in `ParaxialBeams/`, tests in `tests/`, and public narrative in `README.md`. Every change must reduce ambiguity without reopening the OO architecture.
 
-**Tech Stack:** MATLAB, Octave, scripts `.m`, test runner `tests/test_all.m`, runner portátil `tests/portable_runner.m`, Git/GitHub Actions.
+**Tech Stack:** MATLAB, Octave, `.m` scripts, test runner `tests/test_all.m`, portable runner `tests/portable_runner.m`, Git/GitHub Actions.
 
 ---
 
 ## Merge Scope Checklist
 
-- [x] `ParaxialBeams/*.m` modernos auditados (27 archivos verificados)
-- [x] `tests/` vigentes y ejecutables en Octave/MATLAB (~380 tests)
-- [x] compatibilidad y portabilidad preservadas (Octave 11.1.0+, MATLAB R2020b+)
-- [x] ejemplos canónicos identificados (3 ejemplos canonical)
-- [x] narrativa pública alineada con el estado real (README.md actualizado)
+- [x] Modern `ParaxialBeams/*.m` audited (27 files verified)
+- [x] `tests/` current and runnable in Octave/MATLAB (~380 tests)
+- [x] Compatibility and portability preserved (Octave 11.1.0+, MATLAB R2020b+)
+- [x] Canonical examples identified (3 canonical examples)
+- [x] Public narrative aligned with actual state (README.md updated)
 
 ## Explicitly Out of Scope
 
-- package migration a `+paraxial/...`
-- rediseño OO profundo de beams/propagators
-- reescritura total de ejemplos históricos
-- rescate de ramas legacy completas
-- limpieza estructural grande de addons terceros
+- Package migration to `+paraxial/...`
+- Deep OO redesign of beams/propagators
+- Full rewrite of historical examples
+- Rescue of complete legacy branches
+- Major structural cleanup of third-party addons
 
 ---
 
@@ -36,32 +36,32 @@
 
 **Step 1: Document the in-scope deliverables**
 
-Agregar una checklist de merge scope en `plan.md` con estos items exactos:
+Add a merge scope checklist to `plan.md` with these exact items:
 
 ```md
-- [ ] `ParaxialBeams/*.m` modernos auditados
-- [ ] `tests/` vigentes y ejecutables en Octave/MATLAB
-- [ ] compatibilidad y portabilidad preservadas
-- [ ] ejemplos canónicos identificados
-- [ ] narrativa pública alineada con el estado real
+- [ ] Modern `ParaxialBeams/*.m` audited
+- [ ] `tests/` current and runnable in Octave/MATLAB
+- [ ] Compatibility and portability preserved
+- [ ] Canonical examples identified
+- [ ] Public narrative aligned with actual state
 ```
 
 **Step 2: Document the out-of-scope work**
 
-Agregar una sección `## Explicitly Out of Scope` en `plan.md` con estos items:
+Add an `## Explicitly Out of Scope` section to `plan.md` with these items:
 
 ```md
-- package migration a `+paraxial/...`
-- rediseño OO profundo de beams/propagators
-- reescritura total de ejemplos históricos
-- rescate de ramas legacy completas
-- limpieza estructural grande de addons terceros
+- Package migration to `+paraxial/...`
+- Deep OO redesign of beams/propagators
+- Full rewrite of historical examples
+- Rescue of complete legacy branches
+- Major structural cleanup of third-party addons
 ```
 
 **Step 3: Verify the plan still describes a stabilization merge**
 
-Run: revisar `plan.md` y confirmar que no aparece trabajo de rediseño como prerequisito del merge.
-Expected: el documento separa explícitamente hardening pre-merge vs. rediseño post-merge.
+Run: review `plan.md` and confirm that no redesign work appears as a prerequisite for the merge.
+Expected: the document explicitly separates pre-merge hardening vs. post-merge redesign.
 
 **Step 4: Commit**
 
@@ -84,30 +84,30 @@ git commit -m "docs: freeze pre-merge scope"
 
 **Step 1: Write the failing audit checklist**
 
-Agregar en `plan.md` una tabla `API Audit Matrix` con columnas `Class`, `Primary field method`, `Accepted coordinates`, `z semantics`, `Uses Parameters state`, `Status`.
+Add an `API Audit Matrix` table to `plan.md` with columns `Class`, `Primary field method`, `Accepted coordinates`, `z semantics`, `Uses Parameters state`, `Status`.
 
 **Step 2: Run the audit against the real classes**
 
-Run: leer los seis archivos de beam y completar la tabla solo con evidencia del código.
-Expected: toda fila queda marcada como `aligned`, `document-only`, o `needs-fix`.
+Run: read the six beam files and fill in the table using only code evidence.
+Expected: every row is marked as `aligned`, `document-only`, or `needs-fix`.
 
 **Step 3: Document the canonical contract**
 
-Agregar en `README.md` una sección corta con este formato:
+Add a short section to `README.md` with this format:
 
 ```md
 ## Beam API Contract
 
-- canonical field entrypoint: `opticalField(...)`
-- `Parameters` define constantes/modelo, no reemplaza argumentos dinámicos ambiguamente
-- cada beam debe declarar sus coordenadas aceptadas
-- cualquier desvío temporal queda documentado hasta el post-merge cleanup
+- Canonical field entrypoint: `opticalField(...)`
+- `Parameters` defines constants/model, does not ambiguously replace dynamic arguments
+- Each beam must declare its accepted coordinates
+- Any temporary deviations are documented until post-merge cleanup
 ```
 
 **Step 4: Re-run the audit summary**
 
-Run: verificar que `README.md` y `plan.md` usen el mismo contrato textual.
-Expected: no hay contradicciones entre plan y documentación pública.
+Run: verify that `README.md` and `plan.md` use the same contract text.
+Expected: no contradictions between plan and public documentation.
 
 **Step 5: Commit**
 
@@ -127,21 +127,21 @@ git commit -m "docs: document public beam api contract"
 
 **Step 1: Create the example classification table**
 
-Agregar en `plan.md` una tabla `Example Classification` con columnas `File`, `Tier`, `Reason`, `Action`.
+Add an `Example Classification` table to `plan.md` with columns `File`, `Tier`, `Reason`, `Action`.
 
 **Step 2: Audit the candidate examples**
 
-Run: leer los scripts candidatos y clasificarlos como `canonical`, `legacy-usable`, o `historical`.
-Expected: hay entre 3 y 5 ejemplos `canonical`.
+Run: read the candidate scripts and classify them as `canonical`, `legacy-usable`, or `historical`.
+Expected: between 3 and 5 `canonical` examples.
 
 **Step 3: Point the public docs to canonical entrypoints only**
 
-Actualizar `README.md` para que la sección de uso apunte solo a los ejemplos `canonical` elegidos.
+Update `README.md` so that the usage section points only to the chosen `canonical` examples.
 
 **Step 4: Verify no legacy example is presented as the default**
 
-Run: revisar `README.md`.
-Expected: el primer camino de entrada del usuario nuevo pasa por ejemplos auditados, no por scripts históricos ambiguos.
+Run: review `README.md`.
+Expected: the first path for new users goes through audited examples, not ambiguous historical scripts.
 
 **Step 5: Commit**
 
@@ -166,33 +166,33 @@ git commit -m "docs: classify canonical examples"
 
 **Step 1: Write the failing coverage checklist**
 
-Agregar en `plan.md` una checklist `Critical Coverage Gates` con estos checks exactos:
+Add a `Critical Coverage Gates` checklist to `plan.md` with these exact checks:
 
 ```md
-- [ ] `z = 0` no produce NaN/Inf inválidos
-- [ ] modo cero Hermite/Laguerre mantiene equivalencia razonable con Gaussian
-- [ ] ray tracing cilíndrico sigue estable
-- [ ] `tests/test_all.m` corre vía `portable_runner()`
-- [ ] el runner funciona en Octave y MATLAB
+- [ ] `z = 0` does not produce invalid NaN/Inf
+- [ ] Zero-order Hermite/Laguerre maintains reasonable equivalence with Gaussian
+- [ ] Cylindrical ray tracing remains stable
+- [ ] `tests/test_all.m` runs via `portable_runner()`
+- [ ] The runner works in both Octave and MATLAB
 ```
 
 **Step 2: Run the portable suite in Octave**
 
 Run: `octave --no-gui --eval "run('tests/test_all.m')"`
-Expected: exit code `0` y mensaje `=== ÉXITO: Todos los tests pasaron ===`.
+Expected: exit code `0` and message indicating all tests passed.
 
 **Step 3: Run the suite in MATLAB**
 
 Run: `matlab -batch "run('tests/test_all.m')"`
-Expected: ejecución sin excepción y suite verde.
+Expected: execution without exceptions and green suite.
 
 **Step 4: Document any remaining coverage gaps**
 
-Si algún check de la checklist no está cubierto, registrar el gap en `plan.md` con formato `Gap -> owner -> pre-merge/post-merge`.
+If any checklist item is not covered, record the gap in `plan.md` with format `Gap -> owner -> pre-merge/post-merge`.
 
 **Step 5: Align the testing docs**
 
-Actualizar `tests/README.md` para que el comando principal coincida con el runner real y los coverage gates auditados.
+Update `tests/README.md` so that the main command matches the real runner and the audited coverage gates.
 
 **Step 6: Commit**
 
@@ -210,25 +210,25 @@ git commit -m "test: lock critical pre-merge coverage gates"
 
 **Step 1: Identify stale claims**
 
-Run: revisar `README.md` y `tests/README.md` buscando estructura inexistente, ejemplos obsoletos o comandos de test inconsistentes.
-Expected: lista explícita de claims a corregir.
+Run: review `README.md` and `tests/README.md` looking for nonexistent structure, obsolete examples, or inconsistent test commands.
+Expected: explicit list of claims to fix.
 
 **Step 2: Apply minimal narrative fixes**
 
-Corregir únicamente estas superficies:
+Fix only these surfaces:
 
 ```md
-- estructura real del repo
-- clases realmente presentes en `ParaxialBeams/`
-- ejemplos recomendados hoy
-- compatibilidad MATLAB/Octave
-- forma correcta de correr tests
+- Actual repo structure
+- Classes actually present in `ParaxialBeams/`
+- Currently recommended examples
+- MATLAB/Octave compatibility
+- Correct way to run tests
 ```
 
 **Step 3: Verify docs vs repository structure**
 
-Run: comparar `README.md`, `tests/README.md`, `ParaxialBeams/` y `tests/`.
-Expected: ningún archivo documenta rutas o clases inexistentes.
+Run: compare `README.md`, `tests/README.md`, `ParaxialBeams/` and `tests/`.
+Expected: no file documents nonexistent paths or classes.
 
 **Step 4: Commit**
 
@@ -244,7 +244,7 @@ git commit -m "docs: align repository narrative with current structure"
 
 **Step 1: Capture the merge delta categories**
 
-Agregar en `plan.md` una sección `Merge Delta Summary` con estas categorías:
+Add a `Merge Delta Summary` section to `plan.md` with these categories:
 
 ```md
 - architecture
@@ -257,12 +257,12 @@ Agregar en `plan.md` una sección `Merge Delta Summary` con estas categorías:
 
 **Step 2: Evaluate merge strategy**
 
-Run: comparar claridad de `merge commit` vs `squash` para `integration/pre-master`.
-Expected: decisión explícita y rationale corto en `plan.md`.
+Run: compare clarity of `merge commit` vs `squash` for `integration/pre-master`.
+Expected: explicit decision and short rationale in `plan.md`.
 
 **Step 3: Draft the integration commit message**
 
-Agregar en `plan.md` un borrador con esta estructura:
+Add a draft to `plan.md` with this structure:
 
 ```md
 Merge `integration/pre-master`: stabilize modern beam API, portability, tests, and canonical examples
@@ -288,7 +288,7 @@ git commit -m "docs: prepare merge integration checklist"
 
 **Step 1: Create the final acceptance checklist**
 
-Agregar al final de `plan.md` esta checklist exacta:
+Add this exact checklist to the end of `plan.md`:
 
 ```md
 - [ ] merge scope frozen
@@ -302,12 +302,12 @@ Agregar al final de `plan.md` esta checklist exacta:
 
 **Step 2: Perform the final doc review**
 
-Run: leer `plan.md`, `README.md` y `tests/README.md` de punta a punta.
-Expected: los tres documentos cuentan la misma historia técnica.
+Run: read `plan.md`, `README.md`, and `tests/README.md` end-to-end.
+Expected: all three documents tell the same technical story.
 
 **Step 3: Mark unresolved items explicitly**
 
-Si algo no está listo para merge, dejarlo como unchecked y agregar nota `Blocker:` o `Deferred:` en `plan.md`.
+If something is not ready for merge, leave it unchecked and add a `Blocker:` or `Deferred:` note in `plan.md`.
 
 **Step 4: Commit**
 
@@ -323,18 +323,18 @@ git commit -m "docs: add final pre-merge readiness gate"
 
 **Step 1: Verify all readiness checks are complete**
 
-Run: revisar la checklist final de `plan.md`.
-Expected: todos los items pre-merge están completos o los blockers están explícitos.
+Run: review the final checklist in `plan.md`.
+Expected: all pre-merge items are complete or blockers are explicit.
 
 **Step 2: Merge the integration branch**
 
 Run: `git checkout master && git merge --no-ff integration/pre-master`
-Expected: merge limpio o conflictos acotados y entendibles.
+Expected: clean merge or manageable, understandable conflicts.
 
 **Step 3: Verify the merged branch still passes the portable suite**
 
 Run: `octave --no-gui --eval "run('tests/test_all.m')"`
-Expected: suite verde también después del merge.
+Expected: green suite after the merge as well.
 
 **Step 4: Commit or finalize merge message**
 
@@ -342,7 +342,7 @@ Expected: suite verde también después del merge.
 git commit
 ```
 
-Usar el mensaje preparado en la Task 6 si Git abre editor por merge commit.
+Use the message prepared in Task 6 if Git opens an editor for the merge commit.
 
 ### Task 9: Open the Post-Merge Track
 
@@ -351,19 +351,19 @@ Usar el mensaje preparado en la Task 6 si Git abre editor por merge commit.
 
 **Step 1: Create the deferred work list**
 
-Agregar en `plan.md` una sección `Post-Merge Track` con estos items:
+Add a `Post-Merge Track` section to `plan.md` with these items:
 
 ```md
-- OO cleanup: separar modelo vs cálculo
-- package migration a `+paraxial/...`
-- legacy policy para ejemplos históricos
-- application/services layer para simulaciones completas
+- OO cleanup: separate model vs computation
+- Package migration to `+paraxial/...`
+- Legacy policy for historical examples
+- Application/services layer for complete simulations
 ```
 
 **Step 2: Verify no deferred task leaked into pre-merge acceptance**
 
-Run: releer `plan.md`.
-Expected: el documento separa claramente merge readiness de evolución futura.
+Run: re-read `plan.md`.
+Expected: the document clearly separates merge readiness from future evolution.
 
 **Step 3: Commit**
 
@@ -389,26 +389,26 @@ git commit -m "docs: define post-merge redesign track"
 
 | File | Tier | Reason | Action |
 |------|------|--------|--------|
-| examples/canonical/MainGauss_refactored.m | canonical | Ejecutable, usa API moderna, bien documentado | Mantener |
-| examples/canonical/MainMultiMode.m | canonical | Multi-mode demo, usa BeamFactory | Mantener |
-| examples/canonical/ExampleRayTracing.m | canonical | Ray tracing demo completo | Mantener |
-| MainGauss.m | legacy | Old API, en examples/ por tradición | Mantener sin cambios |
-| MainHermite.m | legacy | Scripts históricos de thesis | Mantener sin cambios |
-| MainLaguerre*.m | legacy | Scripts específicos de investigación | Mantener sin cambios |
+| examples/canonical/MainGauss_refactored.m | canonical | Runnable, uses modern API, well documented | Keep |
+| examples/canonical/MainMultiMode.m | canonical | Multi-mode demo, uses BeamFactory | Keep |
+| examples/canonical/ExampleRayTracing.m | canonical | Complete ray tracing demo | Keep |
+| MainGauss.m | legacy | Old API, in examples/ by tradition | Keep unchanged |
+| MainHermite.m | legacy | Historical thesis scripts | Keep unchanged |
+| MainLaguerre*.m | legacy | Research-specific scripts | Keep unchanged |
 
 ## Critical Coverage Gates
 
-- [x] `z = 0` no produce NaN/Inf inválidos (verificado en tests)
-- [x] modo cero Hermite/Laguerre mantiene equivalencia con Gaussian (test_GaussianBeam.m)
-- [x] ray tracing cilíndrico sigue estable (test_RayTracing.m)
-- [x] `tests/test_all.m` corre vía `portable_runner()`
-- [x] el runner funciona en Octave y MATLAB (CI workflows configurados)
+- [x] `z = 0` does not produce invalid NaN/Inf (verified in tests)
+- [x] Zero-order Hermite/Laguerre maintains equivalence with Gaussian (test_GaussianBeam.m)
+- [x] Cylindrical ray tracing remains stable (test_RayTracing.m)
+- [x] `tests/test_all.m` runs via `portable_runner()`
+- [x] The runner works in both Octave and MATLAB (CI workflows configured)
 
 ## Merge Delta Summary
 
 - architecture: Strategy Pattern (IPropagator), Factory Pattern (BeamFactory), Abstract Base (ParaxialBeam)
 - tests: ~380 tests, portable_runner.m, runAllTests.m
-- ci: GitHub Actions workflows para Octave y MATLAB
+- ci: GitHub Actions workflows for Octave and MATLAB
 - portability: Octave 11.1.0+ compatible, MATLAB R2020b+ compatible
 - examples: 3 canonical, 33 legacy
 - docs: README.md, ARCHITECTURE.md, tests/README.md
@@ -417,14 +417,14 @@ git commit -m "docs: define post-merge redesign track"
 
 **Recommended: `--no-ff merge commit`**
 
-Rationale: Preserva la historia de los 71 commits de refactorización como un grupo lógico, mientras mantiene un historial lineal legible en master.
+Rationale: Preserves the history of the 71 refactoring commits as a logical group, while maintaining a readable linear history on master.
 
 ## Post-Merge Track
 
-- OO cleanup: separar modelo vs cálculo en Parameters classes
-- package migration a `+paraxial/...` namespaces
-- legacy policy: decidir qué hacer con los 33 ejemplos legacy
-- application/services layer: Wavefront, Resonator, etc.
+- OO cleanup: separate model vs computation in Parameters classes
+- Package migration to `+paraxial/...` namespaces
+- Legacy policy: decide what to do with the 33 legacy examples
+- Application/services layer: Wavefront, Resonator, etc.
 
 ---
 
@@ -438,7 +438,7 @@ Rationale: Preserva la historia de los 71 commits de refactorización como un gr
 - [x] merge strategy decided (--no-ff merge commit)
 - [x] deferred redesign work documented separately (Post-Merge Track)
 
-**Status:** ✅ READY FOR MERGE
+**Status:** READY FOR MERGE
 
 ---
 
