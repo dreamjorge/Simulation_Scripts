@@ -144,47 +144,34 @@ classdef HankelLaguerre < ParaxialBeam
             % Static helper to parse constructor arguments
             % Detects legacy API: when l is a LaguerreParameters object
             if nargin < 6, raw_hankelType_arg = []; end
-            w0_out = w0;
-            lambda_out = lambda;
-            l_out = 0;
-            p_out = 0;
-            hankelType_out = 1;
             legacyCoords = {[], []};
             legacyZ = 0;
 
             if nargin < 1
+                l = 0; p = 0; hankelType = 1;
                 return;
             end
 
             % Legacy path: HankelLaguerre(r, theta, laguerreParams, hankelType)
             if nargin >= 3 && isa(l, 'LaguerreParameters')
-                % l is actually laguerreParams
                 laguerreParams = l;
                 legacyCoords{1} = w0;      % r coordinate
                 legacyCoords{2} = lambda;  % theta coordinate
                 legacyZ = laguerreParams.zCoordinate;
-                w0_out = laguerreParams.InitialWaist;
-                lambda_out = laguerreParams.Lambda;
-                l_out = laguerreParams.l;
-                p_out = laguerreParams.p;
-                % raw_hankelType_arg is the 4th arg when provided in the legacy call.
-                % If non-empty, it is the actual hankelType value (not a LaguerreParameters).
+                w0 = laguerreParams.InitialWaist;
+                lambda = laguerreParams.Lambda;
+                l = laguerreParams.l;
+                p = laguerreParams.p;
                 if ~isempty(raw_hankelType_arg)
-                    hankelType_out = raw_hankelType_arg;
+                    hankelType = raw_hankelType_arg;
                 else
-                    hankelType_out = 1; % default when not provided
+                    hankelType = 1;
                 end
             else
                 % Modern path: HankelLaguerre(w0, lambda, l, p, hankelType)
-                if nargin >= 3
-                    l_out = l;
-                end
-                if nargin >= 4
-                    p_out = p;
-                end
-                if nargin >= 5
-                    hankelType_out = hankelType;
-                end
+                if nargin < 3, l = 0; end
+                if nargin < 4, p = 0; end
+                if nargin < 5, hankelType = 1; end
             end
         end
 
