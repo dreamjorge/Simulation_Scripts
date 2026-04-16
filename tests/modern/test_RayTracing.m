@@ -13,7 +13,7 @@ failed = 0;
 
 % testRayBundleGridInitialization
 bundle_grid = RayBundle.createGrid(10, 12, 1e-3, 1.2e-3);
-if (isequal(size(bundle_grid.x), [12, 10, 1]) && abs(max(bundle_grid.x(:)) - 0.5e-3) < 1e-8)
+if (size(bundle_grid.x, 1) == 12 && size(bundle_grid.x, 2) == 10 && size(bundle_grid.x, 3) == 1 && abs(max(bundle_grid.x(:)) - 0.5e-3) < 1e-8)
     fprintf('  PASS: RayBundle createGrid initialization\n');
     passed = passed + 1;
 else
