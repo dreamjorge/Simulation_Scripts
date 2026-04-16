@@ -259,11 +259,11 @@ function field = hankelField(r, theta, w0, lambda, l, p, z, hankelType)
     %   XLG: exp(-i*p*theta)   <- Hilbert-transform companion
 
     k  = 2*pi/lambda;
-    zr = pi * w0^2 / lambda;
+    zr = pi * w0.^2 ./ lambda;
 
-    w   = w0 * sqrt(1 + (z/zr)^2);
-    Rc  = z  * (1 + (zr/z)^2);
-    if z == 0, Rc = Inf; end
+    w   = w0 .* sqrt(1 + (z./zr).^2);
+    Rc  = z  .* (1 + (zr./z).^2);
+    Rc(z == 0) = Inf;
     psi = atan2(z, zr);
 
     % Gaussian carrier field u_0(r,z)

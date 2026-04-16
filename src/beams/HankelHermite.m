@@ -215,20 +215,20 @@ function field = hankelHermiteField(X, Y, w0, lambda, n, m, z, hankelType)
     % differential equation, obtained via HermiteParameters.getHermiteSolutions.
 
     k  = 2*pi/lambda;
-    zr = pi * w0^2 / lambda;
+    zr = pi * w0.^2 ./ lambda;
 
-    w   = w0 * sqrt(1 + (z/zr)^2);
-    Rc  = z  * (1 + (zr/z)^2);
-    if z == 0, Rc = Inf; end
+    w   = w0 .* sqrt(1 + (z./zr).^2);
+    Rc  = z  .* (1 + (zr./z).^2);
+    Rc(z == 0) = Inf;
     psi = atan2(z, zr);
 
     % Gaussian carrier field u_0(r,z)
     r          = sqrt(X.^2 + Y.^2);
     amplitude  = (w0 ./ w) .* exp(-r.^2 ./ w.^2);
-    phase_z    = -1i * k * z;
-    phase_curv = 1i * k * r.^2 ./ (2 * Rc);
+    phase_z    = -1i .* k .* z;
+    phase_curv = 1i .* k .* r.^2 ./ (2 .* Rc);
     phase_curv(isinf(Rc)) = 0;
-    phase_gouy = -1i * psi;
+    phase_gouy = -1i .* psi;
     carrier    = amplitude .* exp(phase_z + phase_curv + phase_gouy);
 
     % Both Hermite solutions in x and y
