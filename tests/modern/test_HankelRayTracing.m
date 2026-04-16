@@ -137,7 +137,7 @@ grid = GridUtils(4, 4, 2*w0, 2*w0);
 prop_h = HankelRayTracePropagator(grid, 11, 'RK4', zr/50);
 try
     bundle_ph = prop_h.propagate(beam_h, zr/10);
-    if size(bundle_ph.x, 3) > 1 && all(bundle_ph.ht(:,:,1) == 11)
+    if size(bundle_ph.x, 3) > 1 & all(bundle_ph.ht(:) == 11)
         fprintf('  PASS: HankelRayTracePropagator Hermite\n');
         passed = passed + 1;
     else

@@ -25,6 +25,7 @@ function totalFailed = portable_runner()
     % Add test subdirectories
     addpath(fullfile(testDir, 'modern'));
     addpath(fullfile(testDir, 'legacy_compat'));
+    addpath(fullfile(testDir, 'edge_cases'));
     
     % Canonical list of tests to run (from tests/modern/)
     testFiles = {
@@ -53,7 +54,12 @@ function totalFailed = portable_runner()
         fullfile(testDir, 'legacy_compat', 'test_HankelCompatibility.m'),
         fullfile(testDir, 'legacy_compat', 'test_LegacyBeamConstructors.m'),
         fullfile(testDir, 'legacy_compat', 'test_HankelAliasStaticDelegation.m'),
-        fullfile(testDir, 'legacy_compat', 'test_HankelAliasEdgeCases.m')
+        fullfile(testDir, 'legacy_compat', 'test_HankelAliasEdgeCases.m'),
+        % Edge case tests (z=0, r=0, extreme parameters)
+        'test_GaussianBeam_edge.m',
+        'test_HankelHermite_edge.m',
+        'test_HankelLaguerre_edge.m',
+        'test_RayTracing_extreme.m'
     };
     
     totalPassed = 0;
