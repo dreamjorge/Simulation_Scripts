@@ -15,6 +15,7 @@ classdef RayBundle < handle
         sx % dx/dz slopes
         sy % dy/dz slopes
         sz % dz/dz (always 1 for standard paraxial, but tracking for generality)
+        ht % Hankel type per ray (Ny x Nx x Nz), default 1
     end
     
     properties (Dependent)
@@ -35,6 +36,7 @@ classdef RayBundle < handle
                 obj.sx = zeros(size(x0));
                 obj.sy = zeros(size(x0));
                 obj.sz = ones(size(x0));
+                obj.ht = ones(size(x0));
             end
         end
         
@@ -48,13 +50,17 @@ classdef RayBundle < handle
             val = size(obj.x, 3);
         end
         
-        function addStep(obj, x, y, z, sx, sy)
-            % Add a new slice of coordinates to the bundle
+        function addStep(obj, x, y, z, sx, sy, ht)
             obj.x = cat(3, obj.x, x);
             obj.y = cat(3, obj.y, y);
             obj.z = cat(3, obj.z, z);
             obj.sx = cat(3, obj.sx, sx);
             obj.sy = cat(3, obj.sy, sy);
+            if nargin >= 7
+                obj.ht = cat(3, obj.ht, ht);
+            else
+                obj.ht = cat(3, obj.ht, obj.ht(:,:,end));
+            end
         end
     end
     
