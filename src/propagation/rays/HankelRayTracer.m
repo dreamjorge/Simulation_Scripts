@@ -35,19 +35,19 @@ classdef HankelRayTracer < handle
 
                 if strcmpi(method, 'Euler')
                     [sx, sy] = HankelRayTracer.calculateSlopes(beam, x0, y0, z0, ht0);
-                    x1 = x0 + sx * dz;
-                    y1 = y0 + sy * dz;
+                    x1 = x0 + sx .* dz;
+                    y1 = y0 + sy .* dz;
                 else
                     [k1x, k1y] = HankelRayTracer.calculateSlopes(beam, x0, y0, z0, ht0);
-                    [k2x, k2y] = HankelRayTracer.calculateSlopes(beam, x0 + k1x*dz/2, y0 + k1y*dz/2, z0 + dz/2, ht0);
-                    [k3x, k3y] = HankelRayTracer.calculateSlopes(beam, x0 + k2x*dz/2, y0 + k2y*dz/2, z0 + dz/2, ht0);
-                    [k4x, k4y] = HankelRayTracer.calculateSlopes(beam, x0 + k3x*dz, y0 + k3y*dz, z0 + dz, ht0);
+                    [k2x, k2y] = HankelRayTracer.calculateSlopes(beam, x0 + k1x.*dz./2, y0 + k1y.*dz./2, z0 + dz/2, ht0);
+                    [k3x, k3y] = HankelRayTracer.calculateSlopes(beam, x0 + k2x.*dz./2, y0 + k2y.*dz./2, z0 + dz/2, ht0);
+                    [k4x, k4y] = HankelRayTracer.calculateSlopes(beam, x0 + k3x.*dz, y0 + k3y.*dz, z0 + dz, ht0);
 
-                    sx = (k1x + 2*k2x + 2*k3x + k4x) / 6;
-                    sy = (k1y + 2*k2y + 2*k3y + k4y) / 6;
+                    sx = (k1x + 2.*k2x + 2.*k3x + k4x) ./ 6;
+                    sy = (k1y + 2.*k2y + 2.*k3y + k4y) ./ 6;
 
-                    x1 = x0 + sx * dz;
-                    y1 = y0 + sy * dz;
+                    x1 = x0 + sx .* dz;
+                    y1 = y0 + sy .* dz;
                 end
 
                 z1 = z0 + dz;
