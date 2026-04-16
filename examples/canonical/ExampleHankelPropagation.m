@@ -24,9 +24,9 @@ zr     = pi * w0^2 / lambda;
 %% Grid setup
 Nx = 256;
 Dx = 8 * w0;
-grid = GridUtils(Nx, Nx, Dx, Dx);
-[X, Y]   = grid.create2DGrid();
-[Kx, Ky] = grid.createFreqGrid();
+simGrid = GridUtils(Nx, Nx, Dx, Dx);
+[X, Y]   = simGrid.create2DGrid();
+[Kx, Ky] = simGrid.createFreqGrid();
 fftOps   = FFTUtils();
 
 %% Propagation parameters
@@ -34,6 +34,11 @@ Dz    = zr;
 Nz    = 64;
 dz    = Dz / Nz;
 z_vec = (0:Nz) * dz;
+
+%% Obstruction setup (Optional disk in the center)
+R_obs = 0.6 * w0; % Obstruction radius
+mask = (sqrt(X.^2 + Y.^2) > R_obs);
+fprintf('Adding circular obstruction (R = %.1f w0)\n', R_obs/w0);
 
 %% ===================================================================
 %%  SECTION 1: Hankel-Hermite Propagation (4 types: 11, 12, 21, 22)
@@ -46,10 +51,10 @@ beam_h12 = HankelHermite(w0, lambda, n_mode, m_mode, 12);
 beam_h21 = HankelHermite(w0, lambda, n_mode, m_mode, 21);
 beam_h22 = HankelHermite(w0, lambda, n_mode, m_mode, 22);
 
-field_h11 = beam_h11.opticalField(X, Y, 0);
-field_h12 = beam_h12.opticalField(X, Y, 0);
-field_h21 = beam_h21.opticalField(X, Y, 0);
-field_h22 = beam_h22.opticalField(X, Y, 0);
+field_h11 = beam_h11.opticalField(X, Y, 0) .* mask;
+field_h12 = beam_h12.opticalField(X, Y, 0) .* mask;
+field_h21 = beam_h21.opticalField(X, Y, 0) .* mask;
+field_h22 = beam_h22.opticalField(X, Y, 0) .* mask;
 
 % Ray tracing for all 4 Hankel types
 rayGrid = GridUtils(8, 8, 2*w0, 2*w0);
@@ -96,11 +101,12 @@ for zi = 1:Nz+1
     xlabel('x / w_0'); ylabel('y / w_0');
 
     subplot(1,2,2);
-    field_sum = abs(field_h11).^2 + abs(field_h12).^2 + abs(field_h21).^2 + abs(field_h22).^2;
-    imagesc(x_axis, y_axis, field_sum);
+    % Coherent sum gives the "normal" (Gaussian-derivative) beam
+    field_total = field_h11 + field_h12 + field_h21 + field_h22;
+    imagesc(x_axis, y_axis, abs(field_total).^2);
     set(gca, 'YDir', 'normal');
     colormap(hot);
-    title(sprintf('\\Sigma|H|^2  z=%.2f z_R', z_vec(zi)/zr));
+    title(sprintf('Gaussian (Coherent Sum)  z=%.2f z_R', z_vec(zi)/zr));
     xlabel('x / w_0'); ylabel('y / w_0');
 
     drawnow;
@@ -126,14 +132,14 @@ end
 %% ===================================================================
 %%  SECTION 2: Hankel-Laguerre Propagation (2 types: H1, H2)
 %% ===================================================================
-l_mode = 2;
+l_mode = 8;
 p_mode = 0;
 
 beam_l1 = HankelLaguerre(w0, lambda, l_mode, p_mode, 1);
 beam_l2 = HankelLaguerre(w0, lambda, l_mode, p_mode, 2);
 
-field_l1 = beam_l1.opticalField(X, Y, 0);
-field_l2 = beam_l2.opticalField(X, Y, 0);
+field_l1 = beam_l1.opticalField(X, Y, 0) .* mask;
+field_l2 = beam_l2.opticalField(X, Y, 0) .* mask;
 
 % Ray tracing for H^(1) — with axis-crossing awareness
 bundle_l1 = RayBundle.createConcentric(5, 12, 2*w0);
@@ -177,17 +183,12 @@ for zi = 1:Nz+1
     xlabel('x / w_0'); ylabel('y / w_0');
 
     subplot(1,2,2);
-    imagesc(x_axis, y_axis, abs(field_l2).^2);
+    % Coherent sum gives the Laguerre-Gauss (Normal) beam
+    field_lg = field_l1 + field_l2;
+    imagesc(x_axis, y_axis, abs(field_lg).^2);
     set(gca, 'YDir', 'normal');
     colormap(hot);
-    hold on;
-    if zi <= size(bundle_l2.x, 3)
-        rx = squeeze(bundle_l2.x(:,:,zi)) / w0;
-        ry = squeeze(bundle_l2.y(:,:,zi)) / w0;
-        plot(rx(:), ry(:), 'y.', 'MarkerSize', 6);
-    end
-    hold off;
-    title(sprintf('H^{(2)}_{%d,%d}  z=%.2f z_R', l_mode, p_mode, z_vec(zi)/zr));
+    title(sprintf('Laguerre-Gauss (Normal)  z=%.2f z_R', z_vec(zi)/zr));
     xlabel('x / w_0'); ylabel('y / w_0');
 
     drawnow;
