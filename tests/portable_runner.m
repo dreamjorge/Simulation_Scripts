@@ -42,6 +42,8 @@ function totalFailed = portable_runner()
         'test_ElegantHermiteBeam.m',
         'test_ElegantLaguerreBeam.m',
         'test_HankelLaguerre.m',
+        'test_HankelHermite.m',
+        'test_HankelRayTracing.m',
         'test_CylindricalRay.m',
         'test_OpticalRay.m',
         'test_AnalysisUtils.m',
