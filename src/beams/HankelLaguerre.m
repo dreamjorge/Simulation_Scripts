@@ -43,7 +43,7 @@ classdef HankelLaguerre < ParaxialBeam
     end
 
     methods
-        function obj = HankelLaguerre(w0, lambda, l, p, hankelType)
+        function obj = HankelLaguerre(w0, lambda, l, p, hankelType, varargin)
             % Constructor
             % w0:         initial beam waist at z = 0 (m)
             % lambda:     wavelength (m)
@@ -54,29 +54,38 @@ classdef HankelLaguerre < ParaxialBeam
             % Legacy constructor (also supported):
             %   HankelLaguerre(r, theta, laguerreParameters, hankelType)
             % Produces .OpticalFieldLaguerre for legacy scripts.
+            %
+            % Note: uses varargin to capture the raw 4th argument in legacy calls,
+            % avoiding Octave parse errors when hankelType is not passed.
 
             % Call superclass constructor first (MATLAB requirement)
             obj = obj@ParaxialBeam();
 
-            % Detect legacy API before touching any arguments.
+            % Detect legacy API by checking the type of the 3rd argument.
             % Legacy: HankelLaguerre(r, theta, laguerreParams, hankelType)
-            %   — arg3 (l) is a LaguerreParameters object
+            %   — arg3 is a LaguerreParameters object
             % Modern: HankelLaguerre(w0, lambda, l, p, hankelType)
-            %   — arg3 (l) is numeric (topological charge)
-            isLegacy = (nargin >= 3 && isa(l, 'LaguerreParameters'));
+            %   — arg3 is numeric (or empty if not provided)
+            % Use inputname(3) to safely detect arg3 without Octave undefined-var errors.
+            if nargin >= 3
+                thirdArgName = inputname(3);
+                isLegacy = ~isempty(thirdArgName) && isa(l, 'LaguerreParameters');
+            else
+                isLegacy = false;
+            end
 
             if isLegacy
-                % Legacy API: save raw hankelType before applying any defaults.
-                % In legacy 4-arg form: arg4 = hankelType directly.
-                if nargin >= 4
-                    raw_hankelType_arg = hankelType;
+                % Legacy API: arg4 is hankelType (captured via varargin{1}).
+                % arg3 is LaguerreParameters (passed as 'l' in this signature).
+                if nargin >= 4 && ~isempty(varargin)
+                    raw_hankelType_arg = varargin{1};
                 else
                     raw_hankelType_arg = [];
                 end
-                % No defaults needed for l and p in legacy; they come from laguerreParams.
+                % hankelType, l, p are from the legacy call signature; set defaults for safety.
                 if nargin < 4, hankelType = 1; end
             else
-                % Modern API: apply sequential defaults for optional args.
+                % Modern API.
                 raw_hankelType_arg = [];
                 if nargin < 5, hankelType = 1; end
                 if nargin < 4, p = 0; end
