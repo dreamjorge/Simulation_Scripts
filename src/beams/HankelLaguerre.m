@@ -134,6 +134,8 @@ classdef HankelLaguerre < ParaxialBeam
                 p_out = laguerreParams.p;
                 if nargin >= 4
                     hankelType_out = p;
+                else
+                    hankelType_out = 1; % default when not provided
                 end
             else
                 % Modern path: HankelLaguerre(w0, lambda, l, p, hankelType)
