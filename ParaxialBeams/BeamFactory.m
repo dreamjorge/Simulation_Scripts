@@ -19,13 +19,17 @@ classdef BeamFactory
     %                         Name-Value: 'l' (default 0), 'p' (default 0)
     %   'hankel'            — HankelLaguerre(w0, lambda, l, p, hankelType)
     %                         Name-Value: 'l' (default 0), 'p' (default 0),
-    %                                     'type' (default 1)
+    %                                     'type' (default 1, values: 1 or 2)
+    %   'hankel_hermite'    — HankelHermite(w0, lambda, n, m, hankelType)
+    %                         Name-Value: 'n' (default 0), 'm' (default 0),
+    %                                     'type' (default 11, values: 11, 12, 21, 22)
     %
     % Examples:
     %   beam = BeamFactory.create('gaussian', 100e-6, 632.8e-9);
     %   beam = BeamFactory.create('hermite', 100e-6, 632.8e-9, 'n', 2, 'm', 1);
     %   beam = BeamFactory.create('laguerre', 100e-6, 632.8e-9, 'l', 1, 'p', 0);
     %   beam = BeamFactory.create('hankel', 100e-6, 632.8e-9, 'l', 2, 'type', 1);
+    %   beam = BeamFactory.create('hankel_hermite', 100e-6, 632.8e-9, 'n', 1, 'm', 1, 'type', 11);
     %
     % Extensibility:
     %   To add a new beam type, add a case to the switch in BeamFactory.create().
@@ -70,9 +74,13 @@ classdef BeamFactory
                 case {'hankel', 'hankel_laguerre'}
                     beam = HankelLaguerre(w0, lambda, l, p, htype);
 
+                case {'hankel_hermite', 'hankelh'}
+                    if htype < 10, htype = 11; end
+                    beam = HankelHermite(w0, lambda, n, m, htype);
+
                 otherwise
                     error('BeamFactory:unknownType', ...
-                        'Unknown beam type "%s". Supported: gaussian, hermite, laguerre, elegant_hermite, elegant_laguerre, hankel.', ...
+                        'Unknown beam type "%s". Supported: gaussian, hermite, laguerre, elegant_hermite, elegant_laguerre, hankel, hankel_hermite.', ...
                         type);
             end
         end
@@ -80,7 +88,8 @@ classdef BeamFactory
         function types = supportedTypes()
             % supportedTypes - Return cell array of all supported type names.
             types = {'gaussian', 'hermite', 'laguerre', ...
-                     'elegant_hermite', 'elegant_laguerre', 'hankel'};
+                     'elegant_hermite', 'elegant_laguerre', ...
+                     'hankel', 'hankel_hermite'};
         end
     end
 
