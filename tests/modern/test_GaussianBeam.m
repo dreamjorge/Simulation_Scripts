@@ -16,7 +16,7 @@ beam = GaussianBeam(w0, lambda);
 
 % testFieldGeneration
 field = beam.opticalField(X, Y, 0.01);
-if (size(field) == [64, 64])
+if (isequal(size(field), [64, 64]))
     fprintf('  PASS: field generation\n');
     passed = passed + 1;
 else

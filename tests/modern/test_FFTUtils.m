@@ -186,7 +186,7 @@ end
 
 % test fft2_centered output size
 G_cc = FFTUtils.fft2_centered(g);
-if (size(G_cc) == size(g))
+if (isequal(size(G_cc), size(g)))
     fprintf('  PASS: fft2_centered size\n');
     passed = passed + 1;
 else

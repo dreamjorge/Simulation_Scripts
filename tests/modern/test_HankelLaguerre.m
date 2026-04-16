@@ -26,7 +26,7 @@ end
 % testConstructorHankelType2
 HL2 = HankelLaguerre(w0, lambda, 1, 0, 2);
 field2 = HL2.opticalField(X, Y, 0);
-if (~isempty(field2) && size(field2) == [64, 64])
+if (~isempty(field2) && isequal(size(field2), [64, 64]))
     fprintf('  PASS: constructor hankelType=2\n');
     passed = passed + 1;
 else

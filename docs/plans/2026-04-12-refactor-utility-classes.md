@@ -1,37 +1,37 @@
-# Refactor Completo — `refactor/utility-classes` Implementation Plan
+# Full Refactor — `refactor/utility-classes` Implementation Plan
 
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
-**Goal:** Arreglar todos los issues técnicos del branch refactor/utility-classes antes de hacer PR.
+**Goal:** Fix all technical issues on the refactor/utility-classes branch before creating a PR.
 
 **Architecture:**
-- **GridUtils**: Fix static methods `meshgrid2D` y `freqGrid` para soportar Nx/Ny separados
-- **ElegantHermiteBeam**: Eliminar uso innecesario de `cart2pol` — compute R directamente
-- **Elegant beam naming**: Estandarizar a lowercase `x,y` para coordenadas cartesianas
-- **Backwards-compat wrappers**: Remover `HermiteBeam.hermitePoly()` y `LaguerreParameters.getAssociatedLaguerrePolynomial()`
-- **HankelLaguerre**: Implementar con formula real descubierta en git history
-- **AnalysisUtils.combinedHankelWave**: Decidir si implementar o remover stub
-- **Addons/Addons que llaman a stubs**: getPropagateCylindricalRays y getPropagateRay — SI se usan
-- **Test compatibility**: Reemplazar `exit(0)/exit(1)` con `assert()` para MATLAB compatibilidad
+- **GridUtils**: Fix static methods `meshgrid2D` and `freqGrid` to support separate Nx/Ny
+- **ElegantHermiteBeam**: Remove unnecessary `cart2pol` usage — compute R directly
+- **Elegant beam naming**: Standardize to lowercase `x,y` for Cartesian coordinates
+- **Backwards-compat wrappers**: Remove `HermiteBeam.hermitePoly()` and `LaguerreParameters.getAssociatedLaguerrePolynomial()`
+- **HankelLaguerre**: Implement with the real formula discovered in git history
+- **AnalysisUtils.combinedHankelWave**: Decide whether to implement or remove stub
+- **Addons calling stubs**: getPropagateCylindricalRays and getPropagateRay — ARE used
+- **Test compatibility**: Replace `exit(0)/exit(1)` with `assert()` for MATLAB compatibility
 
 **Tech Stack:** Octave/MATLAB, classdef, (no framework — vanilla scripts)
 
 ---
 
-## Task 1: Investigar HankelLaguerre y archivos relacionados ✅ (COMPLETADO)
+## Task 1: Investigate HankelLaguerre and related files (COMPLETED)
 
-**Investigación completada:**
+**Investigation completed:**
 
-### Archivos que usan getPropagateCylindricalRays:
-- `MainLaguerre.m` — líneas 206, 218
-- `MainLaguerre2.m` — líneas 203, 215
-- `MaineLaguerreForTest.m` — líneas 203, 215
-- `AnalysisExperimentalLaguerre.m` — líneas 207-225
+### Files using getPropagateCylindricalRays:
+- `MainLaguerre.m` — lines 206, 218
+- `MainLaguerre2.m` — lines 203, 215
+- `MaineLaguerreForTest.m` — lines 203, 215
+- `AnalysisExperimentalLaguerre.m` — lines 207-225
 
-### Fórmula real de HankelLaguerre (descubierta en commit 981b7b1):
+### Real HankelLaguerre formula (discovered in commit 981b7b1):
 
 ```matlab
-% Del @HankelLaguerre legacy (MATLAB class folder):
+% From legacy @HankelLaguerre (MATLAB class folder):
 if nh == 1
     Hankel.OpticalFieldLaguerre = LB.OpticalFieldLaguerre + 1i*XLB.OpticalFieldLaguerre;
 elseif nh == 2
@@ -39,19 +39,19 @@ elseif nh == 2
 end
 ```
 
-Donde XLaguerreBeam usa:
-- `exp(-1i*abs(p)*theta)` vs `exp(1i*l*theta)` en fase
-- `XAssociatedLaguerrePolynomial(l,abs(p),xArg)` = `associatedLaguerre(p, l, x)` (orden swapped!)
+Where XLaguerreBeam uses:
+- `exp(-1i*abs(p)*theta)` vs `exp(1i*l*theta)` in phase
+- `XAssociatedLaguerrePolynomial(l,abs(p),xArg)` = `associatedLaguerre(p, l, x)` (args in different order!)
 
 ---
 
-## Task 2: Implementar HankelLaguerre — Formula real
+## Task 2: Implement HankelLaguerre — Real formula
 
 **Files:**
 - Modify: `ParaxialBeams/HankelLaguerre.m`
 - Create: `tests/test_HankelLaguerre.m`
 
-**Step 1: Escribir test primero**
+**Step 1: Write test first**
 
 ```matlab
 #!/usr/bin/env octave
@@ -119,7 +119,7 @@ end
 try
     HL1 = HankelLaguerre(r, theta, params, 1);
     HL2 = HankelLaguerre(r, theta, params, 2);
-    % H1 + H2 should equal 2*LB (imag parts cancel)
+    % H1 + H2 should equal 2*LB (imaginary parts cancel)
     diff = HL1.OpticalFieldLaguerre + HL2.OpticalFieldLaguerre;
     LB = LaguerreBeam(r, theta, params);
     if max(max(abs(diff - 2*LB.OpticalField))) < 1e-10
@@ -146,7 +146,7 @@ Expected: FAIL (current stub throws error)
 
 **Step 2: Implement HankelLaguerre**
 
-Reemplazar todo el contenido de `ParaxialBeams/HankelLaguerre.m`:
+Replace the entire content of `ParaxialBeams/HankelLaguerre.m`:
 
 ```matlab
 classdef HankelLaguerre
@@ -156,7 +156,7 @@ classdef HankelLaguerre
     % Implements: HL^{(p,l)}_1 = LB + 1i*XLG
     %             HL^{(p,l)}_2 = LB - 1i*XLG
     %
-    % Where LB is standard LaguerreBeam and XLG is the Hilbert-transformed
+    % Where LB is the standard LaguerreBeam and XLG is the Hilbert-transformed
     % counterpart with:
     %   - Phase: exp(-1i*p*theta) instead of exp(1i*l*theta)
     %   - Polynomial: AssociatedLaguerre(p, l, x) (args in different order)
@@ -205,7 +205,7 @@ function field = computeHankelField(r, theta, params, hankelType)
     
     % XLG (Hilbert-transformed) field:
     % - Phase uses exp(-1i*p*theta) instead of exp(1i*l*theta)
-    % - Polynomial uses associatedLaguerre(p, l, x) which is what we already have!
+    % - Polynomial uses associatedLaguerre(p, l, x) which is what we already have
     XLG_field = amp .* Lpl .* exp(-1i * p * theta) .* exp(1i * params.PhiPhase) .* GField;
     
     % Combine via Hankel type
@@ -237,14 +237,14 @@ git commit -m "feat(HankelLaguerre): implement Hankel-type LG beam field"
 **Step 1: Fix meshgrid2D static method**
 
 ```matlab
-% ANTES (line 72-75):
+% BEFORE (line 72-75):
 function [X, Y] = meshgrid2D(N, D)
     n = -N/2:N/2-1;
     x = n * (D / N);
     [X, Y] = meshgrid(x, x);
 end
 
-% NUEVO (line 72-79):
+% NEW (line 72-79):
 function [X, Y] = meshgrid2D(Nx, Ny, Dx, Dy)
     % meshgrid2D - Create 2D coordinate grid
     % Supports asymmetric grids when Nx~=Ny or Dx~=Dy
@@ -263,14 +263,14 @@ end
 **Step 2: Fix freqGrid static method**
 
 ```matlab
-% ANTES (line 81-85):
+% BEFORE (line 81-85):
 function [Kx, Ky] = freqGrid(N, D)
     n = -N/2:N/2-1;
     u = n * (1 / D);
     [Kx, Ky] = meshgrid(2*pi*u, 2*pi*u);
 end
 
-% NUEVO (line 81-91):
+% NEW (line 81-91):
 function [Kx, Ky] = freqGrid(Nx, Ny, Dx, Dy)
     % freqGrid - Create frequency domain grid
     % Supports asymmetric grids when Nx~=Ny or Dx~=Dy
@@ -286,16 +286,16 @@ function [Kx, Ky] = freqGrid(Nx, Ny, Dx, Dy)
 end
 ```
 
-**Step 3: Fix polarGrid (llama a meshgrid2D)**
+**Step 3: Fix polarGrid (calls meshgrid2D)**
 
 ```matlab
-% ANTES (line 93-96):
+% BEFORE (line 93-96):
 function [r, theta] = polarGrid(N, D)
     [X, Y] = GridUtils.meshgrid2D(N, D);
     [r, theta] = cart2pol(X, Y);
 end
 
-% NUEVO (line 93-101):
+% NEW (line 93-101):
 function [r, theta] = polarGrid(Nx, Ny, Dx, Dy)
     % polarGrid - Create polar coordinate grid
     % Supports asymmetric grids when Nx~=Ny or Dx~=Dy
@@ -308,10 +308,10 @@ function [r, theta] = polarGrid(Nx, Ny, Dx, Dy)
 end
 ```
 
-**Step 4: Correr tests**
+**Step 4: Run tests**
 
 Run: `octave tests/test_GridUtils.m`
-Expected: PASS (backwards compat mantener N,D funcionando)
+Expected: PASS (backwards compat keeps N,D working)
 
 **Step 5: Commit**
 ```bash
@@ -321,32 +321,32 @@ git commit -m "fix(GridUtils): static methods now support asymmetric grids"
 
 ---
 
-## Task 4: Estandarizar naming en Elegant beams
+## Task 4: Standardize naming in Elegant beams
 
 **Files:**
 - Modify: `ParaxialBeams/ElegantHermiteBeam.m`
 
-**Step 1: Analizar convencion actual**
+**Step 1: Analyze current convention**
 
-- `HermiteBeam`: usa `x`, `y` (lowercase)
-- `ElegantHermiteBeam`: usa `X`, `Y` (uppercase) — INCONSISTENTE
-- `ElegantLaguerreBeam`: usa `r`, `theta` (correcto para cilíndricas)
+- `HermiteBeam`: uses `x`, `y` (lowercase)
+- `ElegantHermiteBeam`: uses `X`, `Y` (uppercase) — INCONSISTENT
+- `ElegantLaguerreBeam`: uses `r`, `theta` (correct for cylindrical)
 
-Elegir convencion: **lowercase** (`x`, `y`) para consistencia con `HermiteBeam`.
+Chosen convention: **lowercase** (`x`, `y`) for consistency with `HermiteBeam`.
 
 **Step 2: Fix ElegantHermiteBeam**
 
 ```matlab
-% ANTES (propiedades, lines 7-8):
+% BEFORE (properties, lines 7-8):
 X               % X coordinate matrix
 Y               % Y coordinate matrix
 
-% NUEVO (propiedades):
+% NEW (properties):
 x               % x coordinate matrix
 y               % y coordinate matrix
 
-% Constructor (lines 12-17) cambiar X,Y por x,y en todo
-% Tambien line 21: argX = sqrt_alpha .* X; -> argX = sqrt_alpha .* x;
+% Constructor (lines 12-17) change X,Y to x,y throughout
+% Also line 21: argX = sqrt_alpha .* X; -> argX = sqrt_alpha .* x;
 % Line 22: argY = sqrt_alpha .* Y; -> argY = sqrt_alpha .* y;
 % Line 29: [R, ~] = cart2pol(X, Y); -> [R, ~] = cart2pol(x, y);
 ```
@@ -359,23 +359,23 @@ git commit -m "refactor(ElegantHermiteBeam): standardize to lowercase x,y"
 
 ---
 
-## Task 5: Eliminar backwards-compat wrappers
+## Task 5: Remove backwards-compat wrappers
 
 **Files:**
-- Modify: `ParaxialBeams/HermiteBeam.m` (remover método estático hermitePoly)
-- Modify: `ParaxialBeams/LaguerreParameters.m` (remover método estático getAssociatedLaguerrePolynomial)
+- Modify: `ParaxialBeams/HermiteBeam.m` (remove static method hermitePoly)
+- Modify: `ParaxialBeams/LaguerreParameters.m` (remove static method getAssociatedLaguerrePolynomial)
 
-**Step 1: Buscar usages de estos wrappers**
+**Step 1: Search for usages of these wrappers**
 
 ```bash
 grep -r "HermiteBeam.hermitePoly\|LaguerreParameters.getAssociatedLaguerrePolynomial" /root/Simulation_Scripts --include="*.m"
 ```
 
-Expected: solo las definiciones (no se usan)
+Expected: only the definitions (not used elsewhere)
 
-**Step 2: Remover wrappers**
+**Step 2: Remove wrappers**
 
-De `HermiteBeam.m` líneas 45-50 remover el bloque completo:
+From `HermiteBeam.m` lines 45-50 remove the entire block:
 ```matlab
 methods (Static)
     function H = hermitePoly(n, x)
@@ -384,7 +384,7 @@ methods (Static)
 end
 ```
 
-De `LaguerreParameters.m` líneas 59-62 remover solo `getAssociatedLaguerrePolynomial`:
+From `LaguerreParameters.m` lines 59-62 remove only `getAssociatedLaguerrePolynomial`:
 ```matlab
 methods (Static)
     function wL = getWaist(z, w0, zr, l, p)
@@ -398,7 +398,7 @@ methods (Static)
 end
 ```
 
-**Mantener** `getWaist` (es útil) pero remover `getAssociatedLaguerrePolynomial`.
+**Keep** `getWaist` (it's useful) but remove `getAssociatedLaguerrePolynomial`.
 
 **Step 3: Commit**
 ```bash
@@ -408,29 +408,29 @@ git commit -m "refactor: remove backwards-compat wrappers"
 
 ---
 
-## Task 6: Fix ElegantHermiteBeam cart2pol innecesario
+## Task 6: Fix ElegantHermiteBeam unnecessary cart2pol
 
 **Files:**
 - Modify: `ParaxialBeams/ElegantHermiteBeam.m`
 
-**Step 1: Analizar**
+**Step 1: Analyze**
 
-El código actual (línea 29):
+The current code (line 29):
 ```matlab
 [R, ~] = cart2pol(X, Y);
 GB = GaussianBeam(R, params);
 ```
 
-Pero `GaussianBeam` recibe `r` (radial), no necesita `theta`. El `cart2pol` computa theta que se descarta.
+But `GaussianBeam` receives `r` (radial), it doesn't need `theta`. The `cart2pol` computes theta which is discarded.
 
-**Step 2: Compute R directamente**
+**Step 2: Compute R directly**
 
 ```matlab
-% ANTES:
+% BEFORE:
 [R, ~] = cart2pol(X, Y);
 GB = GaussianBeam(R, params);
 
-% NUEVO:
+% NEW:
 R = sqrt(X.^2 + Y.^2);
 GB = GaussianBeam(R, params);
 ```
@@ -443,29 +443,29 @@ git commit -m "fix(ElegantHermiteBeam): compute radius directly instead of cart2
 
 ---
 
-## Task 7: Test compatibility — reemplazar exit() con assert()
+## Task 7: Test compatibility — replace exit() with assert()
 
 **Files:**
-- Modify: `tests/*.m` (todos los archivos de test)
+- Modify: `tests/*.m` (all test files)
 
-**Step 1: Reemplazar exit() con assert()**
+**Step 1: Replace exit() with assert()**
 
-Patrón a buscar en cada test file:
+Pattern to search for in each test file:
 ```matlab
-% ANTES:
+% BEFORE:
 if failed == 0
     exit(0);
 else
     exit(1);
 end
 
-% NUEVO:
+% NEW:
 if failed ~= 0
     error('Tests failed: %d/%d', failed, passed + failed);
 end
 ```
 
-Hacerlo para todos los test files:
+Apply to all test files:
 - test_all.m
 - test_GridUtils.m
 - test_FFTUtils.m
@@ -490,35 +490,35 @@ git commit -m "test: replace exit() with assert() for MATLAB compatibility"
 
 ---
 
-## Task 8: Revisar AnalysisUtils.combinedHankelWave
+## Task 8: Review AnalysisUtils.combinedHankelWave
 
 **Files:**
 - Analyze: `ParaxialBeams/AnalysisUtils.m`
-- Analyze: `ParaxialBeams/HankelLaguerre.m` (note sobre combinedHankelWave)
+- Analyze: `ParaxialBeams/HankelLaguerre.m` (note about combinedHankelWave)
 
-**Step 1: Buscar usages**
+**Step 1: Search for usages**
 
 ```bash
 grep -r "combinedHankelWave" /root/Simulation_Scripts --include="*.m"
 ```
 
-**Step 2: Si no se usa**
+**Step 2: If unused**
 
-Este stub hace referencia a `HankelHermiteSlices.m`. No se encontró en el código actual. Remover el stub y su comentario de error.
+This stub references `HankelHermiteSlices.m`. It was not found in the current code. Remove the stub and its error comment.
 
 ---
 
-## Task 9: Run full test suite y verification
+## Task 9: Run full test suite and verification
 
-**Step 1: Correr todos los tests**
+**Step 1: Run all tests**
 
 ```bash
 cd /root/Simulation_Scripts && octave tests/test_all.m
 ```
 
-Expected: Todos PASS
+Expected: All PASS
 
-**Step 2: Verificar coverage**
+**Step 2: Verify coverage**
 
 ```bash
 octave tests/run_coverage.m
@@ -528,21 +528,21 @@ octave tests/run_coverage.m
 
 ## Pre-PR Checklist
 
-- [ ] HankelLaguerre implementado y testeado
-- [ ] GridUtils static methods fix con backwards compat
-- [ ] ElegantHermiteBeam naming (x,y) y cart2pol fix
-- [ ] Backwards-compat wrappers removidos
-- [ ] Tests con error() en vez de exit()
-- [ ] AnalysisUtils.combinedHankelWave stub removido si no se usa
-- [ ] Todos los tests pasando
-- [ ] No nuevas advertencias
+- [ ] HankelLaguerre implemented and tested
+- [ ] GridUtils static methods fixed with backwards compat
+- [ ] ElegantHermiteBeam naming (x,y) and cart2pol fix
+- [ ] Backwards-compat wrappers removed
+- [ ] Tests use error() instead of exit()
+- [ ] AnalysisUtils.combinedHankelWave stub removed if unused
+- [ ] All tests passing
+- [ ] No new warnings
 
 ---
 
-## Riscos
+## Risks
 
-1. **Implementación HankelLaguerre**: La formula real requiere XLaguerreBeam que tiene normalización extra — verificar con scripts reales
-2. **Breaking backwards compat**: GridUtils ahora soporta Nx,Ny,Dx,Dy — signature changed pero con backwards compat
-3. **Breaking backwards compat wrappers**: Los wrappers removidos eran solo para backwards — verificar que no se usen externamente
+1. **HankelLaguerre implementation**: The real formula requires XLaguerreBeam which has extra normalization — verify with actual scripts
+2. **Breaking backwards compat**: GridUtils now supports Nx,Ny,Dx,Dy — signature changed but with backwards compat
+3. **Breaking backwards compat wrappers**: The removed wrappers were only for backwards compatibility — verify they are not used externally
 
-**Mitigación**: Tests primero, commits atômicos, validación manual antes de PR.
+**Mitigation**: Tests first, atomic commits, manual validation before PR.
