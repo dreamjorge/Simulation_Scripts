@@ -58,9 +58,34 @@ classdef HankelLaguerre < ParaxialBeam
             % Call superclass constructor first (MATLAB requirement)
             obj = obj@ParaxialBeam();
 
+            % Detect legacy API before touching any arguments.
+            % Legacy: HankelLaguerre(r, theta, laguerreParams, hankelType)
+            %   — arg3 (l) is a LaguerreParameters object
+            % Modern: HankelLaguerre(w0, lambda, l, p, hankelType)
+            %   — arg3 (l) is numeric (topological charge)
+            isLegacy = (nargin >= 3 && isa(l, 'LaguerreParameters'));
+
+            if isLegacy
+                % Legacy API: save raw hankelType before applying any defaults.
+                % In legacy 4-arg form: arg4 = hankelType directly.
+                if nargin >= 4
+                    raw_hankelType_arg = hankelType;
+                else
+                    raw_hankelType_arg = [];
+                end
+                % No defaults needed for l and p in legacy; they come from laguerreParams.
+                if nargin < 4, hankelType = 1; end
+            else
+                % Modern API: apply sequential defaults for optional args.
+                raw_hankelType_arg = [];
+                if nargin < 5, hankelType = 1; end
+                if nargin < 4, p = 0; end
+                if nargin < 3, l = 0; end
+            end
+
             % Determine parameters from input using static helper
             [w0_out, lambda_out, l_out, p_out, hankelType_out, legacyCoords, legacyZ] = ...
-                HankelLaguerre.parseArgs(w0, lambda, l, p, hankelType);
+                HankelLaguerre.parseArgs(w0, lambda, l, p, hankelType, raw_hankelType_arg);
 
             % Initialize parent class state
             if ~isempty(lambda_out)
@@ -106,9 +131,10 @@ classdef HankelLaguerre < ParaxialBeam
     end
 
     methods (Static)
-        function [w0, lambda, l, p, hankelType, legacyCoords, legacyZ] = parseArgs(w0, lambda, l, p, hankelType)
+        function [w0, lambda, l, p, hankelType, legacyCoords, legacyZ] = parseArgs(w0, lambda, l, p, hankelType, raw_hankelType_arg)
             % Static helper to parse constructor arguments
             % Detects legacy API: when l is a LaguerreParameters object
+            if nargin < 6, raw_hankelType_arg = []; end
             w0_out = w0;
             lambda_out = lambda;
             l_out = 0;
@@ -132,8 +158,10 @@ classdef HankelLaguerre < ParaxialBeam
                 lambda_out = laguerreParams.Lambda;
                 l_out = laguerreParams.l;
                 p_out = laguerreParams.p;
-                if nargin >= 4
-                    hankelType_out = p;
+                % raw_hankelType_arg is the 4th arg when provided in the legacy call.
+                % If non-empty, it is the actual hankelType value (not a LaguerreParameters).
+                if ~isempty(raw_hankelType_arg)
+                    hankelType_out = raw_hankelType_arg;
                 else
                     hankelType_out = 1; % default when not provided
                 end
