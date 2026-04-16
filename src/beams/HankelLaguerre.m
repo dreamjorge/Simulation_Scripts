@@ -75,15 +75,15 @@ classdef HankelLaguerre < ParaxialBeam
             end
 
             if isLegacy
-                % Legacy API: arg4 is hankelType (captured via varargin{1}).
-                % arg3 is LaguerreParameters (passed as 'l' in this signature).
-                if nargin >= 4 && ~isempty(varargin)
-                    raw_hankelType_arg = varargin{1};
+                % Legacy API: HankelLaguerre(r, theta, laguerreParams, hankelType)
+                % The 4th legacy arg maps to 'p' in this signature (not varargin).
+                if nargin >= 4
+                    raw_hankelType_arg = p;
                 else
-                    raw_hankelType_arg = [];
+                    raw_hankelType_arg = 1;
                 end
-                % hankelType is the 4th positional arg in legacy calls; default to 1.
-                if nargin < 4, raw_hankelType_arg = 1; end
+                % parseArgs expects hankelType defined; set from extracted value.
+                hankelType = raw_hankelType_arg;
             else
                 % Modern API.
                 raw_hankelType_arg = [];
