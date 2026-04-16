@@ -188,7 +188,7 @@ end
 
 % testSupportedTypes
 types = BeamFactory.supportedTypes();
-if (numel(types) == 6)
+if (numel(types) == 7)
     fprintf('  PASS: supportedTypes count\n');
     passed = passed + 1;
 else
