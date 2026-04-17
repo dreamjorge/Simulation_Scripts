@@ -97,7 +97,7 @@ end
 % At z>0, the radius of curvature R(z) gives non-zero gradient
 z_test = zr / 2;  % away from waist where R(z) is finite
 params = beam.getParameters(z_test);
-R_z = params.RadiusOfCurvature;
+R_z = params.Radius;
 % Analytical phase gradient: dφ/dx = k*x/R(z)
 % Analytical slope: sx = (1/k) * dφ/dx = x/R(z)
 x_test = 20e-6;
