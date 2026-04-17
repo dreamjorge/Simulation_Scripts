@@ -339,7 +339,9 @@ classdef RayTracer < handle
             % Output:
             %   delta  : perturbation size (m)
 
-            delta = max(lambda, abs(x) * 1e-4, abs(y) * 1e-4, w0 * 1e-4);
+            % Nested max() for Octave compatibility (MATLAB also supports 4-arg form,
+            % but Octave requires pairwise chaining: max(a, max(b, max(c, d))).
+            delta = max(lambda, max(abs(x) * 1e-4, max(abs(y) * 1e-4, w0 * 1e-4)));
         end
 
     end % methods (Static)
