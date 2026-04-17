@@ -28,6 +28,7 @@
 | requesting-code-review | Requesting code review |
 
 ## Project Conventions
-- **Tests**: `tests/test_all.m` — run with `octave --no-gui --eval "run('tests/test_all.m')"`
+- **Tests**: `tests/test_all.m` — run with `& "C:\Users\uidn7961\AppData\Local\Programs\GNU Octave\Octave-11.1.0\mingw64\bin\octave-cli.exe" --no-gui --eval "run('tests/test_all.m')"`
+- **Octave Path**: `C:\Users\uidn7961\AppData\Local\Programs\GNU Octave\Octave-11.1.0\mingw64\bin\octave-cli.exe`
 - **CI**: GitHub Actions (`.github/workflows/octave.yml`)
 - **No linting/type-checking**: MATLAB/Octave doesn't have standard tooling
