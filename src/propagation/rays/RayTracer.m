@@ -49,27 +49,66 @@ classdef RayTracer < handle
         
         function [sx, sy] = calculateSlopes(beam, x, y, z)
             % Calculate local phase gradients as slopes dx/dz, dy/dz
-            % We use the analytical phase if available, otherwise numerical
-            
-            % For paraxial beams: dx/dz = (1/k) * d(phase)/dx
-            % In our implementation, we'll use a small finite difference for gradient
-            % because not all beams might have analytical derivatives implemented.
-            
-            delta = 1e-7; % Small perturbation for numerical gradient
-            
-            field = beam.opticalField(x, y, z);
-            phase = unwrap(angle(field));
-            
-            field_dx = beam.opticalField(x + delta, y, z);
-            phase_dx = unwrap(angle(field_dx));
-            
-            field_dy = beam.opticalField(x, y + delta, z);
-            phase_dy = unwrap(angle(field_dy));
-            
-            k = 2*pi / beam.Lambda;
-            
-            sx = (phase_dx - phase) / (delta * k);
-            sy = (phase_dy - phase) / (delta * k);
+            % Uses complex field method: ∇φ = Im(u̅∇u) / |u|²
+            % Falls back to central-difference phase gradient if direct method fails.
+            sx = 0; sy = 0; % ensure output vars exist on early return
+            try
+                [sx, sy] = RayTracer.calculatePhaseGradientComplex(beam, x, y, z);
+            catch
+                % Fallback to central-difference phase gradient
+                w0 = beam.InitialWaist;
+                lambda = beam.Lambda;
+                delta = RayTracer.resolveDelta(x, y, w0, lambda);
+                k = beam.k;
+                field = beam.opticalField(x, y, z);
+                phase = unwrap(angle(field));
+                field_dx = beam.opticalField(x + delta, y, z);
+                phase_dx = unwrap(angle(field_dx));
+                field_dy = beam.opticalField(x, y + delta, z);
+                phase_dy = unwrap(angle(field_dy));
+                sx = (phase_dx - phase) / (delta * k);
+                sy = (phase_dy - phase) / (delta * k);
+            end
+        end
+
+        function [sx, sy] = calculatePhaseGradientComplex(beam, x, y, z)
+            % Compute phase gradient: ∇φ = Im(u̅∇u) / (|u|² + ε)
+            % Uses central difference for spatial derivatives of field.
+            % Returns sx, sy with same units as dx/dz, dy/dz (radians/m).
+            epsilon = 1e-12;
+            w0 = beam.InitialWaist;
+            lambda = beam.Lambda;
+            delta = RayTracer.resolveDelta(x, y, w0, lambda);
+
+            % Field at center and offsets for central difference
+            u0  = beam.opticalField(x, y, z);
+            u_xp = beam.opticalField(x + delta, y, z);
+            u_xm = beam.opticalField(x - delta, y, z);
+            u_yp = beam.opticalField(x, y + delta, z);
+            u_ym = beam.opticalField(x, y - delta, z);
+
+            % Central difference for ∂u/∂x and ∂u/∂y
+            dudx = (u_xp - u_xm) / (2 * delta);
+            dudy = (u_yp - u_ym) / (2 * delta);
+
+            % Phase gradient via complex field identity:
+            % ∇φ = Im(conj(u) * ∇u) / |u|²
+            u0_conj = conj(u0);
+            abs_u0_sq = real(u0_conj .* u0);  % |u|²
+
+            sx_num = imag(u0_conj .* dudx);
+            sy_num = imag(u0_conj .* dudy);
+
+            denominator = abs_u0_sq + epsilon;
+            sx = sx_num ./ denominator;
+            sy = sy_num ./ denominator;
+        end
+
+        function delta = resolveDelta(x, y, w0, lambda)
+            % Adaptive delta based on wavelength and local spatial scale.
+            % Prevents cancellation at small x,y while staying large enough
+            % to capture field curvature at large radii.
+            delta = max(lambda, abs(x) * 1e-4, abs(y) * 1e-4, w0 * 1e-4);
         end
     end
 end
