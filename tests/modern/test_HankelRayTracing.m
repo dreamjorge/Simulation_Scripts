@@ -187,12 +187,14 @@ end
 
 % testAxisCrossingOnlyOnRealCrossing
 % Hermite beams should NOT flip type (no singular axis in Cartesian)
-beam_h_cross = HankelHermite(w0, lambda, 1, 1, 2);
+% Note: hankelType must be 11, 12, 21, or 22 for HankelHermite.
+% ht encodes polar(1)×mode(1) = 11, or use 12 (polar=1, mode=2).
+beam_h_cross = HankelHermite(w0, lambda, 1, 1, 11);
 bundle_h_cross = RayBundle.createGrid(3, 3, w0, w0);
-bundle_h_cross.ht(:) = 2;
+bundle_h_cross.ht(:) = 11;
 try
     bundle_h_cross = HankelRayTracer.propagate(bundle_h_cross, beam_h_cross, zr/5, zr/100, 'RK4');
-    if all(bundle_h_cross.ht(:) == 2)
+    if all(bundle_h_cross.ht(:) == 11)
         fprintf('  PASS: Hermite Hankel does not flip ht (no axis crossing)\n');
         passed = passed + 1;
     else
