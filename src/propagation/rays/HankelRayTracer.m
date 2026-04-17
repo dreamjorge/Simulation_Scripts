@@ -203,7 +203,10 @@ classdef HankelRayTracer < handle
             epsilon = 1e-12;
             w0     = beam.InitialWaist;
             lambda = beam.Lambda;
-            delta  = RayTracer.resolveDelta(x, y, w0, lambda);
+            delta_matrix = RayTracer.resolveDelta(x, y, w0, lambda);
+            % FIX: delta must be scalar for central difference — take max across
+            % the bundle to ensure consistent perturbation scale for all rays
+            delta = max(delta_matrix(:));
 
             uniqueTypes = unique(ht(:));
             sx = zeros(size(x));

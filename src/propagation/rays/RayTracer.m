@@ -279,7 +279,10 @@ classdef RayTracer < handle
             epsilon = 1e-12;  % Tikhonov regularization (see §REGULARIZATION)
             w0     = beam.InitialWaist;
             lambda = beam.Lambda;
-            delta  = RayTracer.resolveDelta(x, y, w0, lambda);  % see §NUMERICAL METHOD
+            delta_matrix = RayTracer.resolveDelta(x, y, w0, lambda);  % see §NUMERICAL METHOD
+            % FIX: delta must be scalar for central difference — take max across
+            % the bundle to ensure consistent perturbation scale across all rays
+            delta = max(delta_matrix(:));
 
             % Evaluate complex field at 5 points for central-difference stencil
             u0  = beam.opticalField(x,      y,      z);
