@@ -106,15 +106,22 @@ else
 end
 
 % test_MixedSlopes
-% RISK: rays with mixed positive/negative slopes from different grid positions
-bundle_mixed = RayBundle.createGrid(4, 1, w0, w0);
-% Calculate slopes at different positions to get mixed signs
-for i = 1:4
-    x_pos = bundle_mixed.x(i,1,1);
-    [sx, sy] = RayTracer.calculateSlopes(beam_g, x_pos, 0, 0);
-    bundle_mixed.sx(i,1,1) = sx;
+% RISK: rays with mixed positive/negative slopes
+% Create a bundle with multiple rays at different positions
+bundle_mixed = RayBundle.createGrid(4, 4, w0, w0);
+% Calculate slopes at different x positions to get mixed signs
+x_grid = zeros(4, 4);
+y_grid = zeros(4, 4);
+for ix = 1:4
+    for iy = 1:4
+        x_pos = bundle_mixed.x(ix, iy, 1);
+        [sx, sy] = RayTracer.calculateSlopes(beam_g, x_pos, 0, 0);
+        x_grid(ix, iy) = sx;
+        y_grid(ix, iy) = sy;
+    end
 end
-bundle_mixed.sy(:,:,1) = 0.0;
+bundle_mixed.sx = x_grid;
+bundle_mixed.sy = y_grid;
 
 bundle_out_mixed = RayTracer.propagate(bundle_mixed, beam_g, 0.001, 0.0001);
 if (all(isfinite(bundle_out_mixed.x(:))) && all(isfinite(bundle_out_mixed.y(:))))
