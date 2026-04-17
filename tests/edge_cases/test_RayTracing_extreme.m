@@ -136,12 +136,18 @@ end
 % test_RayBundle_AddStep_Finite
 % RISK: addStep should maintain finite coordinates
 bundle_test = RayBundle.createGrid(3, 3, w0, w0);
-initial_x = bundle_test.x(:,:,1);
-initial_y = bundle_test.y(:,:,1);
+initial_x = bundle_test.x(:,:,1);  % 3x3
+initial_y = bundle_test.y(:,:,1);  % 3x3
 
-% Manually add a step - wrap in try-catch to diagnose dimension issues
+% Ensure all inputs match the 3x3 dimensions expected by the bundle
+new_x = initial_x + 0.001;   % 3x3
+new_y = initial_y + 0.001;   % 3x3
+new_z = 0.001 * ones(size(initial_x));  % 3x3 to match x,y
+new_sx = 0.1 * ones(size(initial_x));   % 3x3 slopes
+new_sy = 0.1 * ones(size(initial_x));   % 3x3 slopes
+
 try
-    bundle_test.addStep(initial_x + 0.001, initial_y + 0.001, 0.001, 0.1, 0.1);
+    bundle_test.addStep(new_x, new_y, new_z, new_sx, new_sy);
 
     if all(isfinite(bundle_test.x(:))) && all(isfinite(bundle_test.y(:))) && all(isfinite(bundle_test.z(:)))
         fprintf('  PASS: RayBundle.addStep maintains finite coordinates\n');
