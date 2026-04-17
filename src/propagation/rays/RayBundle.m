@@ -43,7 +43,7 @@ classdef RayBundle < handle
             val = sqrt(obj.x(:,:,end).^2 + obj.y(:,:,end).^2);
         end
         function val = get.theta(obj)
-            [~, val] = cart2pol(obj.x(:,:,end), obj.y(:,:,end));
+            [val] = cart2pol(obj.x(:,:,end), obj.y(:,:,end));
         end
         
         function val = get.Nx(obj)
