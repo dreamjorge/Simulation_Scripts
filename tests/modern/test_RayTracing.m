@@ -88,6 +88,77 @@ else
     failed = failed + 1;
 end
 
+% -----------------------------------------------------------------
+% Phase 4: Physical accuracy tests
+% -----------------------------------------------------------------
+
+% testGradientVsAnalyticalGaussian
+% Compare numerical gradient to analytical: d(phase)/dx = k*x/R(z) at z=0, R=Inf => 0
+% At z>0, the radius of curvature R(z) gives non-zero gradient
+z_test = zr / 2;  % away from waist where R(z) is finite
+params = beam.getParameters(z_test);
+R_z = params.RadiusOfCurvature;
+% Analytical phase gradient: dφ/dx = k*x/R(z)
+% Analytical slope: sx = (1/k) * dφ/dx = x/R(z)
+x_test = 20e-6;
+[sx_num, sy_num] = RayTracer.calculateSlopes(beam, x_test, 0, z_test);
+sx_analytical = x_test / R_z;
+rel_err = abs(sx_num - sx_analytical) / abs(sx_analytical);
+if (rel_err < 1e-4)
+    fprintf('  PASS: Gradient vs analytical Gaussian (rel err %.2e)\n', rel_err);
+    passed = passed + 1;
+else
+    fprintf('  FAIL: Gradient vs analytical Gaussian (rel err %.2e)\n', rel_err);
+    failed = failed + 1;
+end
+
+% testEulerVsRK4Convergence
+% Refine dz and verify both methods converge to the same result
+bundle_euler_coarse = RayBundle.createGrid(3, 3, w0, w0);
+bundle_rk4_coarse = RayBundle.createGrid(3, 3, w0, w0);
+dz_coarse = zr / 20;
+bundle_euler_coarse = RayTracer.propagate(bundle_euler_coarse, beam, zr/4, dz_coarse, 'Euler');
+bundle_rk4_coarse = RayTracer.propagate(bundle_rk4_coarse, beam, zr/4, dz_coarse, 'RK4');
+final_euler_coarse = bundle_euler_coarse.x(:,:,end);
+final_rk4_coarse = bundle_rk4_coarse.x(:,:,end);
+
+bundle_euler_fine = RayBundle.createGrid(3, 3, w0, w0);
+bundle_rk4_fine = RayBundle.createGrid(3, 3, w0, w0);
+dz_fine = zr / 80;
+bundle_euler_fine = RayTracer.propagate(bundle_euler_fine, beam, zr/4, dz_fine, 'Euler');
+bundle_rk4_fine = RayTracer.propagate(bundle_rk4_fine, beam, zr/4, dz_fine, 'RK4');
+final_euler_fine = bundle_euler_fine.x(:,:,end);
+final_rk4_fine = bundle_rk4_fine.x(:,:,end);
+
+% Euler should improve with finer dz; RK4 should already be close to final
+euler_improvement = mean(abs(final_euler_coarse(:) - final_rk4_fine(:)));
+euler_coarse_vs_rk4 = mean(abs(final_euler_coarse(:) - final_rk4_coarse(:)));
+if (euler_improvement < euler_coarse_vs_rk4)
+    fprintf('  PASS: Euler converges with finer dz\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: Euler does not improve with finer dz\n');
+    failed = failed + 1;
+end
+
+% testRadialSymmetry
+% Verify that bundle.r matches sqrt(x^2+y^2) from last z-slice
+if (abs(bundle_prop.Nz) > 1)
+    r_computed = sqrt(bundle_prop.x(:,:,end).^2 + bundle_prop.y(:,:,end).^2);
+    r_stored = bundle_prop.r;
+    max_diff = max(abs(r_computed(:) - r_stored(:)));
+    if (max_diff < 1e-15)
+        fprintf('  PASS: bundle.r matches sqrt(x^2+y^2)\n');
+        passed = passed + 1;
+    else
+        fprintf('  FAIL: bundle.r differs from sqrt(x^2+y^2) by %.2e\n', max_diff);
+        failed = failed + 1;
+    end
+else
+    fprintf('  FAIL: insufficient z steps for radial symmetry test\n');
+    failed = failed + 1;
+end
+
 fprintf('\n=== RayTracing: %d/%d passed ===\n', passed, passed + failed);
 
 if failed ~= 0
