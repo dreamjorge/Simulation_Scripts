@@ -94,5 +94,38 @@ classdef RayBundle < handle
             y_line = [zeros(1, N), vals];
             bundle = RayBundle(x_line, y_line, z0);
         end
+
+        function bundle = createCircularContour(Ntheta, radius, z0, x0, y0)
+            if nargin < 3, z0 = 0; end
+            if nargin < 4, x0 = 0; end
+            if nargin < 5, y0 = 0; end
+
+            theta = linspace(0, 2*pi, Ntheta + 1);
+            theta(end) = [];
+            [X, Y] = pol2cart(theta, radius * ones(size(theta)));
+            bundle = RayBundle(X + x0, Y + y0, z0);
+        end
+
+        function bundle = createRectangularContour(pointsPerEdge, width, height, z0, x0, y0)
+            if nargin < 4, z0 = 0; end
+            if nargin < 5, x0 = 0; end
+            if nargin < 6, y0 = 0; end
+
+            top_x = linspace(-width/2, width/2, pointsPerEdge);
+            top_y = (height/2) * ones(1, pointsPerEdge);
+
+            right_x = (width/2) * ones(1, pointsPerEdge);
+            right_y = linspace(height/2, -height/2, pointsPerEdge);
+
+            bottom_x = linspace(width/2, -width/2, pointsPerEdge);
+            bottom_y = (-height/2) * ones(1, pointsPerEdge);
+
+            left_x = (-width/2) * ones(1, pointsPerEdge);
+            left_y = linspace(-height/2, height/2, pointsPerEdge);
+
+            X = [top_x, right_x, bottom_x, left_x] + x0;
+            Y = [top_y, right_y, bottom_y, left_y] + y0;
+            bundle = RayBundle(X, Y, z0);
+        end
     end
 end
