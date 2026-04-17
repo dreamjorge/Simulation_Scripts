@@ -7,8 +7,8 @@
 %   - HankelLaguerre: r=0, theta=0, z=0, l=0, p=0
 %   - RayTracing: zero slope, negative slope, origin, extreme radial
 
-repoRoot = fileparts(fileparts(mfilename('fullpath')));
-testDir = fullfile(repoRoot, 'tests', 'edge_cases');
+repoRoot = fileparts(fileparts(fileparts(mfilename('fullpath'))));
+testDir = fileparts(mfilename('fullpath'));
 
 fprintf('==============================================\n');
 fprintf('   Edge Case Test Suite - Portable Runner\n');
@@ -61,5 +61,3 @@ fprintf('==============================================\n');
 fprintf('Test files executed: %d\n', numel(edgeTests));
 fprintf('Note: See individual test output above for pass/fail counts\n');
 fprintf('==============================================\n');
-
-end

@@ -52,10 +52,12 @@ classdef HankelRayTracer < handle
 
                 z1 = z0 + dz;
 
-                % Axis-crossing check: if r changed sign, flip H^(2) -> H^(1)
-                r1 = sqrt(x1.^2 + y1.^2);
+                % Axis-crossing check: if ray crossed optical axis, flip H^(2) -> H^(1)
+                % The determinant (x0*y1 - x1*y0) changes sign when the ray segment
+                % crosses the origin. This is robust to grazing angles where r never
+                % actually reaches zero.
                 ht1 = ht0;
-                crossed = (r0 > 0) & (r1 < r0) & (r1 < 1e-12);
+                crossed = (x0.*y1 - x1.*y0) < 0;
                 ht1(crossed & (ht0 == 2)) = 1;
 
                 bundle.addStep(x1, y1, z1, sx, sy, ht1);
