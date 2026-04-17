@@ -197,50 +197,43 @@ classdef HankelRayTracer < handle
             % branch (H^(1) vs H^(2)). We group rays by their current
             % ht value and evaluate the corresponding field for each group.
             %
-            % The gradient method is identical to RayTracer
-            % (complex field phase gradient), but applied per-type.
-
-            epsilon = 1e-12;
-            w0     = beam.InitialWaist;
-            lambda = beam.Lambda;
-            delta_matrix = RayTracer.resolveDelta(x, y, w0, lambda);
-            % FIX: delta must be scalar for central difference — take max across
-            % the bundle to ensure consistent perturbation scale for all rays
-            delta = max(delta_matrix(:));
+            % For beams WITH vortex (HankelLaguerre with l ≠ 0), we use
+            % polar-coordinate gradient (calculatePhaseGradientPolar) to avoid
+            % spurious gradients from branch-cut crossing at θ = 0, π.
+            %
+            % For beams WITHOUT vortex, we use the same Cartesian complex
+            % gradient as RayTracer.
 
             uniqueTypes = unique(ht(:));
             sx = zeros(size(x));
             sy = zeros(size(x));
 
-            for t = 1:numel(uniqueTypes)
-                htype = uniqueTypes(t);
-                mask  = (ht == htype);
+            if RayTracer.beamHasVortex(beam)
+                % Vortex beam: use polar-coordinate gradient
+                for t = 1:numel(uniqueTypes)
+                    htype = uniqueTypes(t);
+                    mask  = (ht == htype);
 
-                % Build beam object with correct Hankel branch
-                tempBeam = HankelRayTracer.beamWithType(beam, htype);
+                    % Build beam object with correct Hankel branch
+                    tempBeam = HankelRayTracer.beamWithType(beam, htype);
 
-                % Complex field phase gradient (same as RayTracer)
-                u0   = tempBeam.opticalField(x, y, z);
-                u_xp = tempBeam.opticalField(x+delta, y, z);
-                u_xm = tempBeam.opticalField(x-delta, y, z);
-                u_yp = tempBeam.opticalField(x, y+delta, z);
-                u_ym = tempBeam.opticalField(x, y-delta, z);
+                    % Polar gradient (handles vortex naturally)
+                    [sx_part, sy_part] = RayTracer.calculatePhaseGradientPolar(tempBeam, x, y, z);
 
-                dudx = (u_xp - u_xm) / (2 * delta);
-                dudy = (u_yp - u_ym) / (2 * delta);
+                    sx(mask) = sx_part(mask);
+                    sy(mask) = sy_part(mask);
+                end
+            else
+                for t = 1:numel(uniqueTypes)
+                    htype = uniqueTypes(t);
+                    mask  = (ht == htype);
 
-                u0_conj  = conj(u0);
-                abs_u0_sq = real(u0_conj .* u0);
+                    tempBeam = HankelRayTracer.beamWithType(beam, htype);
+                    [sx_part, sy_part] = RayTracer.calculatePhaseGradientComplex(tempBeam, x, y, z);
 
-                sx_num = imag(u0_conj .* dudx);
-                sy_num = imag(u0_conj .* dudy);
-
-                denom = abs_u0_sq + epsilon;
-                sx_t = sx_num ./ denom;
-                sy_t = sy_num ./ denom;
-
-                sx(mask) = sx_t(mask);
-                sy(mask) = sy_t(mask);
+                    sx(mask) = sx_part(mask);
+                    sy(mask) = sy_part(mask);
+                end
             end
         end
 

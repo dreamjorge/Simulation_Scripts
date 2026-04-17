@@ -299,13 +299,17 @@ classdef RayTracer < handle
             u0_conj  = conj(u0);
             abs_u0_sq = real(u0_conj .* u0);  % |u|² (faster than abs(u0).^2)
 
-            % Phase gradient via Im{u*·∇u} / |u|²
+            % Phase gradient via Im{u*·∇u} / |u|², then convert to
+            % paraxial slopes sx = (1/k) * dphi/dx, sy = (1/k) * dphi/dy.
             sx_num = imag(u0_conj .* dudx);
             sy_num = imag(u0_conj .* dudy);
 
             denominator = abs_u0_sq + epsilon;
-            sx = sx_num ./ denominator;
-            sy = sy_num ./ denominator;
+            dphidx = sx_num ./ denominator;
+            dphidy = sy_num ./ denominator;
+
+            sx = dphidx ./ beam.k;
+            sy = dphidy ./ beam.k;
         end
 
 
@@ -345,6 +349,128 @@ classdef RayTracer < handle
             % Nested max() for Octave compatibility (MATLAB also supports 4-arg form,
             % but Octave requires pairwise chaining: max(a, max(b, max(c, d))).
             delta = max(lambda, max(abs(x) * 1e-4, max(abs(y) * 1e-4, w0 * 1e-4)));
+        end
+
+
+        %% =======================================================================
+        %%  VORTEX BEAM DETECTION
+        %% =======================================================================
+
+        function [hasVortex] = beamHasVortex(beam)
+            % BEAMHASVORTEX — Detect beams with azimuthal phase singularities.
+            %
+            % HankelLaguerre beams with l ≠ 0 carry orbital angular momentum
+            % and have a phase vortex (undefined phase) at the optical axis r=0.
+            %
+            % For these beams, the Cartesian complex gradient fails because
+            % central-difference evaluation u(x±δ, y) lands on different θ
+            % values, crossing the 2π branch cut and producing spurious
+            % gradients at θ = 0, π, etc.
+            %
+            % Inputs:
+            %   beam : ParaxialBeam object
+            %
+            % Output:
+            %   hasVortex : logical true for HankelLaguerre with l ≠ 0
+
+            hasVortex = isa(beam, 'HankelLaguerre') && (beam.l ~= 0);
+        end
+
+
+        %% =======================================================================
+        %%  POLAR PHASE GRADIENT
+        %% =======================================================================
+        %  For beams with azimuthal phase singularities (vortex beams),
+        %  the phase has exp(i·l·θ) structure. Central difference in
+        %  Cartesian (x±δ, y±δ) crosses θ boundaries, producing spurious
+        %  gradients at θ = 0 and θ = π.
+        %
+        %  The polar-coordinate gradient computes ∂φ/∂r and ∂φ/∂θ directly,
+        %  where the vortex is natural and the θ-derivative is periodic
+        %  (no branch cuts).
+        %
+        %  Gradient transform:
+        %    ∇φ = ∂φ/∂r · (x̂/r) + ∂φ/∂θ · (θ̂/r)
+        %       = ∂φ/∂r · (x/r, y/r) + ∂φ/∂θ · (-y/r², x/r²)
+        %
+        %  References:
+        %    - Allen92: L. Allen et al., "Orbital angular momentum of
+        %      light and the transformation of Laguerre-Gaussian laser modes",
+        %      Phys. Rev. A 45, 1992.
+        %% =======================================================================
+
+        function [sx, sy] = calculatePhaseGradientPolar(beam, x, y, z)
+            % CALCULATEPHASEGRADIENTPOLAR — Phase gradient in polar coordinates.
+            %
+            % For HankelLaguerre beams with l ≠ 0, the phase structure
+            % exp(i·l·θ) makes Cartesian central-difference fail at θ=0, π
+            % (branch cut crossing). This method computes ∂φ/∂r and ∂φ/∂θ
+            % in polar coordinates, where the vortex is naturally handled.
+            %
+            % The gradient is transformed to Cartesian via:
+            %   sx = (1/k)·[dφ/dr · x/r - dφ/dθ · y/r²]
+            %   sy = (1/k)·[dφ/dr · y/r + dφ/dθ · x/r²]
+            %
+            % Inputs:
+            %   beam  : HankelLaguerre beam with l ≠ 0
+            %   x, y  : position(s) at which to evaluate (can be matrices)
+            %   z     : axial position
+            %
+            % Output:
+            %   sx, sy : ray slopes (dx/dz, dy/dz) in radians
+
+            epsilon = 1e-12;  % Tikhonov regularization (same as Cartesian method)
+            w0     = beam.InitialWaist;
+            lambda = beam.Lambda;
+            k      = beam.k;
+
+            % Convert to polar coordinates
+            [TH, R] = cart2pol(x, y);
+
+            % Adaptive delta for r-direction (same scaling as Cartesian)
+            delta_r_matrix = RayTracer.resolveDelta(x, y, w0, lambda);
+            delta_r = max(delta_r_matrix(:));
+
+            % For theta-direction: delta_theta = delta_r / R (arc-length equiv)
+            % Cap at pi/4 to avoid sampling more than a quadrant per step
+            delta_theta = min(delta_r ./ R, pi / 4);
+
+            % Evaluate complex field at 5 points in polar coordinates
+            % r-direction perturbations (in Cartesian: radial perturbation)
+            % Use pol2cart to get Cartesian offsets for field evaluation
+            [x_rp, y_rp] = pol2cart(TH, R + delta_r);
+            [x_rm, y_rm] = pol2cart(TH, R - delta_r);
+
+            % theta-direction perturbations (tangential perturbation)
+            [x_tp, y_tp] = pol2cart(TH + delta_theta, R);
+            [x_tm, y_tm] = pol2cart(TH - delta_theta, R);
+
+            u0   = beam.opticalField(x,      y,      z);
+            u_rp = beam.opticalField(x_rp,   y_rp,   z);
+            u_rm = beam.opticalField(x_rm,   y_rm,   z);
+            u_tp = beam.opticalField(x_tp,   y_tp,   z);
+            u_tm = beam.opticalField(x_tm,   y_tm,   z);
+
+            % Central differences in polar coordinates
+            dudr = (u_rp - u_rm) ./ (2 * delta_r);
+            dudt = (u_tp - u_tm) ./ (2 .* delta_theta);
+
+            % Phase gradients via Im{u*·∇u} / |u|²
+            u0_conj  = conj(u0);
+            abs_u0_sq = real(u0_conj .* u0);
+
+            dphidr = imag(u0_conj .* dudr) ./ (abs_u0_sq + epsilon);
+            dphidt = imag(u0_conj .* dudt) ./ (abs_u0_sq + epsilon);
+
+            % Transform polar gradients to Cartesian
+            % ∇φ = ∂φ/∂r · (x/r, y/r) + ∂φ/∂θ · (-y/r², x/r²)
+            % sx = (1/k)·[dphidr·x/R - dphidt·y/R²]
+            % sy = (1/k)·[dphidr·y/R + dphidt·x/R²]
+            R_reg = R + eps;      % avoid division by zero (x/R, y/R terms)
+            R_sq  = R .^ 2 + eps; % avoid division by zero (x/R², y/R² terms)
+
+            sx = (dphidr .* x ./ R_reg - dphidt .* y ./ R_sq) ./ k;
+            sy = (dphidr .* y ./ R_reg + dphidt .* x ./ R_sq) ./ k;
         end
 
     end % methods (Static)
