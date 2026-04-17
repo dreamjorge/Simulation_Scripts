@@ -112,14 +112,15 @@ bundle_mixed = RayBundle.createGrid(4, 4, w0, w0);
 % Calculate slopes at different x positions to get mixed signs
 x_grid = zeros(4, 4);
 y_grid = zeros(4, 4);
-for ix = 1:4
-    for iy = 1:4
-        x_pos = bundle_mixed.x(ix, iy, 1);
-        [sx, sy] = RayTracer.calculateSlopes(beam_g, x_pos, 0, 0);
-        x_grid(ix, iy) = sx;
-        y_grid(ix, iy) = sy;
-    end
-end
+        for ix = 1:4
+            for iy = 1:4
+                x_pos = bundle_mixed.x(ix, iy, 1);
+                y_pos = bundle_mixed.y(ix, iy, 1);
+                [sx, sy] = RayTracer.calculateSlopes(beam_g, x_pos, y_pos, 0);
+                x_grid(ix, iy) = sx;
+                y_grid(ix, iy) = sy;
+            end
+        end
 bundle_mixed.sx = x_grid;
 bundle_mixed.sy = y_grid;
 
@@ -141,7 +142,7 @@ initial_y = bundle_test.y(:,:,1);
 % Manually add a step
 bundle_test.addStep(initial_x + 0.001, initial_y + 0.001, 0.001, 0.1, 0.1);
 
-if (all(isfinite(bundle_test.x(:))) && all(isfinite(bundle_test.y(:))) && all(isfinite(bundle_test.z(:))))
+if all(isfinite(bundle_test.x(:))) && all(isfinite(bundle_test.y(:))) && all(isfinite(bundle_test.z(:)))
     fprintf('  PASS: RayBundle.addStep maintains finite coordinates\n');
     passed = passed + 1;
 else
