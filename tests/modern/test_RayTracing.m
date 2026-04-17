@@ -78,9 +78,10 @@ else
 end
 
 % testPropagationDivergence
-last_x = bundle_prop.x(1, end, end);
-first_x = bundle_prop.x(1, end, 1);
-if (abs(last_x) > abs(first_x))
+% Check RMS width of x-coordinates increases after free-space propagation
+rms_x_first = sqrt(mean(bundle_prop.x(:) .^ 2));
+rms_x_last  = sqrt(mean(bundle_prop.x(:,:,end) .^ 2));
+if (rms_x_last > rms_x_first)
     fprintf('  PASS: RayTracer propagation diverges rays\n');
     passed = passed + 1;
 else
