@@ -52,12 +52,21 @@ classdef HankelRayTracer < handle
 
                 z1 = z0 + dz;
 
-                % Axis-crossing check: if ray crossed optical axis, flip H^(2) -> H^(1)
-                % The determinant (x0*y1 - x1*y0) changes sign when the ray segment
-                % crosses the origin. This is robust to grazing angles where r never
-                % actually reaches zero.
+                % Axis-crossing check via minimum segment distance to origin.
+                % Detects actual geometric crossing rather than orientation change.
+                % The determinant (x0*y1 - x1*y0) only measures orientation,
+                % not whether the segment actually passes through the origin.
+                dx = x1 - x0;
+                dy = y1 - y0;
+                t_param = -(x0 .* dx + y0 .* dy) ./ (dx.^2 + dy.^2 + eps);
+                t_clamped = max(0, min(1, t_param));
+                nearest_x = x0 + t_clamped .* dx;
+                nearest_y = y0 + t_clamped .* dy;
+                min_dist = sqrt(nearest_x.^2 + nearest_y.^2);
+                threshold = max(abs(x0), abs(y0)) * 1e-3;
+                crossed = min_dist < threshold;
+
                 ht1 = ht0;
-                crossed = (x0.*y1 - x1.*y0) < 0;
                 ht1(crossed & (ht0 == 2)) = 1;
 
                 bundle.addStep(x1, y1, z1, sx, sy, ht1);
@@ -66,8 +75,12 @@ classdef HankelRayTracer < handle
         end
 
         function [sx, sy] = calculateSlopes(beam, x, y, z, ht)
-            delta = 1e-7;
-            k = beam.k;
+            % Calculate phase gradients for each Hankel type using complex field method.
+            % For paraxial rays: dx/dz = (1/k) * d(phase)/dx
+            epsilon = 1e-12;
+            w0 = beam.InitialWaist;
+            lambda = beam.Lambda;
+            delta = RayTracer.resolveDelta(x, y, w0, lambda);
 
             uniqueTypes = unique(ht(:));
             sx = zeros(size(x));
@@ -79,17 +92,25 @@ classdef HankelRayTracer < handle
 
                 tempBeam = HankelRayTracer.beamWithType(beam, htype);
 
-                field = tempBeam.opticalField(x, y, z);
-                phase = unwrap(angle(field));
+                % Complex field method: ∇φ = Im(u̅∇u) / |u|²
+                u0  = tempBeam.opticalField(x, y, z);
+                u_xp = tempBeam.opticalField(x + delta, y, z);
+                u_xm = tempBeam.opticalField(x - delta, y, z);
+                u_yp = tempBeam.opticalField(x, y + delta, z);
+                u_ym = tempBeam.opticalField(x, y - delta, z);
 
-                field_dx = tempBeam.opticalField(x + delta, y, z);
-                phase_dx = unwrap(angle(field_dx));
+                dudx = (u_xp - u_xm) / (2 * delta);
+                dudy = (u_yp - u_ym) / (2 * delta);
 
-                field_dy = tempBeam.opticalField(x, y + delta, z);
-                phase_dy = unwrap(angle(field_dy));
+                u0_conj = conj(u0);
+                abs_u0_sq = real(u0_conj .* u0);
 
-                sx_t = (phase_dx - phase) / (delta * k);
-                sy_t = (phase_dy - phase) / (delta * k);
+                sx_num = imag(u0_conj .* dudx);
+                sy_num = imag(u0_conj .* dudy);
+
+                denom = abs_u0_sq + epsilon;
+                sx_t = sx_num ./ denom;
+                sy_t = sy_num ./ denom;
 
                 sx(mask) = sx_t(mask);
                 sy(mask) = sy_t(mask);

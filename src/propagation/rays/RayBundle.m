@@ -10,8 +10,6 @@ classdef RayBundle < handle
         x % x-coordinates (Ny x Nx x Nz)
         y % y-coordinates (Ny x Nx x Nz)
         z % z-coordinates (Ny x Nx x Nz)
-        r % radial coordinates
-        theta % angular coordinates
         sx % dx/dz slopes
         sy % dy/dz slopes
         sz % dz/dz (always 1 for standard paraxial, but tracking for generality)
@@ -19,6 +17,8 @@ classdef RayBundle < handle
     end
     
     properties (Dependent)
+        r     % radial coordinates — computed from x,y at last z-slice
+        theta % angular coordinates — computed from x,y at last z-slice
         Nx
         Ny
         Nz
@@ -32,12 +32,18 @@ classdef RayBundle < handle
                 obj.x = x0;
                 obj.y = y0;
                 obj.z = z0 * ones(size(x0));
-                [obj.theta, obj.r] = cart2pol(obj.x, obj.y);
                 obj.sx = zeros(size(x0));
                 obj.sy = zeros(size(x0));
                 obj.sz = ones(size(x0));
                 obj.ht = ones(size(x0));
             end
+        end
+        
+        function val = get.r(obj)
+            val = sqrt(obj.x(:,:,end).^2 + obj.y(:,:,end).^2);
+        end
+        function val = get.theta(obj)
+            [~, val] = cart2pol(obj.x(:,:,end), obj.y(:,:,end));
         end
         
         function val = get.Nx(obj)
