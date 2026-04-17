@@ -139,14 +139,19 @@ bundle_test = RayBundle.createGrid(3, 3, w0, w0);
 initial_x = bundle_test.x(:,:,1);
 initial_y = bundle_test.y(:,:,1);
 
-% Manually add a step
-bundle_test.addStep(initial_x + 0.001, initial_y + 0.001, 0.001, 0.1, 0.1);
+% Manually add a step - wrap in try-catch to diagnose dimension issues
+try
+    bundle_test.addStep(initial_x + 0.001, initial_y + 0.001, 0.001, 0.1, 0.1);
 
-if all(isfinite(bundle_test.x(:))) && all(isfinite(bundle_test.y(:))) && all(isfinite(bundle_test.z(:)))
-    fprintf('  PASS: RayBundle.addStep maintains finite coordinates\n');
-    passed = passed + 1;
-else
-    fprintf('  FAIL: RayBundle.addStep produces NaN\n');
+    if all(isfinite(bundle_test.x(:))) && all(isfinite(bundle_test.y(:))) && all(isfinite(bundle_test.z(:)))
+        fprintf('  PASS: RayBundle.addStep maintains finite coordinates\n');
+        passed = passed + 1;
+    else
+        fprintf('  FAIL: RayBundle.addStep produces NaN\n');
+        failed = failed + 1;
+    end
+catch ME
+    fprintf('  FAIL: RayBundle.addStep threw error: %s\n', ME.message);
     failed = failed + 1;
 end
 
