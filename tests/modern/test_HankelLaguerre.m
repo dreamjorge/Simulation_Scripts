@@ -95,6 +95,21 @@ else
     failed = failed + 1;
 end
 
+% testHankelType1PlusType2HigherP (regression for p>0)
+HL1_p1 = HankelLaguerre(w0, lambda, 1, 1, 1);
+HL2_p1 = HankelLaguerre(w0, lambda, 1, 1, 2);
+LG_p1  = LaguerreBeam(w0, lambda, 1, 1);
+
+sum_field_p1 = HL1_p1.opticalField(X, Y, 0) + HL2_p1.opticalField(X, Y, 0);
+LG_field_p1  = LG_p1.opticalField(X, Y, 0);
+if (max(max(abs(sum_field_p1 - 2*LG_field_p1))) < 1e-10)
+    fprintf('  PASS: H1 + H2 = 2*LG (p=1)\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: H1 + H2 != 2*LG (p=1)\n');
+    failed = failed + 1;
+end
+
 % testFieldFiniteAtWaist
 f_w1 = HL1.opticalField(X, Y, 0);
 f_w2 = HL2.opticalField(X, Y, 0);

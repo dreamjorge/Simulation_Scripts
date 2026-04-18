@@ -98,6 +98,89 @@ classdef HankelRayTracer < handle
 
     methods (Static)
 
+        function bundleOut = propagateToPlanes(bundleIn, beam, zPlanes, dzInternal, method)
+            % PROPAGATETOPLANES — Propagate with internal substeps, sample at fixed z planes.
+            %
+            % Why this exists:
+            %   Field propagation/visualization is usually rendered on fixed z planes
+            %   (e.g. FFT planes). If ray integration changes internal step size,
+            %   indexing by step can desynchronize rays vs images.
+            %
+            % This method keeps overlay-consistent outputs by always returning ray
+            % states exactly at user-specified z planes, while using dzInternal for
+            % internal integration between planes.
+            %
+            % Inputs:
+            %   bundleIn   : initial RayBundle (uses last slice as starting state)
+            %   beam       : beam model
+            %   zPlanes    : monotonically increasing vector of z sample planes
+            %   dzInternal : internal integration step (scalar > 0)
+            %   method     : 'RK4' (default) or 'Euler'
+            %
+            % Output:
+            %   bundleOut  : RayBundle sampled exactly at zPlanes
+
+            if nargin < 5 || isempty(method), method = 'RK4'; end
+            if nargin < 4 || isempty(dzInternal), dzInternal = []; end
+
+            if isempty(zPlanes)
+                bundleOut = bundleIn;
+                return;
+            end
+
+            zPlanes = zPlanes(:).';
+            if any(diff(zPlanes) < 0)
+                error('zPlanes must be monotonically increasing.');
+            end
+
+            % Current state from input bundle last slice
+            x0 = bundleIn.x(:,:,end);
+            y0 = bundleIn.y(:,:,end);
+            z0 = bundleIn.z(:,:,end);
+            ht0 = bundleIn.ht(:,:,end);
+
+            zStart = z0(1,1);
+            if abs(zPlanes(1) - zStart) > 1e-15
+                error('zPlanes(1) must match initial bundle z (%.6e).', zStart);
+            end
+
+            % Output bundle starts at initial state only (fixed-plane samples)
+            bundleOut = RayBundle(x0, y0, zStart);
+            bundleOut.ht = ht0;
+
+            for kk = 2:numel(zPlanes)
+                zTarget = zPlanes(kk);
+                if zTarget < zStart
+                    error('zPlanes must be increasing and >= initial z.');
+                end
+
+                % Internal step for this interval
+                if isempty(dzInternal)
+                    dzStep = max((zTarget - zStart) / 20, eps);
+                else
+                    dzStep = dzInternal;
+                end
+
+                % Propagate from current state to current target using internal steps
+                bTmp = RayBundle(x0, y0, zStart);
+                bTmp.ht = ht0;
+                bTmp = HankelRayTracer.propagate(bTmp, beam, zTarget, dzStep, method);
+
+                x1 = bTmp.x(:,:,end);
+                y1 = bTmp.y(:,:,end);
+                z1 = bTmp.z(:,:,end);
+                sx1 = bTmp.sx(:,:,end);
+                sy1 = bTmp.sy(:,:,end);
+                ht1 = bTmp.ht(:,:,end);
+
+                bundleOut.addStep(x1, y1, z1, sx1, sy1, ht1);
+
+                % advance state
+                x0 = x1; y0 = y1; z0 = z1; ht0 = ht1;
+                zStart = z0(1,1);
+            end
+        end
+
         function bundle = propagate(bundle, beam, z_final, dz, method)
             % PROPAGATE — Integrate Hankel ray bundle with axis-crossing detection.
             %
@@ -184,6 +267,60 @@ classdef HankelRayTracer < handle
                 ht1 = ht0;
                 ht1(crossed & (ht0 == 2)) = 1;  % flip H^(2) → H^(1)
 
+                % ----------------------------------------------------------------
+                % SUB-STEP CROSSING CORRECTION (smooth H2->H1 transition)
+                %
+                % Problem: flipping only at end-of-step causes a visible kink near
+                % origin (piecewise slope jump) when a ray crosses the axis.
+                %
+                % Fix: for crossed rays, split integration into two sub-steps:
+                %   1) integrate with current branch up to crossing fraction t*
+                %   2) switch branch (2->1) and integrate remaining segment
+                %
+                % This keeps position update smooth through the crossing point and
+                % matches legacy behavior where H^(2) rays pass origin then invert.
+                % ----------------------------------------------------------------
+                if any(crossed(:))
+                    idxCross = find(crossed);
+                    for ii = 1:numel(idxCross)
+                        idx = idxCross(ii);
+
+                        x0i = x0(idx); y0i = y0(idx); z0i = z0(idx);
+                        ht0i = ht0(idx);
+
+                        % Crossing fraction along this step (already clamped [0,1])
+                        tCross = t_clamped(idx);
+                        dz1 = dz * tCross;
+                        dz2 = dz - dz1;
+
+                        % Step 1: up to crossing with original branch
+                        xMid = x0i; yMid = y0i; zMid = z0i;
+                        if dz1 > 0
+                            [xMid, yMid] = HankelRayTracer.singleStep(beam, x0i, y0i, z0i, ht0i, dz1, method);
+                            zMid = z0i + dz1;
+                        end
+
+                        % Step 2: after crossing, force H^(2)->H^(1)
+                        htMid = ht0i;
+                        if ht0i == 2
+                            htMid = 1;
+                        end
+
+                        x1i = xMid; y1i = yMid;
+                        if dz2 > 0
+                            [x1i, y1i] = HankelRayTracer.singleStep(beam, xMid, yMid, zMid, htMid, dz2, method);
+                        end
+
+                        x1(idx) = x1i;
+                        y1(idx) = y1i;
+                        ht1(idx) = htMid;
+
+                        % Effective slope stored for this global step
+                        sx(idx) = (x1i - x0i) / dz;
+                        sy(idx) = (y1i - y0i) / dz;
+                    end
+                end
+
                 bundle.addStep(x1, y1, z1, sx, sy, ht1);
                 z_current = z1;
             end
@@ -207,6 +344,40 @@ classdef HankelRayTracer < handle
             uniqueTypes = unique(ht(:));
             sx = zeros(size(x));
             sy = zeros(size(x));
+
+            % ----------------------------------------------------------------
+            % Smooth H^(2)->H^(1) transition for non-vortex Laguerre (l=0)
+            %
+            % For l=0 there is no azimuthal singularity. A hard branch switch
+            % close to axis can still introduce a visible kink in trajectories.
+            % Blend slopes smoothly near origin for rays currently in H^(2).
+            % ----------------------------------------------------------------
+            if isa(beam, 'HankelLaguerre') && (beam.l == 0)
+                b1 = HankelRayTracer.beamWithType(beam, 1);
+                b2 = HankelRayTracer.beamWithType(beam, 2);
+
+                [sx1, sy1] = RayTracer.calculatePhaseGradientComplex(b1, x, y, z);
+                [sx2, sy2] = RayTracer.calculatePhaseGradientComplex(b2, x, y, z);
+
+                % Transition radius: small core around axis
+                r = sqrt(x.^2 + y.^2);
+                rBlend = max(8 * beam.Lambda, 0.06 * beam.InitialWaist);
+                rWidth = max(2 * beam.Lambda, 0.25 * rBlend);
+                alpha = 0.5 * (1 - tanh((r - rBlend) ./ max(rWidth, eps)));
+
+                % H^(1) rays keep H1 slope; H^(2) rays smoothly morph to H1 near axis
+                mask1 = (ht == 1);
+                mask2 = (ht == 2);
+
+                sxMix = (1 - alpha) .* sx2 + alpha .* sx1;
+                syMix = (1 - alpha) .* sy2 + alpha .* sy1;
+
+                sx(mask1) = sx1(mask1);
+                sy(mask1) = sy1(mask1);
+                sx(mask2) = sxMix(mask2);
+                sy(mask2) = syMix(mask2);
+                return;
+            end
 
             if RayTracer.beamHasVortex(beam)
                 % Vortex beam: use polar-coordinate gradient
@@ -241,6 +412,28 @@ classdef HankelRayTracer < handle
 
 
     methods (Static, Access = private)
+
+        function [x1, y1] = singleStep(beam, x0, y0, z0, ht0, dz, method)
+            % SINGLESTEP — Integrate one ray over a scalar dz.
+            % Used by crossing sub-step correction to split H2->H1 transition.
+
+            if strcmpi(method, 'Euler')
+                [sx, sy] = HankelRayTracer.calculateSlopes(beam, x0, y0, z0, ht0);
+                x1 = x0 + sx .* dz;
+                y1 = y0 + sy .* dz;
+            else
+                [k1x, k1y] = HankelRayTracer.calculateSlopes(beam, x0,              y0,              z0,       ht0);
+                [k2x, k2y] = HankelRayTracer.calculateSlopes(beam, x0+k1x.*dz/2,    y0+k1y.*dz/2,    z0+dz/2,  ht0);
+                [k3x, k3y] = HankelRayTracer.calculateSlopes(beam, x0+k2x.*dz/2,    y0+k2y.*dz/2,    z0+dz/2,  ht0);
+                [k4x, k4y] = HankelRayTracer.calculateSlopes(beam, x0+k3x.*dz,      y0+k3y.*dz,      z0+dz,    ht0);
+
+                sx = (k1x + 2.*k2x + 2.*k3x + k4x) ./ 6;
+                sy = (k1y + 2.*k2y + 2.*k3y + k4y) ./ 6;
+
+                x1 = x0 + sx .* dz;
+                y1 = y0 + sy .* dz;
+            end
+        end
 
         function newBeam = beamWithType(beam, htype)
             % BEAMWITHTYPE — Create a beam copy with a specific Hankel branch.

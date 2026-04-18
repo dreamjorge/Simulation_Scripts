@@ -128,6 +128,27 @@ catch ME
     failed = failed + 1;
 end
 
+% testPropagateToPlanesAlignment
+% Ray samples must align exactly with requested z-planes for field overlay.
+z_planes = linspace(0, zr/10, 9);
+bundle_lp = RayBundle.createCircularContour(12, 0.8*w0);
+bundle_lp.ht(:) = 2;
+try
+    bundle_lp = HankelRayTracer.propagateToPlanes(bundle_lp, beam_l, z_planes, zr/200, 'RK4');
+    z_out = squeeze(bundle_lp.z(1,1,:)).';
+    if numel(z_out) == numel(z_planes) && max(abs(z_out - z_planes)) < 1e-12 && ...
+            all(isfinite(bundle_lp.x(:))) && all(isfinite(bundle_lp.y(:)))
+        fprintf('  PASS: propagateToPlanes keeps z-plane alignment\n');
+        passed = passed + 1;
+    else
+        fprintf('  FAIL: propagateToPlanes z alignment\n');
+        failed = failed + 1;
+    end
+catch ME
+    fprintf('  FAIL: propagateToPlanes (%s)\n', ME.message);
+    failed = failed + 1;
+end
+
 % -----------------------------------------------------------------
 % HankelRayTracePropagator (Strategy pattern)
 % -----------------------------------------------------------------

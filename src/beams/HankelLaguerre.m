@@ -253,6 +253,11 @@ end
 function field = hankelField(r, theta, w0, lambda, l, p, z, hankelType)
     % hankelField - Compute H^(1) or H^(2) Hankel-Laguerre field at depth z.
     %
+    % Project phase convention (same as LaguerreBeam):
+    %   exp(-i*k*z) axial carrier.
+    % Therefore, total LG phase is:
+    %   Phi = -kz + (k*r^2)/(2R) + l*theta - (1+2p+|l|)*psi(z)
+    %
     % Uses two independent solutions of the Laguerre differential equation:
     %   LG  : L_p^|l|(x) — standard associated Laguerre polynomial
     %   XLG : Y_p^|l|(x) — second solution (logarithmic + digamma series)
@@ -296,10 +301,39 @@ function field = hankelField(r, theta, w0, lambda, l, p, z, hankelType)
     Lpl = PolynomialUtils.associatedLaguerre(p, l, arg);
     LB_field = amp .* Lpl .* exp(1i * l * theta) .* exp(-1i * phi_mode) .* carrier;
 
-    % --- XLG field (second solution: xLaguerreG with different radial structure) ---
-    XLpl = PolynomialUtils.xLaguerreG(p, abs(l), arg);
-    truncation = exp(-(r ./ (w0 .* sqrt(2*p + abs(l) + 1))).^50);
-    XLG_field = XLpl .* exp(1i * l * theta) .* exp(-1i * phi_mode) .* carrier .* truncation;
+    % --- XLG field (second solution) ---
+    % Keep amplitude scaling CONSISTENT with LB:
+    %   both use the same Gaussian carrier and (sqrt(2)r/w)^|l| factor.
+    % Use only the second associated-Laguerre solution here (no extra
+    % exp(-x/2)*x^(m/2) envelope), to avoid double-multiplying radial factors.
+    m = abs(l);
+    xNorm = (-1)^(p+1) ./ ((p + (m+1)/2).^(m/2));
+
+    % Avoid log(0) singularities in xAssociatedLaguerre series evaluation.
+    arg_safe = max(arg, 1e-12);
+    XLpl = xNorm .* PolynomialUtils.xAssociatedLaguerre(p, m, arg_safe);
+    XLpl(~isfinite(XLpl)) = 0;
+
+    % Outer truncation: suppress XLG at large r (divergent tail)
+    outer_trunc = exp(-(r ./ (w0 .* sqrt(2*p + abs(l) + 1))).^50);
+
+    % Inner regularization: suppress XLG singularity at r→0.
+    % IMPORTANT: for l=0, a strong inner cutoff can create an artificial
+    % turning radius that prevents H^(2) rays from reaching the axis and
+    % flipping to H^(1) (legacy behavior). Keep l=0 uncut.
+    if m == 0
+        inner_reg = ones(size(r));
+    else
+        % For vortex modes (|l|>0), keep the inner regularizer.
+        % Empirical fit: r_cross ≈ w * (|l|+2p+1)^(-0.35)
+        r_cross = w .* (abs(l) + 2*p + 1).^(-0.35);
+        r_cut   = 0.5 .* r_cross;
+        r_safe  = max(r, eps);
+        inner_reg = exp(-(r_cut ./ r_safe).^6);
+    end
+
+    XLG_field = inner_reg .* outer_trunc .* amp .* XLpl .* exp(1i * l * theta) .* exp(-1i * phi_mode) .* carrier;
+    XLG_field(~isfinite(XLG_field)) = 0;
 
     % Hankel superposition
     if hankelType == 1
@@ -307,4 +341,6 @@ function field = hankelField(r, theta, w0, lambda, l, p, z, hankelType)
     else
         field = LB_field - 1i * XLG_field;   % H^(2): inward
     end
+    field(~isfinite(field)) = 0;
 end
+

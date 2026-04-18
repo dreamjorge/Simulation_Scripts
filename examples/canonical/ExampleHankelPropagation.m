@@ -57,10 +57,12 @@ field_h21 = beam_h21.opticalField(X, Y, 0) .* mask;
 field_h22 = beam_h22.opticalField(X, Y, 0) .* mask;
 
 % Ray tracing for all 4 Hankel types
-rayGrid = GridUtils(8, 8, 2*w0, 2*w0);
-bundle_h11 = RayBundle.createGrid(8, 8, 2*w0, 2*w0);
+% Seed rays on the obstruction contour instead of a generic grid.
+bundle_h11 = RayBundle.createCircularContour(32, R_obs);
 bundle_h11.ht(:) = 11;
-bundle_h11 = HankelRayTracer.propagate(bundle_h11, beam_h11, Dz, dz, 'RK4');
+% Keep ray samples aligned with fixed field z-planes (z_vec), even if
+% internal integration step changes in the future.
+bundle_h11 = HankelRayTracer.propagateToPlanes(bundle_h11, beam_h11, z_vec, dz, 'RK4');
 
 % Video setup
 vidFile = fullfile(scriptPath, 'HankelHermitePropagation.avi');
@@ -132,8 +134,8 @@ end
 %% ===================================================================
 %%  SECTION 2: Hankel-Laguerre Propagation (2 types: H1, H2)
 %% ===================================================================
-l_mode = 8;
-p_mode = 0;
+l_mode = 0;
+p_mode = 10;
 
 beam_l1 = HankelLaguerre(w0, lambda, l_mode, p_mode, 1);
 beam_l2 = HankelLaguerre(w0, lambda, l_mode, p_mode, 2);
@@ -141,14 +143,16 @@ beam_l2 = HankelLaguerre(w0, lambda, l_mode, p_mode, 2);
 field_l1 = beam_l1.opticalField(X, Y, 0) .* mask;
 field_l2 = beam_l2.opticalField(X, Y, 0) .* mask;
 
-% Ray tracing for H^(1) — with axis-crossing awareness
-bundle_l1 = RayBundle.createConcentric(5, 12, 2*w0);
+% Ray tracing for H^(1) — seeded on the obstruction contour
+bundle_l1 = RayBundle.createCircularContour(32, R_obs);
 bundle_l1.ht(:) = 1;
-bundle_l1 = HankelRayTracer.propagate(bundle_l1, beam_l1, Dz, dz, 'RK4');
+% Keep ray samples aligned with fixed field z-planes (z_vec), even if
+% internal integration step changes in the future.
+bundle_l1 = HankelRayTracer.propagateToPlanes(bundle_l1, beam_l1, z_vec, dz, 'RK4');
 
-bundle_l2 = RayBundle.createConcentric(5, 12, 2*w0);
+bundle_l2 = RayBundle.createCircularContour(32, R_obs);
 bundle_l2.ht(:) = 2;
-bundle_l2 = HankelRayTracer.propagate(bundle_l2, beam_l2, Dz, dz, 'RK4');
+bundle_l2 = HankelRayTracer.propagateToPlanes(bundle_l2, beam_l2, z_vec, dz, 'RK4');
 
 vidFile2 = fullfile(scriptPath, 'HankelLaguerrePropagation.avi');
 if GenerateVideo
