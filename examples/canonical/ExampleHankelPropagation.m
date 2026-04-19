@@ -22,8 +22,8 @@ k      = 2*pi / lambda;
 zr     = pi * w0^2 / lambda;
 
 %% Grid setup
-Nx = 256;
-Dx = 8 * w0;
+Nx = 512;
+Dx = 15 * w0;
 simGrid = GridUtils(Nx, Nx, Dx, Dx);
 [X, Y]   = simGrid.create2DGrid();
 [Kx, Ky] = simGrid.createFreqGrid();
@@ -37,7 +37,7 @@ z_vec = (0:Nz) * dz;
 
 %% Obstruction setup (Optional disk in the center)
 R_obs = 0.6 * w0; % Obstruction radius
-mask = (sqrt(X.^2 + Y.^2) > R_obs);
+mask = (sqrt((X-0.95*R_obs).^2 + (Y).^2) > R_obs);
 fprintf('Adding circular obstruction (R = %.1f w0)\n', R_obs/w0);
 
 %% ===================================================================
@@ -58,7 +58,7 @@ field_h22 = beam_h22.opticalField(X, Y, 0) .* mask;
 
 % Ray tracing for all 4 Hankel types
 % Seed rays on the obstruction contour instead of a generic grid.
-bundle_h11 = RayBundle.createCircularContour(32, R_obs);
+bundle_h11 = RayBundle.createCircularContour(32, R_obs, 0, R_obs, 0);
 bundle_h11.ht(:) = 11;
 % Keep ray samples aligned with fixed field z-planes (z_vec), even if
 % internal integration step changes in the future.
@@ -134,7 +134,7 @@ end
 %% ===================================================================
 %%  SECTION 2: Hankel-Laguerre Propagation (2 types: H1, H2)
 %% ===================================================================
-l_mode = 0;
+l_mode = 5;
 p_mode = 10;
 
 beam_l1 = HankelLaguerre(w0, lambda, l_mode, p_mode, 1);
@@ -143,16 +143,19 @@ beam_l2 = HankelLaguerre(w0, lambda, l_mode, p_mode, 2);
 field_l1 = beam_l1.opticalField(X, Y, 0) .* mask;
 field_l2 = beam_l2.opticalField(X, Y, 0) .* mask;
 
-% Ray tracing for H^(1) — seeded on the obstruction contour
-bundle_l1 = RayBundle.createCircularContour(32, R_obs);
-bundle_l1.ht(:) = 1;
-% Keep ray samples aligned with fixed field z-planes (z_vec), even if
-% internal integration step changes in the future.
-bundle_l1 = HankelRayTracer.propagateToPlanes(bundle_l1, beam_l1, z_vec, dz, 'RK4');
+% Finer internal step for high-order modes: the phase structure of
+% LG_{l,p} has (p+1) radial rings and l azimuthal nodes, so the
+% eikonal gradient changes on a shorter scale than for low-order beams.
+dz_internal = dz / 8;
 
-bundle_l2 = RayBundle.createCircularContour(32, R_obs);
+% Ray tracing for H^(1) — seeded on the obstruction contour
+bundle_l1 = RayBundle.createCircularContour(32, 0.95*R_obs, 0, R_obs, 0);
+bundle_l1.ht(:) = 1;
+bundle_l1 = HankelRayTracer.propagateToPlanes(bundle_l1, beam_l1, z_vec, dz_internal, 'RK4');
+
+bundle_l2 = RayBundle.createCircularContour(32, R_obs, 0, R_obs, 0);
 bundle_l2.ht(:) = 2;
-bundle_l2 = HankelRayTracer.propagateToPlanes(bundle_l2, beam_l2, z_vec, dz, 'RK4');
+bundle_l2 = HankelRayTracer.propagateToPlanes(bundle_l2, beam_l2, z_vec, dz_internal, 'RK4');
 
 vidFile2 = fullfile(scriptPath, 'HankelLaguerrePropagation.avi');
 if GenerateVideo

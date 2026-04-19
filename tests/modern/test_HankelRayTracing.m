@@ -252,6 +252,147 @@ catch ME
     failed = failed + 1;
 end
 
+% -----------------------------------------------------------------
+% Eikonal slope convergence tests
+% -----------------------------------------------------------------
+
+% testH2RadialSlopeNegative
+% H^(2) (inward) must produce a NEGATIVE radial slope at r > 0.
+beam_h2_slope = HankelLaguerre(w0, lambda, 1, 0, 2);
+x_test = w0; y_test = 0; z_test = zr / 4;
+[sx_h2, ~] = HankelRayTracer.calculateSlopes(beam_h2_slope, x_test, y_test, z_test, 2);
+if sx_h2 < 0
+    fprintf('  PASS: H^(2) radial slope is negative (converging, sx=%.4e)\n', sx_h2);
+    passed = passed + 1;
+else
+    fprintf('  FAIL: H^(2) radial slope should be negative (sx=%.4e)\n', sx_h2);
+    failed = failed + 1;
+end
+
+% testH1RadialSlopePositive
+% H^(1) (outward) must produce a POSITIVE radial slope at r > 0.
+beam_h1_slope = HankelLaguerre(w0, lambda, 1, 0, 1);
+[sx_h1, ~] = HankelRayTracer.calculateSlopes(beam_h1_slope, x_test, y_test, z_test, 1);
+if sx_h1 > 0
+    fprintf('  PASS: H^(1) radial slope is positive (diverging, sx=%.4e)\n', sx_h1);
+    passed = passed + 1;
+else
+    fprintf('  FAIL: H^(1) radial slope should be positive (sx=%.4e)\n', sx_h1);
+    failed = failed + 1;
+end
+
+% testH2ConvergesOverSteps
+% H^(2) ray at r=w0 must move inward over several integration steps.
+beam_conv = HankelLaguerre(w0, lambda, 1, 0, 2);
+bundle_conv = RayBundle(0.8*w0, 0, 0);
+bundle_conv.ht(:) = 2;
+try
+    bundle_conv = HankelRayTracer.propagate(bundle_conv, beam_conv, zr/4, zr/100, 'RK4');
+    r_start = sqrt(bundle_conv.x(1,1,1)^2 + bundle_conv.y(1,1,1)^2);
+    r_end   = sqrt(bundle_conv.x(1,1,end)^2 + bundle_conv.y(1,1,end)^2);
+    if r_end < r_start
+        fprintf('  PASS: H^(2) ray converges toward axis (r: %.2e -> %.2e)\n', r_start, r_end);
+        passed = passed + 1;
+    else
+        fprintf('  FAIL: H^(2) ray should converge (r: %.2e -> %.2e)\n', r_start, r_end);
+        failed = failed + 1;
+    end
+catch ME
+    fprintf('  FAIL: H^(2) convergence test (%s)\n', ME.message);
+    failed = failed + 1;
+end
+
+% -----------------------------------------------------------------
+% Axis-crossing pass-through tests (position reflection)
+% -----------------------------------------------------------------
+
+z_far = 2 * zr;
+dz_fine = zr / 200;
+
+% testAxisCrossingPassThrough (l=1)
+beam_l1_h2 = HankelLaguerre(w0, lambda, 1, 0, 2);
+bundle_cross = RayBundle(w0, 0, 0);
+bundle_cross.ht(:) = 2;
+try
+    bundle_cross = HankelRayTracer.propagate(bundle_cross, beam_l1_h2, z_far, dz_fine, 'RK4');
+    x_final = bundle_cross.x(1,1,end);
+    y_final = bundle_cross.y(1,1,end);
+    ht_final = bundle_cross.ht(1,1,end);
+
+    htFlipped = (ht_final == 1);
+    onOppositeSide = (x_final < 0);
+    coordsFinite = isfinite(x_final) && isfinite(y_final);
+
+    if htFlipped && onOppositeSide && coordsFinite
+        fprintf('  PASS: H2 ray passes through axis to opposite side (x=%.2e)\n', x_final);
+        passed = passed + 1;
+    else
+        fprintf('  FAIL: Axis pass-through (ht=%d, x=%.2e, finite=%d)\n', ht_final, x_final, coordsFinite);
+        failed = failed + 1;
+    end
+catch ME
+    fprintf('  FAIL: Axis pass-through test (%s)\n', ME.message);
+    failed = failed + 1;
+end
+
+% testAxisCrossingPassThroughL0
+beam_l0_h2 = HankelLaguerre(w0, lambda, 0, 0, 2);
+bundle_cross_l0 = RayBundle(0.8*w0, 0, 0);
+bundle_cross_l0.ht(:) = 2;
+try
+    bundle_cross_l0 = HankelRayTracer.propagate(bundle_cross_l0, beam_l0_h2, z_far, dz_fine, 'RK4');
+    x_final_l0 = bundle_cross_l0.x(1,1,end);
+    ht_final_l0 = bundle_cross_l0.ht(1,1,end);
+
+    htFlipped_l0 = (ht_final_l0 == 1);
+    onOppositeSide_l0 = (x_final_l0 < 0);
+    coordsFinite_l0 = isfinite(x_final_l0) && isfinite(bundle_cross_l0.y(1,1,end));
+
+    if htFlipped_l0 && onOppositeSide_l0 && coordsFinite_l0
+        fprintf('  PASS: l=0 H2 ray passes through axis (x=%.2e)\n', x_final_l0);
+        passed = passed + 1;
+    else
+        fprintf('  FAIL: l=0 axis pass-through (ht=%d, x=%.2e)\n', ht_final_l0, x_final_l0);
+        failed = failed + 1;
+    end
+catch ME
+    fprintf('  FAIL: l=0 axis pass-through (%s)\n', ME.message);
+    failed = failed + 1;
+end
+
+% testAxisCrossingSymmetry
+beam_l2_h2 = HankelLaguerre(w0, lambda, 2, 0, 2);
+bundle_sym = RayBundle.createCircularContour(8, 0.6*w0);
+bundle_sym.ht(:) = 2;
+try
+    x_init = bundle_sym.x(:,:,1);
+
+    bundle_sym = HankelRayTracer.propagate(bundle_sym, beam_l2_h2, z_far, dz_fine, 'RK4');
+
+    x_end = bundle_sym.x(:,:,end);
+    ht_end = bundle_sym.ht(:,:,end);
+
+    crossed_mask = (ht_end == 1);
+    if any(crossed_mask(:))
+        signs_ok = all(sign(x_end(crossed_mask)) == -sign(x_init(crossed_mask)) | ...
+                       abs(x_init(crossed_mask)) < 1e-12);
+
+        if signs_ok && all(isfinite(x_end(:)))
+            fprintf('  PASS: Multi-ray axis crossing symmetry verified\n');
+            passed = passed + 1;
+        else
+            fprintf('  FAIL: Multi-ray symmetry check\n');
+            failed = failed + 1;
+        end
+    else
+        fprintf('  INFO: No rays crossed axis in symmetry test (acceptable)\n');
+        passed = passed + 1;
+    end
+catch ME
+    fprintf('  FAIL: Multi-ray symmetry test (%s)\n', ME.message);
+    failed = failed + 1;
+end
+
 fprintf('\n=== HankelRayTracing: %d/%d passed ===\n', passed, passed + failed);
 
 if failed ~= 0

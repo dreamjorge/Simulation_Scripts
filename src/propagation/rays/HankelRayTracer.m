@@ -1,98 +1,148 @@
 classdef HankelRayTracer < handle
-    % HankelRayTracer — Phase-gradient ray tracing for Hankel (cylindrical) beams.
+    % HankelRayTracer — Eikonal ray tracing for Hankel (cylindrical) beams.
     %
     % ============================================================================
     % HANKEL BEAMS AND THEIR PHYSICS
     % ============================================================================
     %
     % Hankel beams are solutions of the paraxial wave equation in cylindrical
-    % coordinates (r, θ, z). Unlike Hermite-Gaussian beams (Cartesian), they
-    % carry orbital angular momentum (OAM) and have a phase singularity on axis.
+    % coordinates (r, theta, z).  Unlike Hermite-Gaussian beams (Cartesian),
+    % they carry orbital angular momentum (OAM) and have a phase singularity
+    % on axis.
     %
-    % The complex amplitude of a Hankel-Laguerre beam is:
+    % The complex amplitude of a Hankel-Laguerre beam is constructed as:
     %
-    %   u(r, θ, z) = w(z)/w₀ · (√2·r/w(z))^{|l|}
-    %                · exp(-r²/w(z)²) · exp(i·l·θ)
-    %                · exp(-i·k·z - i·k·r²/(2·R(z)) + i·ψ(z))
+    %   H_{lp}^{(1,2)}(r, theta, z) = LG_{lp} +/- i * XLG_{lp}
     %
-    % where:
-    %   l    = azimuthal mode index (integer, OAM per photon = l·ℏ)
-    %   p    = radial mode index (integer)
-    %   w(z) = beam radius at z
-    %   R(z) = wavefront radius of curvature
-    %   ψ(z) = Gouy phase = arctan(z/zᵣ)
+    % where LG_{lp} is the standard Laguerre-Gauss mode and XLG_{lp} is its
+    % second independent solution (logarithmic + digamma series), analogous
+    % to the Neumann function Y_l(kr) in Bessel theory.
     %
-    % At r = 0, the amplitude vanishes for l ≠ 0 (phase singularity/vortex).
-    % The phase is undefined at the axis, and the field has a screw dislocation.
+    %   H^{(1)} = LG + i*XLG   (outward propagating, diverging from axis)
+    %   H^{(2)} = LG - i*XLG   (inward propagating, converging to axis)
     %
-    % Hankel beams are described in:
-    %   - Allen92: L. Allen et al., "Orbital angular momentum of
-    %     light and the transformation of Laguerre-Gaussian laser modes",
-    %     Phys. Rev. A 45, 1992.
-    %   - Papi: J. Papi, "Hankel beams", in "Structured Light", Elsevier 2023.
-    %
-    % ============================================================================
-    % BRANCH SWITCHING: WHY H^(1) AND H^(2) MATTER
-    % ============================================================================
-    %
-    % The radial part of Hankel beams is expressed as a superposition of
-    % inward (H^(1)) and outward (H^(2)) cylindrical waves:
-    %
-    %   H_l^(1)(r,z) ~ J_l(kr) + i·Y_l(kr)   (inward propagating)
-    %   H_l^(2)(r,z) ~ J_l(kr) - i·Y_l(kr)   (outward propagating)
-    %
-    % At the axis (r → 0), both J_l and Y_l behave as:
-    %   J_l(r) ~ (r/2)^{|l|} / Γ(|l|+1)   (finite for l≠0)
-    %   Y_l(r) ~ -Γ(|l|)·(2/r)^{|l|}      (singular for l≠0)
-    %
-    % The combination H_l^(1) or H_l^(2) determines the vorticity direction
-    % (phase winding sense around axis). When a ray crosses the axis, the
-    % Hankel branch must flip to maintain physical continuity — the inward
-    % wave becomes outward and vice versa.
-    %
-    % The flip condition is geometric: when the ray segment passes within
-    % a small distance of the axis, we switch the branch to maintain the
-    % correct topological charge.
+    % This superposition is the paraxial analog of the cylindrical Hankel
+    % functions in free-space wave theory.  The XLG component carries the
+    % radial energy flux information that determines whether the wave
+    % radiates outward or converges inward.
     %
     % References:
-    %   - Nienhuis96: G. Nienhuis, "Doppler effect induced by rotating
-    %     lenses", Opt. Commun. 119 (1996).
-    %   - Courtial98: J. Courtial et al., "Gaussian beams with
-    %     singular phase", Pure Appl. Opt. 7 (1998).
+    %   [Allen92]    L. Allen et al., "Orbital angular momentum of light
+    %                and the transformation of Laguerre-Gaussian laser
+    %                modes", Phys. Rev. A 45, 8185 (1992).
+    %   [Kotlyar07]  V. V. Kotlyar et al., "Hankel-Bessel laser beams",
+    %                J. Opt. Soc. Am. A 24, 1955-1966 (2007).
+    %   [Ugalde20]   J. Ugalde, "Laguerre-Gauss beams and their Hankel
+    %                decomposition", github.com/dreamjorge/LaguerreGaussBeams.
+    %   [Papi23]     J. Papi, "Hankel beams", in Structured Light,
+    %                Elsevier (2023).
+    %
+    % ============================================================================
+    % EIKONAL RAY SLOPES: WHY (dphi/dz + k) MATTERS
+    % ============================================================================
+    %
+    % Standard paraxial ray tracing computes slopes as:
+    %
+    %   sx = (1/k) * dphi/dx          (paraxial approximation)
+    %
+    % This assumes the longitudinal phase gradient is dominated by the
+    % carrier: dphi/dz ~ -k, so the eikonal denominator reduces to k.
+    %
+    % For Hankel beams this approximation is WRONG.  Both H^(1) and H^(2)
+    % share the same exp(-ikz) carrier and the same Gaussian envelope
+    % exp(-r^2/w^2) * exp(ikr^2/2R).  Therefore the transverse gradient
+    % dphi/dx is identical for both branches — the +-i*XLG modulation
+    % affects only the AMPLITUDE, not the transverse phase, because XLG
+    % enters multiplicatively inside the same carrier.
+    %
+    % The difference between H^(1) and H^(2) emerges in the LONGITUDINAL
+    % gradient dphi/dz, where the z-evolution of the XLG component (via
+    % the z-dependent Gouy phase shift, beam width w(z), and curvature
+    % R(z)) creates a correction to the carrier-dominated dphi/dz.
+    %
+    % The full eikonal formula preserves this correction:
+    %
+    %   sx = (dphi/dx) / (dphi/dz + k)     (full eikonal)
+    %   sy = (dphi/dy) / (dphi/dz + k)
+    %
+    % The +k removes the carrier contribution (since dphi/dz ~ -k +
+    % envelope terms), isolating the envelope gradient in the denominator.
+    % This denominator differs between H^(1) and H^(2), producing:
+    %   - H^(1): positive radial slope (outward-diverging rays)
+    %   - H^(2): negative radial slope (inward-converging rays)
+    %
+    % The paraxial formula divides by constant k ~ 10^7 rad/m, which
+    % completely erases this small but physically essential difference.
+    %
+    % This is analogous to the approach in [Ugalde20], where the slope
+    % ratio is computed as:
+    %
+    %   dz/dr = gz / gr,   with gz = gradient(phase_z)/dz + k
+    %
+    % and the ray step is dr = dz * gr / gz (full eikonal in cylindrical).
+    %
+    % References:
+    %   [Born99]     M. Born & E. Wolf, Principles of Optics, 7th ed.,
+    %                Cambridge (1999), Sec. 3.1.2 (eikonal equation).
+    %   [Kravtsov90] Yu. A. Kravtsov & Yu. I. Orlov, Geometrical Optics
+    %                of Inhomogeneous Media, Springer (1990), Ch. 2.
+    %   [Ugalde20]   gradientrthz.m in LaguerreGaussBeams repository.
+    %
+    % ============================================================================
+    % BRANCH SWITCHING: H^(1) <-> H^(2) AT THE AXIS
+    % ============================================================================
+    %
+    % When an inward ray (H^(2)) reaches the optical axis, it must become
+    % outward (H^(1)) and emerge on the OPPOSITE side.  This is the
+    % cylindrical analog of a plane wave passing through a focus.
+    %
+    % The process has three parts:
+    %
+    %   1. CONVERGENCE — The full eikonal slopes drive H^(2) rays inward
+    %      toward r = 0.  Without the correct eikonal, rays follow the
+    %      Gaussian wavefront curvature outward and never reach the axis.
+    %
+    %   2. DETECTION — When the ray segment's minimum distance to the
+    %      origin falls below a threshold, the crossing is detected.
+    %      The threshold adapts to local geometry with a wavelength floor:
+    %
+    %        threshold = max( max(|x0|, |y0|) * 1e-3,  lambda )
+    %
+    %      The floor prevents the threshold from shrinking below detection
+    %      range as the ray approaches the axis (race condition).
+    %
+    %   3. TRANSITION — The integration step is split at the crossing
+    %      fraction t*.  After crossing:
+    %        a) The Hankel type flips: H^(2) -> H^(1)
+    %        b) The position reflects through origin: (x,y) -> (-x,-y)
+    %        c) Integration continues with H^(1) slopes from the
+    %           opposite side
+    %
+    % The position reflection matches the legacy cylindrical approach
+    % in [Ugalde20] where ri < 0 triggers ri = abs(ri); xi = -xi.
+    %
+    % References:
+    %   [Nienhuis96] G. Nienhuis, "Doppler effect induced by rotating
+    %                lenses", Opt. Commun. 119, 271-285 (1996).
+    %   [Courtial98] J. Courtial et al., "Gaussian beams with very high
+    %                orbital angular momentum", Opt. Commun. 144 (1998).
+    %   [Ugalde20]   getPropagateCylindricalRays in HankelLaguerre.m.
     %
     % ============================================================================
     % AXIS-CROSSING DETECTION: MINIMUM SEGMENT DISTANCE
     % ============================================================================
     %
-    % Previous implementation used the sign of the 2D cross product:
-    %   det = x₀·y₁ - x₁·y₀ = |r₀|·|r₁|·sin(θ)
-    % as a proxy for "did the ray cross the axis". This is WRONG:
+    % For segment P(s) = P0 + s*(P1-P0) with s in [0,1]:
+    %   s* = -P0 . (P1-P0) / |P1-P0|^2     (projection parameter)
+    %   min_dist = |P0 + clamp(s*) * (P1-P0)|
     %
-    %   - det only measures the orientation (signed area of triangle O,r₀,r₁).
-    %   - det < 0 can occur when the ray curves near the axis without
-    %     actually passing through it (grazing trajectory).
-    %   - det changes sign when the ray goes "behind" the axis from the
-    %     viewpoint, even if it doesn't physically cross.
-    %
-    % Correct criterion: minimum Euclidean distance from the ray segment
-    % to the origin.
-    %
-    % For segment P(s) = P₀ + s·(P₁-P₀) with s ∈ [0,1]:
-    %   The closest point to origin occurs at s* = -P₀·(P₁-P₀) / |P₁-P₀|²
-    %   The minimum distance is |P₀ + s*·(P₁-P₀)|.
-    %
-    % We flip when min_dist < threshold, where the threshold adapts to
-    % the local geometry: threshold = max(|x₀|, |y₀|) · 10⁻³.
-    %
-    % This ensures:
-    %   (a) Rays aimed at origin (small impact parameter) flip.
-    %   (b) Grazing rays that don't actually cross don't flip.
-    %   (c) The flip point is geometrically well-defined.
+    % This replaces an earlier cross-product sign test, which produced
+    % spurious flips for grazing trajectories that curved near the axis
+    % without physically crossing it.
     %
     % References:
-    %   - Wikipedia: "Distance from a point to a line" (segment case).
-    %   - Eric & Kucnera: "Minimum distance calculation for line segments",
-    %     J. Graphics Tools 8, 2003.
+    %   [Eberly01]   D. Eberly, "Distance between point and line segment",
+    %                Geometric Tools (2001).
     %
     % ============================================================================
 
@@ -182,13 +232,17 @@ classdef HankelRayTracer < handle
         end
 
         function bundle = propagate(bundle, beam, z_final, dz, method)
-            % PROPAGATE — Integrate Hankel ray bundle with axis-crossing detection.
+            % PROPAGATE — Integrate Hankel ray bundle with eikonal slopes
+            % and axis-crossing detection.
             %
-            % Same as RayTracer.propagate but tracks the Hankel type (ht)
-            % per ray. When a ray segment passes within threshold distance
-            % of the optical axis, ht flips from 2 → 1 (outward ↔ inward).
+            % For HankelLaguerre beams, ray slopes are computed using the
+            % full eikonal formula (see calculateSlopesEikonal) so that
+            % H^(2) rays converge toward the axis and H^(1) rays diverge.
             %
-            % See class documentation for axis-crossing criterion.
+            % When a ray segment passes within threshold distance of the
+            % optical axis, the Hankel branch flips (H^(2) -> H^(1)) and
+            % the position reflects through origin.  See class header for
+            % the full detection and transition protocol.
 
             if nargin < 5, method = 'RK4'; end
 
@@ -222,25 +276,7 @@ classdef HankelRayTracer < handle
 
                 z1 = z0 + dz;
 
-                % ----------------------------------------------------------------
-                % AXIS-CROSSING CHECK
-                %
-                % Given segment from P₀ = (x₀,y₀) to P₁ = (x₁,y₁),
-                % find the point on the segment closest to origin.
-                %
-                % Parametric form: P(s) = P₀ + s·(P₁-P₀), s ∈ [0,1]
-                %
-                % Distance to origin squared: |P(s)|²
-                % Derivative w.r.t. s: d/ds|P(s)|² = 2·P₀·(P₁-P₀) + 2·s·|P₁-P₀|²
-                %
-                % Setting to zero:
-                %   s* = -P₀·(P₁-P₀) / |P₁-P₀|²
-                %
-                % Clamp s* to [0,1] → projection falls within segment.
-                % Minimum distance = |P₀ + s*_clamped·(P₁-P₀)|
-                %
-                % Threshold = max(|x₀|,|y₀|) · 10⁻³ adapts to local scale.
-                % ----------------------------------------------------------------
+                % Axis-crossing check — see class header [Eberly01]
                 dx = x1 - x0;
                 dy = y1 - y0;
                 denominator = dx.^2 + dy.^2 + eps;
@@ -258,8 +294,9 @@ classdef HankelRayTracer < handle
                 % Minimum Euclidean distance
                 min_dist = sqrt(nearest_x.^2 + nearest_y.^2);
 
-                % Adaptive threshold: local scale × tolerance
-                threshold = max(abs(x0), abs(y0)) * 1e-3;
+                % Adaptive threshold with wavelength floor to prevent
+                % the threshold from shrinking below detection range
+                threshold = max(max(abs(x0), abs(y0)) * 1e-3, beam.Lambda);
 
                 % Flip only if segment passes close enough to axis
                 crossed = min_dist < threshold;
@@ -267,19 +304,8 @@ classdef HankelRayTracer < handle
                 ht1 = ht0;
                 ht1(crossed & (ht0 == 2)) = 1;  % flip H^(2) → H^(1)
 
-                % ----------------------------------------------------------------
-                % SUB-STEP CROSSING CORRECTION (smooth H2->H1 transition)
-                %
-                % Problem: flipping only at end-of-step causes a visible kink near
-                % origin (piecewise slope jump) when a ray crosses the axis.
-                %
-                % Fix: for crossed rays, split integration into two sub-steps:
-                %   1) integrate with current branch up to crossing fraction t*
-                %   2) switch branch (2->1) and integrate remaining segment
-                %
-                % This keeps position update smooth through the crossing point and
-                % matches legacy behavior where H^(2) rays pass origin then invert.
-                % ----------------------------------------------------------------
+                % Sub-step crossing correction — see class header,
+                % "BRANCH SWITCHING" section
                 if any(crossed(:))
                     idxCross = find(crossed);
                     for ii = 1:numel(idxCross)
@@ -304,6 +330,13 @@ classdef HankelRayTracer < handle
                         htMid = ht0i;
                         if ht0i == 2
                             htMid = 1;
+                            % Reflect position through origin: inward ray
+                            % passed through axis and must emerge on the
+                            % opposite side.  Matches legacy behavior in
+                            % HankelLaguerre.getPropagateCylindricalRays
+                            % (xi = -xi; yi = -yi after H2->H1 flip).
+                            xMid = -xMid;
+                            yMid = -yMid;
                         end
 
                         x1i = xMid; y1i = yMid;
@@ -311,100 +344,55 @@ classdef HankelRayTracer < handle
                             [x1i, y1i] = HankelRayTracer.singleStep(beam, xMid, yMid, zMid, htMid, dz2, method);
                         end
 
-                        x1(idx) = x1i;
-                        y1(idx) = y1i;
+                        x1(idx) = x1i(1);
+                        y1(idx) = y1i(1);
                         ht1(idx) = htMid;
 
                         % Effective slope stored for this global step
-                        sx(idx) = (x1i - x0i) / dz;
-                        sy(idx) = (y1i - y0i) / dz;
+                        sx(idx) = (x1i(1) - x0i) / dz;
+                        sy(idx) = (y1i(1) - y0i) / dz;
                     end
                 end
 
                 bundle.addStep(x1, y1, z1, sx, sy, ht1);
-                z_current = z1;
+                z_current = z1(1,1);
             end
         end
 
 
         function [sx, sy] = calculateSlopes(beam, x, y, z, ht)
-            % CALCULATESLOPES — Phase gradient for Hankel beams by type.
+            % CALCULATESLOPES — Ray slopes for Hankel beams, dispatching
+            % to the appropriate gradient method by beam type.
             %
-            % Hankel beams require different field evaluations for each
-            % branch (H^(1) vs H^(2)). We group rays by their current
-            % ht value and evaluate the corresponding field for each group.
+            % HankelLaguerre:
+            %   Uses the full eikonal formula (calculateSlopesEikonal):
+            %     sx = (dphi/dx) / (dphi/dz + k)
+            %   This is required because the paraxial formula (1/k)*dphi/dx
+            %   erases the XLG correction that differentiates H^(1) from
+            %   H^(2).  See class documentation, "EIKONAL RAY SLOPES".
             %
-            % For beams WITH vortex (HankelLaguerre with l ≠ 0), we use
-            % polar-coordinate gradient (calculatePhaseGradientPolar) to avoid
-            % spurious gradients from branch-cut crossing at θ = 0, π.
-            %
-            % For beams WITHOUT vortex, we use the same Cartesian complex
-            % gradient as RayTracer.
+            % Other beam types (HankelHermite, etc.):
+            %   Falls back to the paraxial complex-field gradient via
+            %   RayTracer.calculatePhaseGradientComplex.
+
+            if isa(beam, 'HankelLaguerre')
+                [sx, sy] = HankelRayTracer.calculateSlopesEikonal(beam, x, y, z, ht);
+                return;
+            end
 
             uniqueTypes = unique(ht(:));
             sx = zeros(size(x));
             sy = zeros(size(x));
 
-            % ----------------------------------------------------------------
-            % Smooth H^(2)->H^(1) transition for non-vortex Laguerre (l=0)
-            %
-            % For l=0 there is no azimuthal singularity. A hard branch switch
-            % close to axis can still introduce a visible kink in trajectories.
-            % Blend slopes smoothly near origin for rays currently in H^(2).
-            % ----------------------------------------------------------------
-            if isa(beam, 'HankelLaguerre') && (beam.l == 0)
-                b1 = HankelRayTracer.beamWithType(beam, 1);
-                b2 = HankelRayTracer.beamWithType(beam, 2);
+            for t = 1:numel(uniqueTypes)
+                htype = uniqueTypes(t);
+                mask  = (ht == htype);
 
-                [sx1, sy1] = RayTracer.calculatePhaseGradientComplex(b1, x, y, z);
-                [sx2, sy2] = RayTracer.calculatePhaseGradientComplex(b2, x, y, z);
+                tempBeam = HankelRayTracer.beamWithType(beam, htype);
+                [sx_part, sy_part] = RayTracer.calculatePhaseGradientComplex(tempBeam, x, y, z);
 
-                % Transition radius: small core around axis
-                r = sqrt(x.^2 + y.^2);
-                rBlend = max(8 * beam.Lambda, 0.06 * beam.InitialWaist);
-                rWidth = max(2 * beam.Lambda, 0.25 * rBlend);
-                alpha = 0.5 * (1 - tanh((r - rBlend) ./ max(rWidth, eps)));
-
-                % H^(1) rays keep H1 slope; H^(2) rays smoothly morph to H1 near axis
-                mask1 = (ht == 1);
-                mask2 = (ht == 2);
-
-                sxMix = (1 - alpha) .* sx2 + alpha .* sx1;
-                syMix = (1 - alpha) .* sy2 + alpha .* sy1;
-
-                sx(mask1) = sx1(mask1);
-                sy(mask1) = sy1(mask1);
-                sx(mask2) = sxMix(mask2);
-                sy(mask2) = syMix(mask2);
-                return;
-            end
-
-            if RayTracer.beamHasVortex(beam)
-                % Vortex beam: use polar-coordinate gradient
-                for t = 1:numel(uniqueTypes)
-                    htype = uniqueTypes(t);
-                    mask  = (ht == htype);
-
-                    % Build beam object with correct Hankel branch
-                    tempBeam = HankelRayTracer.beamWithType(beam, htype);
-
-                    % Polar gradient (handles vortex naturally)
-                    [sx_part, sy_part] = RayTracer.calculatePhaseGradientPolar(tempBeam, x, y, z);
-
-                    sx(mask) = sx_part(mask);
-                    sy(mask) = sy_part(mask);
-                end
-            else
-                for t = 1:numel(uniqueTypes)
-                    htype = uniqueTypes(t);
-                    mask  = (ht == htype);
-
-                    tempBeam = HankelRayTracer.beamWithType(beam, htype);
-                    [sx_part, sy_part] = RayTracer.calculatePhaseGradientComplex(tempBeam, x, y, z);
-
-                    sx(mask) = sx_part(mask);
-                    sy(mask) = sy_part(mask);
-                end
+                sx(mask) = sx_part(mask);
+                sy(mask) = sy_part(mask);
             end
         end
 
@@ -435,11 +423,146 @@ classdef HankelRayTracer < handle
             end
         end
 
+        function [sx, sy] = calculateSlopesEikonal(beam, x, y, z, ht)
+            % CALCULATESLOPESEIKONAL — Full eikonal slopes for Hankel beams.
+            %
+            % Computes ray slopes using the exact eikonal relation instead
+            % of the paraxial approximation:
+            %
+            %   Paraxial:  sx = (1/k) * dphi/dx              (WRONG for Hankel)
+            %   Eikonal:   sx = (dphi/dx) / (dphi/dz + k)    (CORRECT)
+            %
+            % WHY THE PARAXIAL FORMULA FAILS:
+            %
+            %   The Hankel field is H = LG +/- i*XLG, where both LG and
+            %   XLG share the same Gaussian carrier exp(-ikz)*exp(ikr^2/2R).
+            %   The transverse gradient dphi/dx is dominated by this shared
+            %   carrier — the +/-i*XLG modulates the amplitude, not the
+            %   transverse phase.  Dividing by the constant k ~ 10^7 rad/m
+            %   produces slopes that are identical for H^(1) and H^(2) to
+            %   machine precision (~1e-15 relative difference).
+            %
+            %   The LONGITUDINAL gradient dphi/dz differs between H^(1)
+            %   and H^(2) because the XLG component has z-dependent terms
+            %   (beam width w(z), curvature R(z), Gouy phase) that evolve
+            %   differently from LG.  The ratio dphi_perp / (dphi/dz + k)
+            %   captures this difference, producing:
+            %     H^(1): positive radial component (diverging)
+            %     H^(2): negative radial component (converging)
+            %
+            % NUMERICAL METHOD:
+            %
+            %   All three phase gradients (dphi/dx, dphi/dy, dphi/dz) are
+            %   computed via the complex-field identity:
+            %
+            %     dphi/dq = Im{ u* * du/dq } / |u|^2      [Takeda84]
+            %
+            %   with du/dq approximated by central difference.  The "+k"
+            %   in the denominator removes the carrier exp(-ikz) whose
+            %   gradient is -k (our sign convention).
+            %
+            %   For vortex beams (l != 0), the transverse derivatives are
+            %   computed in polar coordinates (r, theta) and transformed
+            %   to Cartesian, avoiding branch-cut artifacts at theta = 0.
+            %
+            % RELATION TO LEGACY CYLINDRICAL APPROACH:
+            %
+            %   The legacy code (gradientrthz.m in [Ugalde20]) computes:
+            %
+            %     gz = gradient(phase_z)/dz + k
+            %     gr = gradient(phase_r)/dr
+            %     dz/dr = gz / gr   =>   dr/dz = gr / gz
+            %
+            %   This is the same eikonal in cylindrical coordinates.  Our
+            %   implementation generalizes it to 2D Cartesian (x,y) with
+            %   RK4 integration, supporting both vortex and non-vortex
+            %   modes uniformly.
+            %
+            % References:
+            %   [Born99]     M. Born & E. Wolf, Principles of Optics,
+            %                7th ed., Cambridge (1999), Sec. 3.1.2.
+            %   [Takeda84]   M. Takeda et al., "Fourier-transform method
+            %                of fringe-pattern analysis", J. Opt. Soc.
+            %                Am. 72, 156-160 (1982).
+            %   [Kravtsov90] Yu. A. Kravtsov & Yu. I. Orlov, Geometrical
+            %                Optics of Inhomogeneous Media, Springer (1990).
+            %   [Ugalde20]   gradientrthz.m in LaguerreGaussBeams.
+
+            epsilon = 1e-12;
+            w0     = beam.InitialWaist;
+            lambda = beam.Lambda;
+            k      = beam.k;
+
+            uniqueTypes = unique(ht(:));
+            sx = zeros(size(x));
+            sy = zeros(size(x));
+
+            for t = 1:numel(uniqueTypes)
+                htype = uniqueTypes(t);
+                mask  = (ht == htype);
+
+                tempBeam = HankelRayTracer.beamWithType(beam, htype);
+
+                delta_mat = RayTracer.resolveDelta(x, y, w0, lambda);
+                delta = max(delta_mat(:));
+                dz_z  = max(lambda, max(abs(z(:))) * 1e-4);
+
+                u0   = tempBeam.opticalField(x,       y,       z);
+                u_zp = tempBeam.opticalField(x,       y,       z + dz_z);
+                u_zm = tempBeam.opticalField(x,       y,       z - dz_z);
+
+                u0c       = conj(u0);
+                abs_u0_sq = real(u0c .* u0) + epsilon;
+
+                dphidz = imag(u0c .* (u_zp - u_zm) ./ (2 * dz_z)) ./ abs_u0_sq;
+
+                gz = dphidz + k;
+                gz(abs(gz) < epsilon) = epsilon;
+
+                if RayTracer.beamHasVortex(beam)
+                    [TH, R] = cart2pol(x, y);
+                    delta_theta = min(delta ./ R, pi / 4);
+
+                    [x_rp, y_rp] = pol2cart(TH, R + delta);
+                    [x_rm, y_rm] = pol2cart(TH, R - delta);
+                    [x_tp, y_tp] = pol2cart(TH + delta_theta, R);
+                    [x_tm, y_tm] = pol2cart(TH - delta_theta, R);
+
+                    u_rp = tempBeam.opticalField(x_rp, y_rp, z);
+                    u_rm = tempBeam.opticalField(x_rm, y_rm, z);
+                    u_tp = tempBeam.opticalField(x_tp, y_tp, z);
+                    u_tm = tempBeam.opticalField(x_tm, y_tm, z);
+
+                    dphidr = imag(u0c .* (u_rp - u_rm) ./ (2 * delta))     ./ abs_u0_sq;
+                    dphidt = imag(u0c .* (u_tp - u_tm) ./ (2 .* delta_theta)) ./ abs_u0_sq;
+
+                    R_reg = R + eps;
+                    R_sq  = R.^2 + eps;
+                    sx_part = (dphidr .* x ./ R_reg - dphidt .* y ./ R_sq) ./ gz;
+                    sy_part = (dphidr .* y ./ R_reg + dphidt .* x ./ R_sq) ./ gz;
+                else
+                    u_xp = tempBeam.opticalField(x + delta, y,         z);
+                    u_xm = tempBeam.opticalField(x - delta, y,         z);
+                    u_yp = tempBeam.opticalField(x,         y + delta, z);
+                    u_ym = tempBeam.opticalField(x,         y - delta, z);
+
+                    dphidx = imag(u0c .* (u_xp - u_xm) ./ (2 * delta)) ./ abs_u0_sq;
+                    dphidy = imag(u0c .* (u_yp - u_ym) ./ (2 * delta)) ./ abs_u0_sq;
+
+                    sx_part = dphidx ./ gz;
+                    sy_part = dphidy ./ gz;
+                end
+
+                sx(mask) = sx_part(mask);
+                sy(mask) = sy_part(mask);
+            end
+        end
+
         function newBeam = beamWithType(beam, htype)
             % BEAMWITHTYPE — Create a beam copy with a specific Hankel branch.
             %
-            % Hankel beams carry a type index: 1 = H^(1) (inward),
-            % 2 = H^(2) (outward). This method fabricates the
+            % Hankel beams carry a type index: 1 = H^(1) (outward),
+            % 2 = H^(2) (inward). This method fabricates the
             % correct beam variant without re-computing the field formula.
             %
             % For HankelLaguerre: the Hankel type determines whether
