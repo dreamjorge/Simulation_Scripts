@@ -309,7 +309,11 @@ end
 z_far = 2 * zr;
 dz_fine = zr / 200;
 
-% testAxisCrossingPassThrough (l=1)
+% testVortexH2Spirals (l=1)
+% For l!=0 the OAM creates a centrifugal barrier: H^(2) rays spiral
+% inward around the axis rather than crossing through it.  The ray
+% converges (r decreases) and rotates azimuthally without triggering
+% the axis-crossing flip.  Verify convergence and finite coords.
 beam_l1_h2 = HankelLaguerre(w0, lambda, 1, 0, 2);
 bundle_cross = RayBundle(w0, 0, 0);
 bundle_cross.ht(:) = 2;
@@ -317,21 +321,19 @@ try
     bundle_cross = HankelRayTracer.propagate(bundle_cross, beam_l1_h2, z_far, dz_fine, 'RK4');
     x_final = bundle_cross.x(1,1,end);
     y_final = bundle_cross.y(1,1,end);
-    ht_final = bundle_cross.ht(1,1,end);
-
-    htFlipped = (ht_final == 1);
-    onOppositeSide = (x_final < 0);
+    r_final = sqrt(x_final^2 + y_final^2);
+    r_init  = w0;
     coordsFinite = isfinite(x_final) && isfinite(y_final);
 
-    if htFlipped && onOppositeSide && coordsFinite
-        fprintf('  PASS: H2 ray passes through axis to opposite side (x=%.2e)\n', x_final);
+    if r_final < r_init && coordsFinite
+        fprintf('  PASS: l=1 H2 ray spirals inward (r: %.2e -> %.2e)\n', r_init, r_final);
         passed = passed + 1;
     else
-        fprintf('  FAIL: Axis pass-through (ht=%d, x=%.2e, finite=%d)\n', ht_final, x_final, coordsFinite);
+        fprintf('  FAIL: l=1 H2 spiral (r: %.2e -> %.2e, finite=%d)\n', r_init, r_final, coordsFinite);
         failed = failed + 1;
     end
 catch ME
-    fprintf('  FAIL: Axis pass-through test (%s)\n', ME.message);
+    fprintf('  FAIL: l=1 H2 spiral test (%s)\n', ME.message);
     failed = failed + 1;
 end
 
