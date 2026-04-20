@@ -505,7 +505,11 @@ classdef HankelRayTracer < handle
 
                 delta_mat = RayTracer.resolveDelta(x, y, w0, lambda);
                 delta = max(delta_mat(:));
-                dz_z  = max(lambda, max(abs(z(:))) * 1e-4);
+                % Sub-wavelength step to resolve the exp(-ikz) carrier.
+                % At dz_z = lambda the carrier wraps by exactly 2*pi,
+                % aliasing its contribution to zero in the central
+                % difference and collapsing gz back to k (paraxial).
+                dz_z  = max(lambda * 0.01, max(abs(z(:))) * 1e-4);
 
                 u0   = tempBeam.opticalField(x,       y,       z);
                 u_zp = tempBeam.opticalField(x,       y,       z + dz_z);
