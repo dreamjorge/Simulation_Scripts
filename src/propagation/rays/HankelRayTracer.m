@@ -505,11 +505,15 @@ classdef HankelRayTracer < handle
 
                 delta_mat = RayTracer.resolveDelta(x, y, w0, lambda);
                 delta = max(delta_mat(:));
-                % Sub-wavelength step to resolve the exp(-ikz) carrier.
-                % At dz_z = lambda the carrier wraps by exactly 2*pi,
-                % aliasing its contribution to zero in the central
-                % difference and collapsing gz back to k (paraxial).
-                dz_z  = max(lambda * 0.01, max(abs(z(:))) * 1e-4);
+                % Fixed sub-wavelength step for the z-derivative.
+                % The carrier exp(-ikz) oscillates with period lambda,
+                % so dz_z must stay well below lambda to resolve it.
+                % Unlike the transverse delta (which can scale with
+                % position because exp(-ikz) doesn't depend on x,y),
+                % the z-perturbation must NOT scale with z.
+                % At lambda/20: k*dz_z = pi/10, derivative accuracy
+                % sin(pi/10)/(pi/10) = 98%.
+                dz_z = lambda / 20;
 
                 u0   = tempBeam.opticalField(x,       y,       z);
                 u_zp = tempBeam.opticalField(x,       y,       z + dz_z);
