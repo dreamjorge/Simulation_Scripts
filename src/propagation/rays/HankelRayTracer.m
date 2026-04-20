@@ -12,8 +12,7 @@ classdef HankelRayTracer < handle
     %
     % The complex amplitude of a Hankel-Laguerre beam is constructed as:
     %
-    %   H_{lp}^{
-  (1, 2)}(r, theta, z) = LG_{lp} +/- i * XLG_{lp}
+    %   H_{lp}^{(1,2)}(r, theta, z) = LG_{lp} +/- i * XLG_{lp}
     %
     % where LG_{lp} is the standard Laguerre-Gauss mode and XLG_{lp} is its
     % second independent solution (logarithmic + digamma series), analogous
