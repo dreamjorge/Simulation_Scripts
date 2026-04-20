@@ -253,41 +253,87 @@ end
 function field = hankelField(r, theta, w0, lambda, l, p, z, hankelType)
     % hankelField - Compute H^(1) or H^(2) Hankel-Laguerre field at depth z.
     %
-    % Both components (LG and XLG) share the same radial amplitude and
-    % Laguerre polynomial; they differ only in the azimuthal phase:
-    %   LG : exp( i*l*theta)
-    %   XLG: exp(-i*p*theta)   <- Hilbert-transform companion
+    % Project phase convention (same as LaguerreBeam):
+    %   exp(-i*k*z) axial carrier.
+    % Therefore, total LG phase is:
+    %   Phi = -kz + (k*r^2)/(2R) + l*theta - (1+2p+|l|)*psi(z)
+    %
+    % Uses two independent solutions of the Laguerre differential equation:
+    %   LG  : L_p^|l|(x) — standard associated Laguerre polynomial
+    %   XLG : Y_p^|l|(x) — second solution (logarithmic + digamma series)
+    %
+    % H^(1) = LG + i*XLG   (outward propagating)
+    % H^(2) = LG - i*XLG   (inward propagating)
+    %
+    % The two solutions have different radial structure, producing genuinely
+    % different wavefront curvature and ray slopes for H^(1) vs H^(2).
+    %
+    % References:
+    %   - Allen92: L. Allen et al., Phys. Rev. A 45, 1992.
+    %   - Papi, "Hankel beams", Structured Light, Elsevier 2023.
 
     k  = 2*pi/lambda;
-    zr = pi * w0^2 / lambda;
+    zr = pi * w0.^2 ./ lambda;
 
-    w   = w0 * sqrt(1 + (z/zr)^2);
-    Rc  = z  * (1 + (zr/z)^2);
-    if z == 0, Rc = Inf; end
-    psi = atan2(z, zr);
+    w   = w0 .* sqrt(1 + (z./zr).^2);
+    Rc  = z  .* (1 + (zr./z).^2);
+    Rc(z == 0) = Inf;
+    gouy = atan2(z, zr);
 
     % Gaussian carrier field u_0(r,z)
     amplitude  = (w0 ./ w) .* exp(-r.^2 ./ w.^2);
     phase_z    = -1i * k * z;
     phase_curv = 1i * k * r.^2 ./ (2 * Rc);
     phase_curv(isinf(Rc)) = 0;
-    phase_gouy = -1i * psi;
+    phase_gouy = -1i * gouy;
     carrier    = amplitude .* exp(phase_z + phase_curv + phase_gouy);
+
+    % Argument for radial polynomials
+    arg = 2 * r.^2 ./ w.^2;
 
     % Standard LG amplitude: (sqrt(2)*r/w)^|l|
     amp  = (sqrt(2) * r ./ w).^abs(l);
 
-    % Associated Laguerre polynomial: L_p^|l|(2*r^2/w^2)
-    Lpl  = PolynomialUtils.associatedLaguerre(p, l, 2 * r.^2 ./ w.^2);
+    % Modal Gouy phase shift: (|l|+2p)*gouy
+    phi_mode = (abs(l) + 2*p) * gouy;
 
-    % Modal Gouy phase shift: (|l|+2p)*psi
-    phi_mode = (abs(l) + 2*p) * psi;
+    % --- LB field (first solution: standard Laguerre polynomial) ---
+    Lpl = PolynomialUtils.associatedLaguerre(p, l, arg);
+    LB_field = amp .* Lpl .* exp(1i * l * theta) .* exp(-1i * phi_mode) .* carrier;
 
-    % Standard LG field
-    LB_field  = amp .* Lpl .* exp( 1i * l * theta) .* exp(-1i * phi_mode) .* carrier;
+    % --- XLG field (second solution) ---
+    % Keep amplitude scaling CONSISTENT with LB:
+    %   both use the same Gaussian carrier and (sqrt(2)r/w)^|l| factor.
+    % Use only the second associated-Laguerre solution here (no extra
+    % exp(-x/2)*x^(m/2) envelope), to avoid double-multiplying radial factors.
+    m = abs(l);
+    xNorm = (-1)^(p+1) ./ ((p + (m+1)/2).^(m/2));
 
-    % XLG (Hilbert-transformed) field — same amplitude, phase uses -p instead of l
-    XLG_field = amp .* Lpl .* exp(-1i * p * theta) .* exp(-1i * phi_mode) .* carrier;
+    % Avoid log(0) singularities in xAssociatedLaguerre series evaluation.
+    arg_safe = max(arg, 1e-12);
+    XLpl = xNorm .* PolynomialUtils.xAssociatedLaguerre(p, m, arg_safe);
+    XLpl(~isfinite(XLpl)) = 0;
+
+    % Outer truncation: suppress XLG at large r (divergent tail)
+    outer_trunc = exp(-(r ./ (w0 .* sqrt(2*p + abs(l) + 1))).^50);
+
+    % Inner regularization: suppress XLG singularity at r→0.
+    % IMPORTANT: for l=0, a strong inner cutoff can create an artificial
+    % turning radius that prevents H^(2) rays from reaching the axis and
+    % flipping to H^(1) (legacy behavior). Keep l=0 uncut.
+    if m == 0
+        inner_reg = ones(size(r));
+    else
+        % For vortex modes (|l|>0), keep the inner regularizer.
+        % Empirical fit: r_cross ≈ w * (|l|+2p+1)^(-0.35)
+        r_cross = w .* (abs(l) + 2*p + 1).^(-0.35);
+        r_cut   = 0.5 .* r_cross;
+        r_safe  = max(r, eps);
+        inner_reg = exp(-(r_cut ./ r_safe).^6);
+    end
+
+    XLG_field = inner_reg .* outer_trunc .* amp .* XLpl .* exp(1i * l * theta) .* exp(-1i * phi_mode) .* carrier;
+    XLG_field(~isfinite(XLG_field)) = 0;
 
     % Hankel superposition
     if hankelType == 1
@@ -295,4 +341,6 @@ function field = hankelField(r, theta, w0, lambda, l, p, z, hankelType)
     else
         field = LB_field - 1i * XLG_field;   % H^(2): inward
     end
+    field(~isfinite(field)) = 0;
 end
+

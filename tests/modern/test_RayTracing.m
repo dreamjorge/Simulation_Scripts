@@ -50,12 +50,60 @@ else
 end
 
 % testRayTracerSlopesOffCenterAtZ0
+zr = pi * w0^2 / lambda;  % Rayleigh range — defined early for tests below
 [sx1, sy1] = RayTracer.calculateSlopes(beam, 50e-6, 0, 0);
 if (abs(sx1) < 1e-6 && abs(sy1) < 1e-6)
     fprintf('  PASS: RayTracer slopes off-center at z=0\n');
     passed = passed + 1;
 else
     fprintf('  FAIL: RayTracer slopes off-center at z=0\n');
+    failed = failed + 1;
+end
+
+% testCircularContourSeedsRaysOnObstructionBoundary
+R_obs = 0.6 * w0;
+bundle_contour = RayBundle.createCircularContour(12, R_obs);
+radii = sqrt(bundle_contour.x(:,:,1).^2 + bundle_contour.y(:,:,1).^2);
+if (bundle_contour.Nx == 12 && bundle_contour.Ny == 1 && max(abs(radii(:) - R_obs)) < 1e-12)
+    fprintf('  PASS: circular contour seeds rays on obstruction boundary\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: circular contour seeds rays on obstruction boundary\n');
+    failed = failed + 1;
+end
+
+% testRectangularContourSeedsRaysOnObstructionEdges
+rect_width = 40e-6;
+rect_height = 20e-6;
+bundle_rect = RayBundle.createRectangularContour(2, rect_width, rect_height, 0, 10e-6, -5e-6);
+x_rect = bundle_rect.x(:,:,1);
+y_rect = bundle_rect.y(:,:,1);
+on_vertical_edges = abs(abs(x_rect - 10e-6) - rect_width/2) < 1e-12;
+on_horizontal_edges = abs(abs(y_rect + 5e-6) - rect_height/2) < 1e-12;
+on_edges = on_vertical_edges | on_horizontal_edges;
+if (bundle_rect.Nx == 8 && bundle_rect.Ny == 1 && all(on_edges(:)))
+    fprintf('  PASS: rectangular contour seeds rays on obstruction edges\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: rectangular contour seeds rays on obstruction edges\n');
+    failed = failed + 1;
+end
+
+% testComplexGradientMatchesAnalyticalGaussian
+% Verify the primary complex-gradient path returns paraxial slope x/R(z),
+% not raw phase gradient k*x/R(z).
+z_grad = zr / 2;
+params_grad = beam.getParameters(z_grad);
+R_grad = params_grad.Radius;
+x_grad = 20e-6;
+[sx_complex, sy_complex] = RayTracer.calculatePhaseGradientComplex(beam, x_grad, 0, z_grad);
+sx_expected = x_grad / R_grad;
+rel_err_complex = abs(sx_complex - sx_expected) / abs(sx_expected);
+if (rel_err_complex < 1e-4 && abs(sy_complex) < 1e-10)
+    fprintf('  PASS: complex gradient matches analytical Gaussian slope (rel err %.2e)\n', rel_err_complex);
+    passed = passed + 1;
+else
+    fprintf('  FAIL: complex gradient matches analytical Gaussian slope (rel err %.2e)\n', rel_err_complex);
     failed = failed + 1;
 end
 
@@ -78,13 +126,87 @@ else
 end
 
 % testPropagationDivergence
-last_x = bundle_prop.x(1, end, end);
-first_x = bundle_prop.x(1, end, 1);
-if (abs(last_x) > abs(first_x))
+% Check RMS width of x-coordinates increases after free-space propagation
+x_first = bundle_prop.x(:,:,1);
+x_last  = bundle_prop.x(:,:,end);
+rms_x_first = sqrt(mean(x_first(:) .^ 2));
+rms_x_last  = sqrt(mean(x_last(:) .^ 2));
+if (rms_x_last > rms_x_first)
     fprintf('  PASS: RayTracer propagation diverges rays\n');
     passed = passed + 1;
 else
     fprintf('  FAIL: RayTracer propagation diverges rays\n');
+    failed = failed + 1;
+end
+
+% -----------------------------------------------------------------
+% Phase 4: Physical accuracy tests
+% -----------------------------------------------------------------
+
+% testGradientVsAnalyticalGaussian
+% Compare numerical gradient to analytical: d(phase)/dx = k*x/R(z) at z=0, R=Inf => 0
+% At z>0, the radius of curvature R(z) gives non-zero gradient
+z_test = zr / 2;  % away from waist where R(z) is finite
+params = beam.getParameters(z_test);
+R_z = params.Radius;
+% Analytical phase gradient: dφ/dx = k*x/R(z)
+% Analytical slope: sx = (1/k) * dφ/dx = x/R(z)
+x_test = 20e-6;
+[sx_num, sy_num] = RayTracer.calculateSlopes(beam, x_test, 0, z_test);
+sx_analytical = x_test / R_z;
+rel_err = abs(sx_num - sx_analytical) / abs(sx_analytical);
+if (rel_err < 1e-4)
+    fprintf('  PASS: Gradient vs analytical Gaussian (rel err %.2e)\n', rel_err);
+    passed = passed + 1;
+else
+    fprintf('  FAIL: Gradient vs analytical Gaussian (rel err %.2e)\n', rel_err);
+    failed = failed + 1;
+end
+
+% testEulerVsRK4Convergence
+% Refine dz and verify both methods converge to the same result
+bundle_euler_coarse = RayBundle.createGrid(3, 3, w0, w0);
+bundle_rk4_coarse = RayBundle.createGrid(3, 3, w0, w0);
+dz_coarse = zr / 20;
+bundle_euler_coarse = RayTracer.propagate(bundle_euler_coarse, beam, zr/4, dz_coarse, 'Euler');
+bundle_rk4_coarse = RayTracer.propagate(bundle_rk4_coarse, beam, zr/4, dz_coarse, 'RK4');
+final_euler_coarse = bundle_euler_coarse.x(:,:,end);
+final_rk4_coarse = bundle_rk4_coarse.x(:,:,end);
+
+bundle_euler_fine = RayBundle.createGrid(3, 3, w0, w0);
+bundle_rk4_fine = RayBundle.createGrid(3, 3, w0, w0);
+dz_fine = zr / 80;
+bundle_euler_fine = RayTracer.propagate(bundle_euler_fine, beam, zr/4, dz_fine, 'Euler');
+bundle_rk4_fine = RayTracer.propagate(bundle_rk4_fine, beam, zr/4, dz_fine, 'RK4');
+final_euler_fine = bundle_euler_fine.x(:,:,end);
+final_rk4_fine = bundle_rk4_fine.x(:,:,end);
+
+% Euler should improve with finer dz; RK4 should already be close to final
+euler_coarse_err = mean(abs(final_euler_coarse(:) - final_rk4_fine(:)));
+euler_fine_err = mean(abs(final_euler_fine(:) - final_rk4_fine(:)));
+if (euler_fine_err < euler_coarse_err)
+    fprintf('  PASS: Euler converges with finer dz\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: Euler does not improve with finer dz\n');
+    failed = failed + 1;
+end
+
+% testRadialSymmetry
+% Verify that bundle.r matches sqrt(x^2+y^2) from last z-slice
+if (abs(bundle_prop.Nz) > 1)
+    r_computed = sqrt(bundle_prop.x(:,:,end).^2 + bundle_prop.y(:,:,end).^2);
+    r_stored = bundle_prop.r;
+    max_diff = max(abs(r_computed(:) - r_stored(:)));
+    if (max_diff < 1e-15)
+        fprintf('  PASS: bundle.r matches sqrt(x^2+y^2)\n');
+        passed = passed + 1;
+    else
+        fprintf('  FAIL: bundle.r differs from sqrt(x^2+y^2) by %.2e\n', max_diff);
+        failed = failed + 1;
+    end
+else
+    fprintf('  FAIL: insufficient z steps for radial symmetry test\n');
     failed = failed + 1;
 end
 
