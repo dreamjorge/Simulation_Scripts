@@ -506,37 +506,37 @@ classdef HankelRayTracer < handle
                 delta_mat = RayTracer.resolveDelta(x, y, w0, lambda);
                 delta = max(delta_mat(:));
 
-                % Compute the ENVELOPE phase gradient in z by stripping
-                % the carrier exp(-ikz) before differentiating.
+                % Longitudinal phase gradient via angle difference.
                 %
-                % Direct central difference of dphidz + k suffers from
-                % catastrophic cancellation: dphidz ~ -k + O(1/zr), so
-                % dphidz + k ~ O(1/zr) is lost in the ~k noise.
+                % We need gz = dphi/dz + k (the envelope gradient),
+                % but computing dphi/dz from the complex-field identity
+                % and then adding k suffers from catastrophic cancellation
+                % (dphi/dz ~ -k, so dphi/dz + k loses ~7 digits).
                 %
-                % Instead: multiply u by exp(+ikz) to get the envelope,
-                % then differentiate the envelope phase.  The result IS
-                % gz = dphidz + k without cancellation.
-                zr_beam = pi * w0^2 / lambda;
-                dz_z = max(lambda, max(abs(z(:))) * 1e-4);
-                dz_z = max(dz_z, zr_beam * 1e-6);
+                % Instead: compute angle(u) at z +/- dz_z, difference,
+                % and add k.  With dz_z = lambda/4, the carrier phase
+                % step is k*dz_z = pi/2, so the angle difference stays
+                % within (-pi, pi) without wrapping.  The +k compensates
+                % the carrier contribution exactly.
+                dz_z = lambda / 4;
 
                 u0   = tempBeam.opticalField(x, y, z);
                 u_zp = tempBeam.opticalField(x, y, z + dz_z);
                 u_zm = tempBeam.opticalField(x, y, z - dz_z);
 
-                % Strip carrier: u_env(z) = u(z) * exp(+ikz)
-                u0_env   = u0   .* exp( 1i * k * z);
-                u_zp_env = u_zp .* exp( 1i * k * (z + dz_z));
-                u_zm_env = u_zm .* exp( 1i * k * (z - dz_z));
+                u0c       = conj(u0);
+                abs_u0_sq = real(u0c .* u0) + epsilon;
 
-                u0c_env   = conj(u0_env);
-                abs_u0_sq = real(u0c_env .* u0_env) + epsilon;
+                % dphi/dz via central difference of angle
+                phi_zp = angle(u_zp);
+                phi_zm = angle(u_zm);
+                dphi_raw = phi_zp - phi_zm;
+                % Unwrap the 2-point difference (handle wrapping at +-pi)
+                dphi_raw = dphi_raw - 2*pi * round(dphi_raw / (2*pi));
+                dphidz = dphi_raw ./ (2 * dz_z);
 
-                % gz = d(phase_envelope)/dz = dphidz + k (carrier removed)
-                gz = imag(u0c_env .* (u_zp_env - u_zm_env) ./ (2 * dz_z)) ./ abs_u0_sq;
+                gz = dphidz + k;
                 gz(abs(gz) < epsilon) = epsilon;
-
-                u0c = conj(u0);
 
                 if RayTracer.beamHasVortex(beam)
                     [TH, R] = cart2pol(x, y);
