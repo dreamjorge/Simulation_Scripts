@@ -170,65 +170,64 @@ classdef HankelRayTracer < handle
             % Output:
             %   bundleOut  : RayBundle sampled exactly at zPlanes
 
-            if nargin < 5 || isempty(method), method = 'RK4';
-end if nargin < 4 || isempty(dzInternal), dzInternal = [];
-end
+            if nargin < 5 || isempty(method), method = 'RK4'; end
+            if nargin < 4 || isempty(dzInternal), dzInternal = []; end
 
-    if isempty (zPlanes) bundleOut = bundleIn;
-return;
-end
+            if isempty(zPlanes)
+                bundleOut = bundleIn;
+                return;
+            end
 
-    zPlanes = zPlanes( :).'; if any (diff(zPlanes) < 0)
-                  error('zPlanes must be monotonically increasing.');
-end
+            zPlanes = zPlanes(:).';
+            if any(diff(zPlanes) < 0)
+                error('zPlanes must be monotonically increasing.');
+            end
 
-    % Current state from input bundle last slice x0 = bundleIn.x( :, :, end);
-y0 = bundleIn.y( :, :, end);
-z0 = bundleIn.z( :, :, end);
-ht0 = bundleIn.ht( :, :, end);
+            % Current state from input bundle last slice
+            x0 = bundleIn.x(:,:,end);
+            y0 = bundleIn.y(:,:,end);
+            z0 = bundleIn.z(:,:,end);
+            ht0 = bundleIn.ht(:,:,end);
 
-zStart = z0(1, 1);
-if abs (zPlanes(1) - zStart)
-  > 1e-15 error('zPlanes(1) must match initial bundle z (%.6e).', zStart);
-end
+            zStart = z0(1,1);
+            if abs(zPlanes(1) - zStart) > 1e-15
+                error('zPlanes(1) must match initial bundle z (%.6e).', zStart);
+            end
 
-    % Output bundle starts at initial state
-      only(fixed - plane samples) bundleOut = RayBundle(x0, y0, zStart);
-bundleOut.ht = ht0;
+            % Output bundle starts at initial state only (fixed-plane samples)
+            bundleOut = RayBundle(x0, y0, zStart);
+            bundleOut.ht = ht0;
 
-            for
-              kk = 2 : numel(zPlanes) zTarget = zPlanes(kk);
-            if zTarget
-              < zStart error('zPlanes must be increasing and >= initial z.');
+            for kk = 2:numel(zPlanes)
+                zTarget = zPlanes(kk);
+                if zTarget < zStart
+                    error('zPlanes must be increasing and >= initial z.');
                 end
 
                 % Internal step for this interval
                 if isempty(dzInternal)
                     dzStep = max((zTarget - zStart) / 20, eps);
-                else dzStep = dzInternal;
+                else
+                    dzStep = dzInternal;
                 end
 
-                    % Propagate from current state to current
-                          target using internal steps bTmp =
-                    RayBundle(x0, y0, zStart);
+                % Propagate from current state to current target using internal steps
+                bTmp = RayBundle(x0, y0, zStart);
                 bTmp.ht = ht0;
-                bTmp = HankelRayTracer.propagate(bTmp, beam, zTarget, dzStep,
-                                                 method);
+                bTmp = HankelRayTracer.propagate(bTmp, beam, zTarget, dzStep, method);
 
-                x1 = bTmp.x( :, :, end);
-                y1 = bTmp.y( :, :, end);
-                z1 = bTmp.z( :, :, end);
-                sx1 = bTmp.sx( :, :, end);
-                sy1 = bTmp.sy( :, :, end);
-                ht1 = bTmp.ht( :, :, end);
+                x1 = bTmp.x(:,:,end);
+                y1 = bTmp.y(:,:,end);
+                z1 = bTmp.z(:,:,end);
+                sx1 = bTmp.sx(:,:,end);
+                sy1 = bTmp.sy(:,:,end);
+                ht1 = bTmp.ht(:,:,end);
 
                 bundleOut.addStep(x1, y1, z1, sx1, sy1, ht1);
 
-                % advance state x0 = x1;
-                y0 = y1;
-                z0 = z1;
-                ht0 = ht1;
-                zStart = z0(1, 1);
+                % advance state
+                x0 = x1; y0 = y1; z0 = z1; ht0 = ht1;
+                zStart = z0(1,1);
             end
         end
 
@@ -245,129 +244,118 @@ bundleOut.ht = ht0;
             % the position reflects through origin.  See class header for
             % the full detection and transition protocol.
 
-            if nargin < 5, method = 'RK4';
-            end
+            if nargin < 5, method = 'RK4'; end
 
-                z_current = bundle.z(1, 1, end);
-            while
-              z_current<z_final if z_current + dz> z_final dz =
-                  z_final - z_current;
-            end
+            z_current = bundle.z(1,1,end);
+            while z_current < z_final
+                if z_current + dz > z_final
+                    dz = z_final - z_current;
+                end
 
-                x0 = bundle.x( :, :, end);
-            y0 = bundle.y( :, :, end);
-            z0 = bundle.z( :, :, end);
-            ht0 = bundle.ht( :, :, end);
+                x0 = bundle.x(:,:,end);
+                y0 = bundle.y(:,:,end);
+                z0 = bundle.z(:,:,end);
+                ht0 = bundle.ht(:,:,end);
 
-            if strcmpi (method, 'Euler')
-              [ sx, sy ] =
-                  HankelRayTracer.calculateSlopes(beam, x0, y0, z0, ht0);
-            x1 = x0 + sx.*dz;
-            y1 = y0 + sy.*dz;
-            else[k1x, k1y] =
-                HankelRayTracer.calculateSlopes(beam, x0, y0, z0, ht0);
-            [ k2x, k2y ] = HankelRayTracer.calculateSlopes(
-                beam, x0 + k1x.*dz / 2, y0 + k1y.*dz / 2, z0 + dz / 2, ht0);
-            [ k3x, k3y ] = HankelRayTracer.calculateSlopes(
-                beam, x0 + k2x.*dz / 2, y0 + k2y.*dz / 2, z0 + dz / 2, ht0);
-            [ k4x, k4y ] = HankelRayTracer.calculateSlopes(
-                beam, x0 + k3x.*dz, y0 + k3y.*dz, z0 + dz, ht0);
+                if strcmpi(method, 'Euler')
+                    [sx, sy] = HankelRayTracer.calculateSlopes(beam, x0, y0, z0, ht0);
+                    x1 = x0 + sx .* dz;
+                    y1 = y0 + sy .* dz;
+                else
+                    [k1x, k1y] = HankelRayTracer.calculateSlopes(beam, x0,           y0,           z0, ht0);
+                    [k2x, k2y] = HankelRayTracer.calculateSlopes(beam, x0+k1x.*dz/2, y0+k1y.*dz/2, z0+dz/2, ht0);
+                    [k3x, k3y] = HankelRayTracer.calculateSlopes(beam, x0+k2x.*dz/2, y0+k2y.*dz/2, z0+dz/2, ht0);
+                    [k4x, k4y] = HankelRayTracer.calculateSlopes(beam, x0+k3x.*dz,   y0+k3y.*dz,   z0+dz,   ht0);
 
-            sx = (k1x + 2. * k2x + 2. * k3x + k4x)./ 6;
-            sy = (k1y + 2. * k2y + 2. * k3y + k4y)./ 6;
+                    sx = (k1x + 2.*k2x + 2.*k3x + k4x) ./ 6;
+                    sy = (k1y + 2.*k2y + 2.*k3y + k4y) ./ 6;
 
-            x1 = x0 + sx.*dz;
-            y1 = y0 + sy.*dz;
-            end
+                    x1 = x0 + sx .* dz;
+                    y1 = y0 + sy .* dz;
+                end
 
                 z1 = z0 + dz;
 
-            % Axis - crossing check — see class header[Eberly01] dx = x1 - x0;
-            dy = y1 - y0;
-            denominator = dx.^ 2 + dy.^ 2 + eps;
+                % Axis-crossing check — see class header [Eberly01]
+                dx = x1 - x0;
+                dy = y1 - y0;
+                denominator = dx.^2 + dy.^2 + eps;
 
-            % s * = -P₀·(P₁ - P₀) / | P₁ - P₀ |² t_param =
-                        -(x0.*dx + y0.*dy)./ denominator;
+                % s* = -P₀·(P₁-P₀) / |P₁-P₀|²
+                t_param = -(x0 .* dx + y0 .* dy) ./ denominator;
 
-            % Clamp projection to segment bounds t_clamped =
-                max(0, min(1, t_param));
+                % Clamp projection to segment bounds
+                t_clamped = max(0, min(1, t_param));
 
-            % Nearest point on segment to origin nearest_x = x0 + t_clamped.*dx;
-            nearest_y = y0 + t_clamped.*dy;
+                % Nearest point on segment to origin
+                nearest_x = x0 + t_clamped .* dx;
+                nearest_y = y0 + t_clamped .* dy;
 
-            % Minimum Euclidean distance min_dist =
-                sqrt(nearest_x.^ 2 + nearest_y.^ 2);
+                % Minimum Euclidean distance
+                min_dist = sqrt(nearest_x.^2 + nearest_y.^2);
 
-            % Adaptive threshold with wavelength floor to prevent %
-                the threshold from shrinking below detection range threshold =
-                max(max(abs(x0), abs(y0)) * 1e-3, beam.Lambda);
+                % Adaptive threshold with wavelength floor to prevent
+                % the threshold from shrinking below detection range
+                threshold = max(max(abs(x0), abs(y0)) * 1e-3, beam.Lambda);
 
-            % Flip only if segment passes close enough to axis crossed =
-                min_dist < threshold;
+                % Flip only if segment passes close enough to axis
+                crossed = min_dist < threshold;
 
-            ht1 = ht0;
-            ht1(crossed &(ht0 == 2)) = 1;
-            % flip H ^ (2) → H ^
-                (1)
+                ht1 = ht0;
+                ht1(crossed & (ht0 == 2)) = 1;  % flip H^(2) → H^(1)
 
-                        % Sub -
-                    step crossing correction — see class header,
-                % "BRANCH SWITCHING" section if any (crossed( :)) idxCross =
-                    find(crossed);
-                    for
-                      ii = 1 : numel(idxCross) idx = idxCross(ii);
+                % Sub-step crossing correction — see class header,
+                % "BRANCH SWITCHING" section
+                if any(crossed(:))
+                    idxCross = find(crossed);
+                    for ii = 1:numel(idxCross)
+                        idx = idxCross(ii);
 
-                    x0i = x0(idx);
-                    y0i = y0(idx);
-                    z0i = z0(idx);
-                    ht0i = ht0(idx);
+                        x0i = x0(idx); y0i = y0(idx); z0i = z0(idx);
+                        ht0i = ht0(idx);
 
-                    % Crossing fraction along this step(
-                          already clamped[0, 1]) tCross = t_clamped(idx);
-                    dz1 = dz * tCross;
-                    dz2 = dz - dz1;
+                        % Crossing fraction along this step (already clamped [0,1])
+                        tCross = t_clamped(idx);
+                        dz1 = dz * tCross;
+                        dz2 = dz - dz1;
 
-                    % Step 1 : up to crossing with original branch xMid = x0i;
-                    yMid = y0i;
-                    zMid = z0i;
-                    if dz1
-                      > 0 [xMid, yMid] = HankelRayTracer.singleStep(
-                          beam, x0i, y0i, z0i, ht0i, dz1, method);
-                    zMid = z0i + dz1;
-                    end
+                        % Step 1: up to crossing with original branch
+                        xMid = x0i; yMid = y0i; zMid = z0i;
+                        if dz1 > 0
+                            [xMid, yMid] = HankelRayTracer.singleStep(beam, x0i, y0i, z0i, ht0i, dz1, method);
+                            zMid = z0i + dz1;
+                        end
 
-                        % Step 2 : after crossing,
-                        force H ^ (2)->H ^ (1)htMid = ht0i;
-                    if ht0i
-                      == 2 htMid = 1;
-                    %
-                        Reflect position through origin
-                        : inward ray %
-                          passed through axis and must emerge on the %
-                          opposite side.Matches legacy behavior in %
-                          HankelLaguerre.getPropagateCylindricalRays %
-                          (xi = -xi; yi = -yi after H2->H1 flip).xMid = -xMid;
-                    yMid = -yMid;
-                    end
+                        % Step 2: after crossing, force H^(2)->H^(1)
+                        htMid = ht0i;
+                        if ht0i == 2
+                            htMid = 1;
+                            % Reflect position through origin: inward ray
+                            % passed through axis and must emerge on the
+                            % opposite side.  Matches legacy behavior in
+                            % HankelLaguerre.getPropagateCylindricalRays
+                            % (xi = -xi; yi = -yi after H2->H1 flip).
+                            xMid = -xMid;
+                            yMid = -yMid;
+                        end
 
-                        x1i = xMid;
-                    y1i = yMid;
-                    if dz2
-                      > 0 [x1i, y1i] = HankelRayTracer.singleStep(
-                          beam, xMid, yMid, zMid, htMid, dz2, method);
-                    end
+                        x1i = xMid; y1i = yMid;
+                        if dz2 > 0
+                            [x1i, y1i] = HankelRayTracer.singleStep(beam, xMid, yMid, zMid, htMid, dz2, method);
+                        end
 
                         x1(idx) = x1i(1);
-                    y1(idx) = y1i(1);
-                    ht1(idx) = htMid;
+                        y1(idx) = y1i(1);
+                        ht1(idx) = htMid;
 
                         % Effective slope stored for this global step
                         sx(idx) = (x1i(1) - x0i) / dz;
                         sy(idx) = (y1i(1) - y0i) / dz;
-                        end end
+                    end
+                end
 
-                            bundle.addStep(x1, y1, z1, sx, sy, ht1);
-                        z_current = z1(1, 1);
+                bundle.addStep(x1, y1, z1, sx, sy, ht1);
+                z_current = z1(1,1);
             end
         end
 
@@ -389,54 +377,49 @@ bundleOut.ht = ht0;
 
             if isa(beam, 'HankelLaguerre')
                 [sx, sy] = HankelRayTracer.calculateSlopesEikonal(beam, x, y, z, ht);
-            return;
+                return;
             end
 
-                uniqueTypes = unique(ht( :));
+            uniqueTypes = unique(ht(:));
             sx = zeros(size(x));
             sy = zeros(size(x));
 
-            for
-              t = 1 : numel(uniqueTypes) htype = uniqueTypes(t);
-            mask = (ht == htype);
+            for t = 1:numel(uniqueTypes)
+                htype = uniqueTypes(t);
+                mask  = (ht == htype);
 
-            tempBeam = HankelRayTracer.beamWithType(beam, htype);
-            [ sx_part, sy_part ] =
-                RayTracer.calculatePhaseGradientComplex(tempBeam, x, y, z);
+                tempBeam = HankelRayTracer.beamWithType(beam, htype);
+                [sx_part, sy_part] = RayTracer.calculatePhaseGradientComplex(tempBeam, x, y, z);
 
-            sx(mask) = sx_part(mask);
-            sy(mask) = sy_part(mask);
-            end end
+                sx(mask) = sx_part(mask);
+                sy(mask) = sy_part(mask);
+            end
+        end
 
-                    end %
-                methods(Static)
+    end % methods (Static)
 
-                    methods(Static, Access = private)
 
-                        function[x1, y1] =
-                singleStep(beam, x0, y0, z0, ht0, dz, method) %
-                    SINGLESTEP — Integrate one ray over a scalar dz.%
-                    Used by crossing sub
-                - step correction to split H2->H1 transition.
+    methods (Static, Access = private)
 
-                  if strcmpi (method, 'Euler')[sx, sy] =
-                    HankelRayTracer.calculateSlopes(beam, x0, y0, z0, ht0);
-            x1 = x0 + sx.*dz;
-            y1 = y0 + sy.*dz;
-            else[k1x, k1y] =
-                HankelRayTracer.calculateSlopes(beam, x0, y0, z0, ht0);
-            [ k2x, k2y ] = HankelRayTracer.calculateSlopes(
-                beam, x0 + k1x.*dz / 2, y0 + k1y.*dz / 2, z0 + dz / 2, ht0);
-            [ k3x, k3y ] = HankelRayTracer.calculateSlopes(
-                beam, x0 + k2x.*dz / 2, y0 + k2y.*dz / 2, z0 + dz / 2, ht0);
-            [ k4x, k4y ] = HankelRayTracer.calculateSlopes(
-                beam, x0 + k3x.*dz, y0 + k3y.*dz, z0 + dz, ht0);
+        function [x1, y1] = singleStep(beam, x0, y0, z0, ht0, dz, method)
+            % SINGLESTEP — Integrate one ray over a scalar dz.
+            % Used by crossing sub-step correction to split H2->H1 transition.
 
-            sx = (k1x + 2. * k2x + 2. * k3x + k4x)./ 6;
-            sy = (k1y + 2. * k2y + 2. * k3y + k4y)./ 6;
+            if strcmpi(method, 'Euler')
+                [sx, sy] = HankelRayTracer.calculateSlopes(beam, x0, y0, z0, ht0);
+                x1 = x0 + sx .* dz;
+                y1 = y0 + sy .* dz;
+            else
+                [k1x, k1y] = HankelRayTracer.calculateSlopes(beam, x0,              y0,              z0,       ht0);
+                [k2x, k2y] = HankelRayTracer.calculateSlopes(beam, x0+k1x.*dz/2,    y0+k1y.*dz/2,    z0+dz/2,  ht0);
+                [k3x, k3y] = HankelRayTracer.calculateSlopes(beam, x0+k2x.*dz/2,    y0+k2y.*dz/2,    z0+dz/2,  ht0);
+                [k4x, k4y] = HankelRayTracer.calculateSlopes(beam, x0+k3x.*dz,      y0+k3y.*dz,      z0+dz,    ht0);
 
-            x1 = x0 + sx.*dz;
-            y1 = y0 + sy.*dz;
+                sx = (k1x + 2.*k2x + 2.*k3x + k4x) ./ 6;
+                sy = (k1y + 2.*k2y + 2.*k3y + k4y) ./ 6;
+
+                x1 = x0 + sx .* dz;
+                y1 = y0 + sy .* dz;
             end
         end
 
@@ -506,118 +489,119 @@ bundleOut.ht = ht0;
             %   [Ugalde20]   gradientrthz.m in LaguerreGaussBeams.
 
             epsilon = 1e-12;
-            w0 = beam.InitialWaist;
+            w0     = beam.InitialWaist;
             lambda = beam.Lambda;
-            k = beam.k;
+            k      = beam.k;
 
-            uniqueTypes = unique(ht( :));
+            uniqueTypes = unique(ht(:));
             sx = zeros(size(x));
             sy = zeros(size(x));
 
-            for
-              t = 1 : numel(uniqueTypes) htype = uniqueTypes(t);
-            mask = (ht == htype);
+            for t = 1:numel(uniqueTypes)
+                htype = uniqueTypes(t);
+                mask  = (ht == htype);
 
-            tempBeam = HankelRayTracer.beamWithType(beam, htype);
+                tempBeam = HankelRayTracer.beamWithType(beam, htype);
 
-            delta_mat = RayTracer.resolveDelta(x, y, w0, lambda);
-            delta = max(delta_mat( :));
-            % Compute the ENVELOPE phase gradient in z by stripping %
-                    the carrier exp(-ikz) before differentiating.%
-                    % Direct central difference of dphidz
-                + k suffers from % catastrophic cancellation : dphidz ~-k +
-                O(1 / zr),
-                so % dphidz + k ~O(1 / zr) is lost in the ~k noise.Any % finite
-                    - difference error in estimating -
-                    k propagates % directly into gz.%
-                        % Instead : multiply u by exp(+ikz) to get the envelope,
-                % then differentiate the envelope phase.The result IS
-                    % gz = dphidz + k without cancellation.zr_beam = pi * w0 ^
-                                                                     2 / lambda;
-            dz_z = max(lambda, max(abs(z( :))) * 1e-4);
-            dz_z = max(dz_z, zr_beam * 1e-6);
+                delta_mat = RayTracer.resolveDelta(x, y, w0, lambda);
+                delta = max(delta_mat(:));
 
-            u0 = tempBeam.opticalField(x, y, z);
-            u_zp = tempBeam.opticalField(x, y, z + dz_z);
-            u_zm = tempBeam.opticalField(x, y, z - dz_z);
+                % Compute the ENVELOPE phase gradient in z by stripping
+                % the carrier exp(-ikz) before differentiating.
+                %
+                % Direct central difference of dphidz + k suffers from
+                % catastrophic cancellation: dphidz ~ -k + O(1/zr), so
+                % dphidz + k ~ O(1/zr) is lost in the ~k noise.
+                %
+                % Instead: multiply u by exp(+ikz) to get the envelope,
+                % then differentiate the envelope phase.  The result IS
+                % gz = dphidz + k without cancellation.
+                zr_beam = pi * w0^2 / lambda;
+                dz_z = max(lambda, max(abs(z(:))) * 1e-4);
+                dz_z = max(dz_z, zr_beam * 1e-6);
 
-            % Strip carrier
-                : u_env(z) = u(z) * exp(+ikz) u0_env = u0.*exp(1i * k * z);
-            u_zp_env = u_zp.*exp(1i * k * (z + dz_z));
-            u_zm_env = u_zm.*exp(1i * k * (z - dz_z));
+                u0   = tempBeam.opticalField(x, y, z);
+                u_zp = tempBeam.opticalField(x, y, z + dz_z);
+                u_zm = tempBeam.opticalField(x, y, z - dz_z);
 
-            u0c_env = conj(u0_env);
-            abs_u0_sq = real(u0c_env.*u0_env) + epsilon;
+                % Strip carrier: u_env(z) = u(z) * exp(+ikz)
+                u0_env   = u0   .* exp( 1i * k * z);
+                u_zp_env = u_zp .* exp( 1i * k * (z + dz_z));
+                u_zm_env = u_zm .* exp( 1i * k * (z - dz_z));
 
-            % gz = d(phase_envelope) / dz =
-                       dphidz + k(carrier removed) gz =
-                           imag(u0c_env.*(u_zp_env - u_zm_env)./ (2 * dz_z))./
-                           abs_u0_sq;
-            gz(abs(gz) < epsilon) = epsilon;
+                u0c_env   = conj(u0_env);
+                abs_u0_sq = real(u0c_env .* u0_env) + epsilon;
 
-            u0c = conj(u0);
-delta);
-[ x_tp, y_tp ] = pol2cart(TH + delta_theta, R);
-[ x_tm, y_tm ] = pol2cart(TH - delta_theta, R);
+                % gz = d(phase_envelope)/dz = dphidz + k (carrier removed)
+                gz = imag(u0c_env .* (u_zp_env - u_zm_env) ./ (2 * dz_z)) ./ abs_u0_sq;
+                gz(abs(gz) < epsilon) = epsilon;
 
-u_rp = tempBeam.opticalField(x_rp, y_rp, z);
-u_rm = tempBeam.opticalField(x_rm, y_rm, z);
-u_tp = tempBeam.opticalField(x_tp, y_tp, z);
-u_tm = tempBeam.opticalField(x_tm, y_tm, z);
+                u0c = conj(u0);
 
-dphidr = imag(u0c.*(u_rp - u_rm)./ (2 * delta))./ abs_u0_sq;
-dphidt = imag(u0c.*(u_tp - u_tm)./ (2.*delta_theta))./ abs_u0_sq;
+                if RayTracer.beamHasVortex(beam)
+                    [TH, R] = cart2pol(x, y);
+                    delta_theta = min(delta ./ R, pi / 4);
 
-R_reg = R + eps;
-R_sq = R.^ 2 + eps;
-sx_part = (dphidr.*x./ R_reg - dphidt.*y./ R_sq)./ gz;
-sy_part = (dphidr.*y./ R_reg + dphidt.*x./ R_sq)./ gz;
-else u_xp = tempBeam.opticalField(x + delta, y, z);
-u_xm = tempBeam.opticalField(x - delta, y, z);
-u_yp = tempBeam.opticalField(x, y + delta, z);
-u_ym = tempBeam.opticalField(x, y - delta, z);
+                    [x_rp, y_rp] = pol2cart(TH, R + delta);
+                    [x_rm, y_rm] = pol2cart(TH, R - delta);
+                    [x_tp, y_tp] = pol2cart(TH + delta_theta, R);
+                    [x_tm, y_tm] = pol2cart(TH - delta_theta, R);
 
-dphidx = imag(u0c.*(u_xp - u_xm)./ (2 * delta))./ abs_u0_sq;
-dphidy = imag(u0c.*(u_yp - u_ym)./ (2 * delta))./ abs_u0_sq;
+                    u_rp = tempBeam.opticalField(x_rp, y_rp, z);
+                    u_rm = tempBeam.opticalField(x_rm, y_rm, z);
+                    u_tp = tempBeam.opticalField(x_tp, y_tp, z);
+                    u_tm = tempBeam.opticalField(x_tm, y_tm, z);
 
-sx_part = dphidx./ gz;
-sy_part = dphidy./ gz;
-end
+                    dphidr = imag(u0c .* (u_rp - u_rm) ./ (2 * delta))     ./ abs_u0_sq;
+                    dphidt = imag(u0c .* (u_tp - u_tm) ./ (2 .* delta_theta)) ./ abs_u0_sq;
 
-    sx(mask) = sx_part(mask);
-sy(mask) = sy_part(mask);
-end end
+                    R_reg = R + eps;
+                    R_sq  = R.^2 + eps;
+                    sx_part = (dphidr .* x ./ R_reg - dphidt .* y ./ R_sq) ./ gz;
+                    sy_part = (dphidr .* y ./ R_reg + dphidt .* x ./ R_sq) ./ gz;
+                else
+                    u_xp = tempBeam.opticalField(x + delta, y,         z);
+                    u_xm = tempBeam.opticalField(x - delta, y,         z);
+                    u_yp = tempBeam.opticalField(x,         y + delta, z);
+                    u_ym = tempBeam.opticalField(x,         y - delta, z);
 
-    function newBeam = beamWithType(beam, htype) %
-                       BEAMWITHTYPE — Create
-                           a beam copy with a specific Hankel branch.%
-                       % Hankel beams carry a type index : 1 = H ^ (1)(outward),
-             % 2 = H ^
-                       (2)(inward).This method fabricates the %
-                               correct beam variant without re -
-                           computing the field formula.% %
-                               For HankelLaguerre
-    : the Hankel type determines whether %
-      the radial Bessel function uses H ^
-                       (1) or
-                   H ^ (2),
-             which % have different asymptotic behavior at infinity.% %
-                 For Hermite beams
-    : no branch
-      switching(Cartesian,
-                % no singular axis) — returns original beam unchanged.
+                    dphidx = imag(u0c .* (u_xp - u_xm) ./ (2 * delta)) ./ abs_u0_sq;
+                    dphidy = imag(u0c .* (u_yp - u_ym) ./ (2 * delta)) ./ abs_u0_sq;
 
-      if isa (beam, 'HankelLaguerre') newBeam = HankelLaguerre(
-                 beam.InitialWaist, beam.Lambda, ... beam.l, beam.p, htype);
-elseif isa(beam, 'HankelHermite') newBeam = HankelHermite(beam.InitialWaist,
-                                                          beam.Lambda,
-                                                          ... beam.n, beam.m,
-                                                          htype);
-else newBeam = beam;
-end end
+                    sx_part = dphidx ./ gz;
+                    sy_part = dphidy ./ gz;
+                end
 
-        end %
-    methods(Static, Access = private)
-
+                sx(mask) = sx_part(mask);
+                sy(mask) = sy_part(mask);
+            end
         end
-    % classdef
+
+        function newBeam = beamWithType(beam, htype)
+            % BEAMWITHTYPE — Create a beam copy with a specific Hankel branch.
+            %
+            % Hankel beams carry a type index: 1 = H^(1) (outward),
+            % 2 = H^(2) (inward). This method fabricates the
+            % correct beam variant without re-computing the field formula.
+            %
+            % For HankelLaguerre: the Hankel type determines whether
+            % the radial Bessel function uses H^(1) or H^(2), which
+            % have different asymptotic behavior at infinity.
+            %
+            % For Hermite beams: no branch switching (Cartesian,
+            % no singular axis) — returns original beam unchanged.
+
+            if isa(beam, 'HankelLaguerre')
+                newBeam = HankelLaguerre(beam.InitialWaist, beam.Lambda, ...
+                    beam.l, beam.p, htype);
+            elseif isa(beam, 'HankelHermite')
+                newBeam = HankelHermite(beam.InitialWaist, beam.Lambda, ...
+                    beam.n, beam.m, htype);
+            else
+                newBeam = beam;
+            end
+        end
+
+    end % methods (Static, Access = private)
+
+end % classdef
