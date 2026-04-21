@@ -53,7 +53,7 @@ beam = BeamFactory.create('laguerre', 100e-6, 632.8e-9, 'l', 1, 'p', 0);
 
 **Why**: Decouples calling code from concrete beam classes, simplifies API.
 
-### 3. Parameters Pattern — BeamParameters
+### 3. Parameters Pattern — BeamParameters + Computation Layer
 
 Each beam type has a corresponding Parameters class:
 
@@ -72,6 +72,23 @@ Parameters classes provide:
 - Radius of curvature
 
 **Why**: Separates beam geometry (parameters) from field computation.
+
+**Computation Layer**: Parameter classes delegate formula evaluation to a stateless utility layer. This separates the *what* (parameter values) from the *how* (numerical computation).
+
+```
+Parameters (state: w0, lambda, z)
+    │
+    └─── delegates formula evaluation ──→ BeamComputation (static methods)
+                                               rayleighDistance(w0, lambda)
+                                               waveNumber(lambda)
+                                               waist(w0, z, zr)
+                                               gouyPhase(z, zr)
+                                               radiusOfCurvature(z, zr)
+                                               complexBeamParameter(z, zr)
+                                               complexAlpha(q, k)
+```
+
+**Migration complete (2026-04-21)**: GaussianParameters now delegates all formulas to `BeamComputation`. HermiteParameters.getHermiteSolutions delegates to `HermiteComputation`. Legacy inline formulas have been extracted to the computation layer with deprecation comments in the parameter classes.
 
 ## Beam API Contract
 
@@ -158,6 +175,9 @@ Simulation_Scripts/
 │   │   ├── ElegantHermiteBeam.m
 │   │   ├── ElegantLaguerreBeam.m
 │   │   └── HankelLaguerre.m
+│   ├── computation/           ← Stateless formula layer
+│   │   ├── BeamComputation.m       — Core formulas (Rayleigh, waist, Gouy, q, α)
+│   │   └── HermiteComputation.m    — Hermite polynomial evaluation
 │   ├── parameters/
 │   │   ├── GaussianParameters.m
 │   │   ├── HermiteParameters.m

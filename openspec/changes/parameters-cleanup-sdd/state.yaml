@@ -1,0 +1,29 @@
+schema: spec-driven
+change: parameters-cleanup-sdd
+status: in_review
+created: 2026-04-21
+phase: closeout
+phase_updated: 2026-04-21
+
+artifacts:
+  proposal: openspec/changes/parameters-cleanup-sdd/proposal.md
+  design: openspec/changes/parameters-cleanup-sdd/design.md
+  specs:
+    - parameter-computation-layer
+    - parameter-model-delegation
+  tasks: openspec/changes/parameters-cleanup-sdd/tasks.md
+
+context: |
+  Tech stack: MATLAB, Octave, classdef (.m files)
+  Constraints: preserve public API signatures, no external dependencies, maintain Octave/MATLAB compatibility
+  Architecture intent: split parameter data/API façade from stateless computation layer
+  Branch: feat/parameters-cleanup-sdd
+
+summary: |
+  All 4 implementation tasks complete. BeamComputation (7 static methods) and
+  HermiteComputation (hermiteSolutions algorithm) created. GaussianParameters fully
+  delegates to BeamComputation. HermiteParameters.getHermiteSolutions is now a shim
+  delegating to HermiteComputation. All test suites pass (30/30 portable, 48/48
+  GaussianParameters, legacy compat 6/6, etc.).
+
+  Remaining: docs/ARCHITECTURE.md updated, PR ready for review.
