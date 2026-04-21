@@ -19,6 +19,7 @@ function setpaths()
     % Modern library structure (src/)
     addpath(fullfile(scriptPath, 'src', 'beams'));
     addpath(fullfile(scriptPath, 'src', 'parameters'));
+    addpath(fullfile(scriptPath, 'src', 'computation'));
     addpath(fullfile(scriptPath, 'src', 'propagation', 'field'));
     addpath(fullfile(scriptPath, 'src', 'propagation', 'rays'));
     addpath(fullfile(scriptPath, 'src', 'visualization'));
