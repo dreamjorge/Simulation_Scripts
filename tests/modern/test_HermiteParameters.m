@@ -276,6 +276,18 @@ else
     failed = failed + 1;
 end
 
+% testHermiteComputationDelegation
+x_test = linspace(-1, 1, 11);
+[HG_shim, NHG_shim] = HermiteParameters.getHermiteSolutions(2, x_test);
+[HG_direct, NHG_direct] = HermiteComputation.hermiteSolutions(2, x_test);
+if (max(abs(HG_shim - HG_direct)) < 1e-12 && max(abs(NHG_shim - NHG_direct)) < 1e-12)
+    fprintf('  PASS: HermiteParameters.getHermiteSolutions delegates to HermiteComputation\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: HermiteParameters.getHermiteSolutions shim mismatch\n');
+    failed = failed + 1;
+end
+
 fprintf('\n=== HermiteParameters: %d/%d passed ===\n', passed, passed + failed);
 
 if failed ~= 0

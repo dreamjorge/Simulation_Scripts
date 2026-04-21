@@ -120,36 +120,15 @@ classdef HermiteParameters < GaussianParameters
         function [HG, NHG] = getHermiteSolutions(nu, x)
             % getHermiteSolutions - Legacy-compatible Hermite pair (HG, NHG).
             %
-            % Preserves the historical API used by research scripts that build
-            % Hankel-Hermite combinations from the two independent series
-            % solutions of the Hermite differential equation.
-
-            an = 1;
-            bn = 1;
-
-            fpar = 1;
-            fimpar = x;
-
-            n = floor(nu + nu / 2);
-            for k = 0:n
-                an = an .* (2 * ((2 * k) - nu)) ./ (((2 * k) + 1) * ((2 * k) + 2));
-                fpar = fpar + an .* (x).^(2 * k + 2);
-
-                bn = bn .* (2 * ((2 * k + 1) - nu)) ./ (((2 * k + 1) + 1) * ((2 * k + 1) + 2));
-                fimpar = fimpar + bn .* (x).^(2 * k + 3);
-            end
-
-            norma = sqrt(2 * nu + 1);
-
-            if mod(nu, 2) ~= 0
-                fimpar = norma .* fimpar;
-                HG = fimpar;
-                NHG = fpar;
-            else
-                fimpar = norma .* fimpar;
-                NHG = fimpar;
-                HG = fpar;
-            end
+            % DEPRECATED: Use HermiteComputation.hermiteSolutions(nu, x) instead.
+            %
+            % This entrypoint is preserved for backward compatibility with
+            % research scripts that build Hankel-Hermite combinations from
+            % the two independent series solutions of the Hermite differential
+            % equation.
+            %
+            % Calls: HermiteComputation.hermiteSolutions(nu, x)
+            [HG, NHG] = HermiteComputation.hermiteSolutions(nu, x);
         end
     end
 end
