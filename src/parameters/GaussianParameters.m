@@ -43,12 +43,12 @@ classdef GaussianParameters
                 obj.InitialWaist = w0;
                 obj.Lambda = lambda;
 
-                obj.RayleighDistance = PhysicalConstants.rayleighDistance(w0, lambda);
-                obj.k = PhysicalConstants.waveNumber(lambda);
+                obj.RayleighDistance = BeamComputation.rayleighDistance(w0, lambda);
+                obj.k = BeamComputation.waveNumber(lambda);
 
-                obj.Waist          = PhysicalConstants.waistAtZ(w0, z, lambda, obj.RayleighDistance);
-                obj.GouyPhase      = PhysicalConstants.gouyPhase(z, obj.RayleighDistance);
-                obj.Radius         = PhysicalConstants.radiusOfCurvature(z, obj.RayleighDistance);
+                obj.Waist          = BeamComputation.waist(w0, z, lambda, obj.RayleighDistance);
+                obj.GouyPhase      = BeamComputation.gouyPhase(z, obj.RayleighDistance);
+                obj.Radius         = BeamComputation.radiusOfCurvature(z, obj.RayleighDistance);
                 obj.Amplitude      = 1 ./ obj.Waist;
                 obj.DivergenceAngle = atan(w0 ./ obj.RayleighDistance);
             end
@@ -63,21 +63,21 @@ classdef GaussianParameters
             %
             % Unlike the stored property Waist (fixed at construction z),
             % this method evaluates at any scalar or vector z.
-            w = PhysicalConstants.waistAtZ(obj.InitialWaist, z, obj.Lambda, obj.RayleighDistance);
+            w = BeamComputation.waist(obj.InitialWaist, z, obj.Lambda, obj.RayleighDistance);
         end
 
         function psi = gouyPhase(obj, z)
             % gouyPhase  Gouy phase psi(z) = arctan(z / zR).
             %
             % Returns the cumulative Gouy phase at axial position z.
-            psi = PhysicalConstants.gouyPhase(z, obj.RayleighDistance);
+            psi = BeamComputation.gouyPhase(z, obj.RayleighDistance);
         end
 
         function R = radius(obj, z)
             % radius  Radius of curvature R(z) = z*(1 + (zR/z)^2).
             %
             % Returns Inf at z = 0 (plane wavefront at the waist).
-            R = PhysicalConstants.radiusOfCurvature(z, obj.RayleighDistance);
+            R = BeamComputation.radiusOfCurvature(z, obj.RayleighDistance);
         end
 
         function a = amplitude(obj, z)
@@ -95,8 +95,7 @@ classdef GaussianParameters
             % Used by Elegant Hermite/Laguerre variants. This method
             % evaluates alpha at the given z (unlike computeAlpha which
             % uses the stored zCoordinate).
-            q = z + 1i * obj.RayleighDistance;
-            a = 1i * obj.k / (2 * q);
+            a = BeamComputation.complexAlpha(z, obj.RayleighDistance, obj.k);
         end
 
         % -----------------------------------------------------------------
@@ -130,8 +129,7 @@ classdef GaussianParameters
             % alpha = i*k / (2*q(z))  where  q(z) = z + i*zR
             %
             % Prefer computeAlphaAtZ(z) for dynamic evaluation at any z.
-            q = obj.zCoordinate + 1i * obj.RayleighDistance;
-            a = 1i * obj.k / (2 * q);
+            a = BeamComputation.complexAlpha(obj.zCoordinate, obj.RayleighDistance, obj.k);
         end
     end
 

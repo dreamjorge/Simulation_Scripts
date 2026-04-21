@@ -11,6 +11,7 @@ function totalFailed = portable_runner()
     % Add modern library paths (src/)
     addpath(fullfile(repoRoot, 'src', 'beams'));
     addpath(fullfile(repoRoot, 'src', 'parameters'));
+    addpath(fullfile(repoRoot, 'src', 'computation'));
     addpath(fullfile(repoRoot, 'src', 'propagation', 'field'));
     addpath(fullfile(repoRoot, 'src', 'propagation', 'rays'));
     addpath(fullfile(repoRoot, 'src', 'visualization'));
