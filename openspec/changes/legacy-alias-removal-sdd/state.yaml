@@ -2,7 +2,7 @@ schema: spec-driven
 change: legacy-alias-removal-sdd
 status: in_progress
 created: 2026-04-22
-phase: ready-pending-usage-signal
+phase: release-checkpoint-pending
 phase_updated: 2026-04-22
 
 artifacts:
@@ -23,11 +23,8 @@ context: |
   Branch: feat/legacy-alias-removal-sdd
 
 summary: |
-  Phase 1 completed with evidence (guardrail PASS, portable 31/0). Docs and
-  release blockers were advanced by defining a named milestone/tag and
-  breaking-change note template in ALIAS_REMOVAL_RELEASE_PLAN.md.
-  Test transition completed: legacy_compat alias tests now support both
-  pre-removal (aliases present) and post-removal (aliases absent) modes.
-  Temporary alias-removal run now passes full portable suite (31/0).
-  Usage-signal artifacts added (checklist + announcement template).
-  Remaining blocker: collect and sign off external dependency signal.
+  All readiness gates (A/B/C/D) are satisfied and legacy aliases were removed
+  from `legacy/compat`. Legacy compatibility tests now enforce strict default
+  behavior and require explicit post-removal mode (`LEGACY_ALIAS_REMOVAL_MODE=1`)
+  when aliases are intentionally absent. Remaining closeout item is release
+  checkpoint update with final removal commit hash.

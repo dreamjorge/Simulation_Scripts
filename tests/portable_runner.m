@@ -27,6 +27,11 @@ function totalFailed = portable_runner()
     addpath(fullfile(testDir, 'modern'));
     addpath(fullfile(testDir, 'legacy_compat'));
     addpath(fullfile(testDir, 'edge_cases'));
+
+    % Legacy alias removal mode:
+    % Hankele* aliases were removed; legacy_compat tests assert post-removal
+    % migration behavior when this flag is enabled.
+    setenv('LEGACY_ALIAS_REMOVAL_MODE', '1');
     
     % Canonical list of tests to run (from tests/modern/)
     testFiles = {

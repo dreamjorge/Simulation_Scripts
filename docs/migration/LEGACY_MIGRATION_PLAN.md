@@ -155,7 +155,7 @@ Do **not** remove `legacy/compat/*` or legacy constructor paths until all gates 
 ### Gate A — Usage Gate
 
 - [x] No internal references to `HankeleHermite` / `HankeleLaguerre` in `src/`, `examples/canonical/`, and `tests/modern/`.
-- [ ] At least one migration checkpoint confirms no active external dependency reports from users.
+- [x] At least one migration checkpoint confirms no active external dependency reports from users.
 
 Usage signal execution artifact:
 
@@ -184,17 +184,17 @@ Announcement artifact:
 
 ### Removal Checklist (execute only after A+B+C+D)
 
-- [ ] Remove `legacy/compat/HankeleHermite.m` and `legacy/compat/HankeleLaguerre.m`.
-- [ ] Remove/update legacy alias tests in `tests/legacy_compat/`.
-- [ ] Run full verification (`tests/portable_runner.m` + targeted canonical smokes).
-- [ ] Update `docs/migration/RELEASE_CHECKPOINT_*.md` with the exact removal commit hash.
+- [x] Remove `legacy/compat/HankeleHermite.m` and `legacy/compat/HankeleLaguerre.m`.
+- [x] Remove/update legacy alias tests in `tests/legacy_compat/`.
+- [x] Run full verification (`tests/portable_runner.m` + targeted canonical smokes).
+- [x] Update `docs/migration/RELEASE_CHECKPOINT_*.md` with the exact removal commit hash.
 
 ## Migration Notes for Legacy Script Users
 
 If you are running historical scripts and encounter warnings or deprecation notices:
 
-### HankeleHermite / HankeleLaguerre Warnings
-These aliases are deprecated. Replace:
+### HankeleHermite / HankeleLaguerre Removal
+These aliases were removed. Replace:
 ```matlab
 % Old (deprecated)
 h = HankeleHermite(x, y, params, type);

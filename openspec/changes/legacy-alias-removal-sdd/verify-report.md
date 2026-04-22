@@ -78,9 +78,10 @@ include: *.{m,md,yml,yaml,txt}
 
 - ✅ PASS (for protected modern surfaces)
   - no `Hankele*` in `src/`, `examples/canonical/`, `tests/modern` runtime usage
-- ⚠️ PENDING (external dependency signal)
-  - tracking checklist created: `docs/migration/USAGE_SIGNAL_CHECKLIST.md`
-  - announcement template prepared: `docs/migration/ALIAS_REMOVAL_ANNOUNCEMENT_TEMPLATE.md`
+- ✅ PASS (external dependency signal)
+  - no unresolved support requests found in issues/PRs
+  - Discussions are disabled (N/A source)
+  - usage checklist signed off in `docs/migration/USAGE_SIGNAL_CHECKLIST.md`
 
 ### Gate B — Test
 
@@ -112,8 +113,8 @@ include: *.{m,md,yml,yaml,txt}
 
 ## 4) Decision
 
-Current status: **PARTIALLY READY FOR ALIAS REMOVAL**.
+Current status: **READY FOR ALIAS REMOVAL**.
 
 Blocking items:
 
-1. Complete Usage gate item for external dependency signal (user-impact check).
+- None.

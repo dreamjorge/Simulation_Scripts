@@ -10,9 +10,9 @@
 
 ## Phase 2: Alias removal implementation
 
-- [ ] 2.1 Remove `legacy/compat/HankeleHermite.m`
-- [ ] 2.2 Remove `legacy/compat/HankeleLaguerre.m`
-- [ ] 2.3 Update any path/bootstrap docs that still suggest alias usage
+- [x] 2.1 Remove `legacy/compat/HankeleHermite.m`
+- [x] 2.2 Remove `legacy/compat/HankeleLaguerre.m`
+- [x] 2.3 Update any path/bootstrap docs that still suggest alias usage
 
 ## Phase 3: Test strategy transition
 
@@ -22,6 +22,6 @@
 
 ## Phase 4: Documentation and release closeout
 
-- [ ] 4.1 Update `docs/migration/LEGACY_MIGRATION_PLAN.md` with completed removal status
+- [x] 4.1 Update `docs/migration/LEGACY_MIGRATION_PLAN.md` with completed removal status
 - [ ] 4.2 Add/Update release checkpoint with removal commit hash and rollback command
-- [ ] 4.3 Final review of unresolved migration risks
+- [x] 4.3 Final review of unresolved migration risks

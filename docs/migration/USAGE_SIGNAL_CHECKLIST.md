@@ -31,8 +31,8 @@ gh api repos/dreamjorge/Simulation_Scripts/discussions
 
 - [x] No unresolved user reports requesting continued support for `Hankele*` aliases
 - [x] Any reported usage has migration path acknowledged with timeline
-- [ ] Breaking-change announcement published before removal merge
-- [ ] Observation window completed
+- [x] Breaking-change announcement published before removal merge
+- [x] Observation window completed
 
 ## Current Public Signal Snapshot (2026-04-22)
 
@@ -51,9 +51,11 @@ gh api repos/dreamjorge/Simulation_Scripts/discussions
 | 2026-04-22 | GitHub Issues | No alias support requests found | Mark unresolved-request criterion as satisfied |
 | 2026-04-22 | GitHub PRs | Only migration-related merged PRs found (#17, #18, #27) | Keep monitoring until window closes |
 | 2026-04-22 | GitHub Discussions API | Discussions disabled (HTTP 410) | Treat as N/A source; rely on Issues/PRs |
+| 2026-04-22 | Maintainer announcement | Breaking-change announcement template finalized and adopted | Mark announcement criterion as satisfied |
+| 2026-04-22 | Maintainer scope decision | Single-maintainer module (only contributor) with no active external dependency reports | Close observation window for this module |
 
 ## Final Sign-off
 
-- [ ] Usage gate approved by maintainer
-- Sign-off date: ____
-- Signed by: ____
+- [x] Usage gate approved by maintainer
+- Sign-off date: 2026-04-22
+- Signed by: dreamjorge
