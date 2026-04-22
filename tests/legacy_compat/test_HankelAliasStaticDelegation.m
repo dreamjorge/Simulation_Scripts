@@ -12,6 +12,11 @@ fprintf('=== Hankel Alias Static Delegation Tests ===\n\n');
 passed = 0;
 failed = 0;
 
+% Explicit mode gate:
+%   - default: aliases required
+%   - LEGACY_ALIAS_REMOVAL_MODE=1: aliases expected removed
+aliasRemovalMode = strcmp(getenv('LEGACY_ALIAS_REMOVAL_MODE'), '1');
+
 w0 = 100e-6;
 lambda = 632.8e-9;
 zi = 0.0;
@@ -34,21 +39,31 @@ rayH.zySlope(:) = 1e8;
 rayH.xySlope(:) = 1.0;
 
 baseH = HankelHermite.getPropagateCartesianRays(rayH, x, y, dr, hpZi, hpZf, 11);
-aliasH = HankeleHermite.getPropagateCartesianRays(rayH, x, y, dr, hpZi, hpZf, 11);
 
-okH = isequaln(baseH.xCoordinate, aliasH.xCoordinate) && ...
-      isequaln(baseH.yCoordinate, aliasH.yCoordinate) && ...
-      isequaln(baseH.zCoordinate, aliasH.zCoordinate) && ...
-      isequaln(baseH.zxSlope, aliasH.zxSlope) && ...
-      isequaln(baseH.zySlope, aliasH.zySlope) && ...
-      isequaln(baseH.xySlope, aliasH.xySlope) && ...
-      isequaln(baseH.hankelType, aliasH.hankelType);
+hasHankeleHermite = (exist('HankeleHermite', 'class') == 8);
+if hasHankeleHermite
+    aliasH = HankeleHermite.getPropagateCartesianRays(rayH, x, y, dr, hpZi, hpZf, 11);
 
-if okH
-    fprintf('  PASS: HankeleHermite.getPropagateCartesianRays delegates to base\n');
+    okH = isequaln(baseH.xCoordinate, aliasH.xCoordinate) && ...
+          isequaln(baseH.yCoordinate, aliasH.yCoordinate) && ...
+          isequaln(baseH.zCoordinate, aliasH.zCoordinate) && ...
+          isequaln(baseH.zxSlope, aliasH.zxSlope) && ...
+          isequaln(baseH.zySlope, aliasH.zySlope) && ...
+          isequaln(baseH.xySlope, aliasH.xySlope) && ...
+          isequaln(baseH.hankelType, aliasH.hankelType);
+
+    if okH
+        fprintf('  PASS: HankeleHermite.getPropagateCartesianRays delegates to base\n');
+        passed = passed + 1;
+    else
+        fprintf('  FAIL: HankeleHermite.getPropagateCartesianRays delegates to base\n');
+        failed = failed + 1;
+    end
+elseif aliasRemovalMode
+    fprintf('  PASS: HankeleHermite static delegation removed with alias class\n');
     passed = passed + 1;
 else
-    fprintf('  FAIL: HankeleHermite.getPropagateCartesianRays delegates to base\n');
+    fprintf('  FAIL: HankeleHermite static delegation alias missing before removal mode\n');
     failed = failed + 1;
 end
 
@@ -71,23 +86,33 @@ rayL.zthSlope(:) = 1e8;
 rayL.rthSlope(:) = 1.0;
 
 baseL = HankelLaguerre.getPropagateCylindricalRays(rayL, totalRays, r, th, difr, lpZi, lpZf, 2);
-aliasL = HankeleLaguerre.getPropagateCylindricalRays(rayL, totalRays, r, th, difr, lpZi, lpZf, 2);
 
-okL = isequaln(baseL.rCoordinate, aliasL.rCoordinate) && ...
-      isequaln(baseL.thetaCoordinate, aliasL.thetaCoordinate) && ...
-      isequaln(baseL.zCoordinate, aliasL.zCoordinate) && ...
-      isequaln(baseL.xCoordinate, aliasL.xCoordinate) && ...
-      isequaln(baseL.yCoordinate, aliasL.yCoordinate) && ...
-      isequaln(baseL.zrSlope, aliasL.zrSlope) && ...
-      isequaln(baseL.zthSlope, aliasL.zthSlope) && ...
-      isequaln(baseL.rthSlope, aliasL.rthSlope) && ...
-      isequaln(baseL.hankelType, aliasL.hankelType);
+hasHankeleLaguerre = (exist('HankeleLaguerre', 'class') == 8);
+if hasHankeleLaguerre
+    aliasL = HankeleLaguerre.getPropagateCylindricalRays(rayL, totalRays, r, th, difr, lpZi, lpZf, 2);
 
-if okL
-    fprintf('  PASS: HankeleLaguerre.getPropagateCylindricalRays delegates to base\n');
+    okL = isequaln(baseL.rCoordinate, aliasL.rCoordinate) && ...
+          isequaln(baseL.thetaCoordinate, aliasL.thetaCoordinate) && ...
+          isequaln(baseL.zCoordinate, aliasL.zCoordinate) && ...
+          isequaln(baseL.xCoordinate, aliasL.xCoordinate) && ...
+          isequaln(baseL.yCoordinate, aliasL.yCoordinate) && ...
+          isequaln(baseL.zrSlope, aliasL.zrSlope) && ...
+          isequaln(baseL.zthSlope, aliasL.zthSlope) && ...
+          isequaln(baseL.rthSlope, aliasL.rthSlope) && ...
+          isequaln(baseL.hankelType, aliasL.hankelType);
+
+    if okL
+        fprintf('  PASS: HankeleLaguerre.getPropagateCylindricalRays delegates to base\n');
+        passed = passed + 1;
+    else
+        fprintf('  FAIL: HankeleLaguerre.getPropagateCylindricalRays delegates to base\n');
+        failed = failed + 1;
+    end
+elseif aliasRemovalMode
+    fprintf('  PASS: HankeleLaguerre static delegation removed with alias class\n');
     passed = passed + 1;
 else
-    fprintf('  FAIL: HankeleLaguerre.getPropagateCylindricalRays delegates to base\n');
+    fprintf('  FAIL: HankeleLaguerre static delegation alias missing before removal mode\n');
     failed = failed + 1;
 end
 

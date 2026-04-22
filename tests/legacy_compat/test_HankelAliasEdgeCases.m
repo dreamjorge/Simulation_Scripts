@@ -12,6 +12,11 @@ fprintf('=== Hankel Alias Edge Cases Tests ===\n\n');
 passed = 0;
 failed = 0;
 
+% Explicit mode gate:
+%   - default: aliases required
+%   - LEGACY_ALIAS_REMOVAL_MODE=1: aliases expected removed
+aliasRemovalMode = strcmp(getenv('LEGACY_ALIAS_REMOVAL_MODE'), '1');
+
 w0 = 100e-6;
 lambda = 632.8e-9;
 zi = 0.0;
@@ -34,21 +39,31 @@ rayH.zySlope = [Inf, -9e7, 9e7, 7e7];
 rayH.xySlope = [Inf, -1.0, 1.0, -0.5];
 
 baseH = HankelHermite.getPropagateCartesianRays(rayH, x, y, dr, hpZi, hpZf, 12);
-aliasH = HankeleHermite.getPropagateCartesianRays(rayH, x, y, dr, hpZi, hpZf, 12);
 
-okH = isequaln(baseH.xCoordinate, aliasH.xCoordinate) && ...
-      isequaln(baseH.yCoordinate, aliasH.yCoordinate) && ...
-      isequaln(baseH.zCoordinate, aliasH.zCoordinate) && ...
-      isequaln(baseH.zxSlope, aliasH.zxSlope) && ...
-      isequaln(baseH.zySlope, aliasH.zySlope) && ...
-      isequaln(baseH.xySlope, aliasH.xySlope) && ...
-      isequaln(baseH.hankelType, aliasH.hankelType);
+hasHankeleHermite = (exist('HankeleHermite', 'class') == 8);
+if hasHankeleHermite
+    aliasH = HankeleHermite.getPropagateCartesianRays(rayH, x, y, dr, hpZi, hpZf, 12);
 
-if okH
-    fprintf('  PASS: Hermite alias delegation with mixed slopes\n');
+    okH = isequaln(baseH.xCoordinate, aliasH.xCoordinate) && ...
+          isequaln(baseH.yCoordinate, aliasH.yCoordinate) && ...
+          isequaln(baseH.zCoordinate, aliasH.zCoordinate) && ...
+          isequaln(baseH.zxSlope, aliasH.zxSlope) && ...
+          isequaln(baseH.zySlope, aliasH.zySlope) && ...
+          isequaln(baseH.xySlope, aliasH.xySlope) && ...
+          isequaln(baseH.hankelType, aliasH.hankelType);
+
+    if okH
+        fprintf('  PASS: Hermite alias delegation with mixed slopes\n');
+        passed = passed + 1;
+    else
+        fprintf('  FAIL: Hermite alias delegation with mixed slopes\n');
+        failed = failed + 1;
+    end
+elseif aliasRemovalMode
+    fprintf('  PASS: Hermite alias edge-case delegation removed with alias class\n');
     passed = passed + 1;
 else
-    fprintf('  FAIL: Hermite alias delegation with mixed slopes\n');
+    fprintf('  FAIL: Hermite alias edge-case alias missing before removal mode\n');
     failed = failed + 1;
 end
 
@@ -71,23 +86,33 @@ rayL.rthSlope = [Inf, -1.0, 1.0, -0.25];
 
 totalRays = numel(rayL.rCoordinate);
 baseL = HankelLaguerre.getPropagateCylindricalRays(rayL, totalRays, r, th, difr, lpZi, lpZf, 2);
-aliasL = HankeleLaguerre.getPropagateCylindricalRays(rayL, totalRays, r, th, difr, lpZi, lpZf, 2);
 
-okL = isequaln(baseL.rCoordinate, aliasL.rCoordinate) && ...
-      isequaln(baseL.thetaCoordinate, aliasL.thetaCoordinate) && ...
-      isequaln(baseL.zCoordinate, aliasL.zCoordinate) && ...
-      isequaln(baseL.xCoordinate, aliasL.xCoordinate) && ...
-      isequaln(baseL.yCoordinate, aliasL.yCoordinate) && ...
-      isequaln(baseL.zrSlope, aliasL.zrSlope) && ...
-      isequaln(baseL.zthSlope, aliasL.zthSlope) && ...
-      isequaln(baseL.rthSlope, aliasL.rthSlope) && ...
-      isequaln(baseL.hankelType, aliasL.hankelType);
+hasHankeleLaguerre = (exist('HankeleLaguerre', 'class') == 8);
+if hasHankeleLaguerre
+    aliasL = HankeleLaguerre.getPropagateCylindricalRays(rayL, totalRays, r, th, difr, lpZi, lpZf, 2);
 
-if okL
-    fprintf('  PASS: Laguerre alias delegation with mixed radial cases\n');
+    okL = isequaln(baseL.rCoordinate, aliasL.rCoordinate) && ...
+          isequaln(baseL.thetaCoordinate, aliasL.thetaCoordinate) && ...
+          isequaln(baseL.zCoordinate, aliasL.zCoordinate) && ...
+          isequaln(baseL.xCoordinate, aliasL.xCoordinate) && ...
+          isequaln(baseL.yCoordinate, aliasL.yCoordinate) && ...
+          isequaln(baseL.zrSlope, aliasL.zrSlope) && ...
+          isequaln(baseL.zthSlope, aliasL.zthSlope) && ...
+          isequaln(baseL.rthSlope, aliasL.rthSlope) && ...
+          isequaln(baseL.hankelType, aliasL.hankelType);
+
+    if okL
+        fprintf('  PASS: Laguerre alias delegation with mixed radial cases\n');
+        passed = passed + 1;
+    else
+        fprintf('  FAIL: Laguerre alias delegation with mixed radial cases\n');
+        failed = failed + 1;
+    end
+elseif aliasRemovalMode
+    fprintf('  PASS: Laguerre alias edge-case delegation removed with alias class\n');
     passed = passed + 1;
 else
-    fprintf('  FAIL: Laguerre alias delegation with mixed radial cases\n');
+    fprintf('  FAIL: Laguerre alias edge-case alias missing before removal mode\n');
     failed = failed + 1;
 end
 

@@ -21,7 +21,7 @@ Simulation_Scripts/
 │   │   ├── ElegantLaguerreBeam.m
 │   │   ├── HankelHermite.m
 │   │   ├── HankelLaguerre.m
-│   │   └── HankeleHermite.m, HankeleLaguerre.m (legacy aliases)
+│   │   └── (modern classes only)
 │   ├── parameters/             % Beam parameter classes
 │   │   ├── GaussianParameters.m
 │   │   ├── HermiteParameters.m
@@ -57,6 +57,8 @@ Simulation_Scripts/
 │   └── ... (legacy examples)
 ├── tests/                  % Test suite (~380 tests)
 ├── setpaths.m              % Path initialization utility
+├── legacy/
+│   └── compat/             % Deprecated aliases (planned removal track)
 ├── docs/
 │   └── ARCHITECTURE.md    % Architecture documentation
 └── README.md
@@ -195,6 +197,8 @@ matlab -batch "run('tests/test_all.m')"
 
 - Incremental plan (Strangler pattern): `docs/migration/LEGACY_MIGRATION_PLAN.md`
 - Release checkpoint (2026-04-15): `docs/migration/RELEASE_CHECKPOINT_2026-04-15.md`
+- Release checkpoint (2026-04-22): `docs/migration/RELEASE_CHECKPOINT_2026-04-22.md`
+- Alias removal release plan: `docs/migration/ALIAS_REMOVAL_RELEASE_PLAN.md`
 
 ## Changelog
 
