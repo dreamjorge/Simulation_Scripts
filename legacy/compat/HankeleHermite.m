@@ -1,5 +1,10 @@
 classdef HankeleHermite
     % HankeleHermite - Legacy alias for HankelHermite.
+    %
+    % REMOVAL ANNOTATION:
+    %   Remove this alias only when LEGACY_MIGRATION_PLAN readiness gates
+    %   (Usage/Test/Docs/Release) are all satisfied.
+    %   See: docs/migration/LEGACY_MIGRATION_PLAN.md
 
     properties
         HankelType
