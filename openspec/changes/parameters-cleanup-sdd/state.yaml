@@ -1,9 +1,11 @@
 schema: spec-driven
 change: parameters-cleanup-sdd
-status: in_review
+status: merged
 created: 2026-04-21
-phase: closeout
+phase: completed
 phase_updated: 2026-04-21
+merged_pr: 24
+merged_commit: 1f77da9
 
 artifacts:
   proposal: openspec/changes/parameters-cleanup-sdd/proposal.md
@@ -26,4 +28,6 @@ summary: |
   delegating to HermiteComputation. All test suites pass (30/30 portable, 48/48
   GaussianParameters, legacy compat 6/6, etc.).
 
-  Remaining: docs/ARCHITECTURE.md updated, PR ready for review.
+  Closed: PR #24 merged to master at commit 1f77da9.
+  Post-merge follow-up completed on branch chore/parameters-next-steps: canonical
+  smoke examples executed; MainGauss_refactored plotting calls fixed for Octave.

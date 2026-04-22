@@ -90,6 +90,8 @@ Parameters (state: w0, lambda, z)
 
 **Migration complete (2026-04-21)**: GaussianParameters now delegates all formulas to `BeamComputation`. HermiteParameters.getHermiteSolutions delegates to `HermiteComputation`. Legacy inline formulas have been extracted to the computation layer with deprecation comments in the parameter classes.
 
+**Invariant**: classes under `src/parameters/` are parameter/data facades and should not implement or duplicate core beam formulas. Formula logic belongs in `src/computation/` and parameter classes must delegate to it (including static helper methods kept for backward compatibility).
+
 ## Beam API Contract
 
 Every `ParaxialBeam` subclass MUST implement:

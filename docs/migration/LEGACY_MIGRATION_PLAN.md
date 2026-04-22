@@ -148,6 +148,39 @@ Full package migration will be done in a future phase after `src/` is stable.
 - Risk: Duplicate plotting APIs persist.
   - Mitigation: deprecate direct addon plotting in stages, with wrappers.
 
+## Legacy Removal Readiness Gates (when we can safely remove legacy)
+
+Do **not** remove `legacy/compat/*` or legacy constructor paths until all gates below are green.
+
+### Gate A — Usage Gate
+
+- [ ] No internal references to `HankeleHermite` / `HankeleLaguerre` in `src/`, `examples/canonical/`, and `tests/modern/`.
+- [ ] At least one migration checkpoint confirms no active external dependency reports from users.
+
+### Gate B — Test Gate
+
+- [ ] `tests/portable_runner.m` passes with legacy aliases still present.
+- [ ] A dedicated branch run validates portable suite still passes **after** temporarily removing `legacy/compat/Hankele*.m`.
+- [ ] Legacy-only test suite is either retired or replaced with explicit migration assertions.
+
+### Gate C — Documentation Gate
+
+- [ ] README and migration docs no longer recommend legacy aliases anywhere.
+- [ ] Canonical examples exclusively use modern APIs (`HankelHermite`, `HankelLaguerre`, `opticalField`).
+- [ ] Release notes include a breaking-change notice and replacement snippets.
+
+### Gate D — Release Gate
+
+- [ ] Legacy aliases have emitted deprecation warnings for at least one stable release cycle.
+- [ ] Removal is scheduled in a named release milestone (version/tag), not ad-hoc.
+
+### Removal Checklist (execute only after A+B+C+D)
+
+- [ ] Remove `legacy/compat/HankeleHermite.m` and `legacy/compat/HankeleLaguerre.m`.
+- [ ] Remove/update legacy alias tests in `tests/legacy_compat/`.
+- [ ] Run full verification (`tests/portable_runner.m` + targeted canonical smokes).
+- [ ] Update `docs/migration/RELEASE_CHECKPOINT_*.md` with the exact removal commit hash.
+
 ## Migration Notes for Legacy Script Users
 
 If you are running historical scripts and encounter warnings or deprecation notices:

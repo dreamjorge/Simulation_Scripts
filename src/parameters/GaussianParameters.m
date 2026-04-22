@@ -135,19 +135,22 @@ classdef GaussianParameters
 
     methods (Static)
         function w = getWaist(z, w0, zr)
-            w = w0 .* sqrt(1 + (z./zr).^2);
+            % Keep legacy signature (z, w0, zr) but delegate computation.
+            % BeamComputation.waist expects (w0, z, lambda, zr); lambda is
+            % unused when zr is provided, so pass [] for compatibility.
+            w = BeamComputation.waist(w0, z, [], zr);
         end
 
         function zr = rayleighDistance(w0, lambda)
-            zr = PhysicalConstants.rayleighDistance(w0, lambda);
+            zr = BeamComputation.rayleighDistance(w0, lambda);
         end
 
         function phase = getPhase(z, zr)
-            phase = PhysicalConstants.gouyPhase(z, zr);
+            phase = BeamComputation.gouyPhase(z, zr);
         end
 
         function R = getRadius(z, zr)
-            R = PhysicalConstants.radiusOfCurvature(z, zr);
+            R = BeamComputation.radiusOfCurvature(z, zr);
         end
     end
 end
