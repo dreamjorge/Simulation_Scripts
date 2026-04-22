@@ -12,6 +12,11 @@ fprintf('=== Hankel Alias Static Delegation Tests ===\n\n');
 passed = 0;
 failed = 0;
 
+% Explicit mode gate:
+%   - default: aliases required
+%   - LEGACY_ALIAS_REMOVAL_MODE=1: aliases expected removed
+aliasRemovalMode = strcmp(getenv('LEGACY_ALIAS_REMOVAL_MODE'), '1');
+
 w0 = 100e-6;
 lambda = 632.8e-9;
 zi = 0.0;
@@ -35,7 +40,8 @@ rayH.xySlope(:) = 1.0;
 
 baseH = HankelHermite.getPropagateCartesianRays(rayH, x, y, dr, hpZi, hpZf, 11);
 
-if (exist('HankeleHermite', 'class') == 8)
+hasHankeleHermite = (exist('HankeleHermite', 'class') == 8);
+if hasHankeleHermite
     aliasH = HankeleHermite.getPropagateCartesianRays(rayH, x, y, dr, hpZi, hpZf, 11);
 
     okH = isequaln(baseH.xCoordinate, aliasH.xCoordinate) && ...
@@ -53,9 +59,12 @@ if (exist('HankeleHermite', 'class') == 8)
         fprintf('  FAIL: HankeleHermite.getPropagateCartesianRays delegates to base\n');
         failed = failed + 1;
     end
-else
+elseif aliasRemovalMode
     fprintf('  PASS: HankeleHermite static delegation removed with alias class\n');
     passed = passed + 1;
+else
+    fprintf('  FAIL: HankeleHermite static delegation alias missing before removal mode\n');
+    failed = failed + 1;
 end
 
 % testHankeleLaguerreStaticDelegatesExactly
@@ -78,7 +87,8 @@ rayL.rthSlope(:) = 1.0;
 
 baseL = HankelLaguerre.getPropagateCylindricalRays(rayL, totalRays, r, th, difr, lpZi, lpZf, 2);
 
-if (exist('HankeleLaguerre', 'class') == 8)
+hasHankeleLaguerre = (exist('HankeleLaguerre', 'class') == 8);
+if hasHankeleLaguerre
     aliasL = HankeleLaguerre.getPropagateCylindricalRays(rayL, totalRays, r, th, difr, lpZi, lpZf, 2);
 
     okL = isequaln(baseL.rCoordinate, aliasL.rCoordinate) && ...
@@ -98,9 +108,12 @@ if (exist('HankeleLaguerre', 'class') == 8)
         fprintf('  FAIL: HankeleLaguerre.getPropagateCylindricalRays delegates to base\n');
         failed = failed + 1;
     end
-else
+elseif aliasRemovalMode
     fprintf('  PASS: HankeleLaguerre static delegation removed with alias class\n');
     passed = passed + 1;
+else
+    fprintf('  FAIL: HankeleLaguerre static delegation alias missing before removal mode\n');
+    failed = failed + 1;
 end
 
 fprintf('\n=== Hankel Alias Static Delegation: %d/%d passed ===\n', passed, passed + failed);

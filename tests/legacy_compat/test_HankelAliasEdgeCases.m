@@ -12,6 +12,11 @@ fprintf('=== Hankel Alias Edge Cases Tests ===\n\n');
 passed = 0;
 failed = 0;
 
+% Explicit mode gate:
+%   - default: aliases required
+%   - LEGACY_ALIAS_REMOVAL_MODE=1: aliases expected removed
+aliasRemovalMode = strcmp(getenv('LEGACY_ALIAS_REMOVAL_MODE'), '1');
+
 w0 = 100e-6;
 lambda = 632.8e-9;
 zi = 0.0;
@@ -35,7 +40,8 @@ rayH.xySlope = [Inf, -1.0, 1.0, -0.5];
 
 baseH = HankelHermite.getPropagateCartesianRays(rayH, x, y, dr, hpZi, hpZf, 12);
 
-if (exist('HankeleHermite', 'class') == 8)
+hasHankeleHermite = (exist('HankeleHermite', 'class') == 8);
+if hasHankeleHermite
     aliasH = HankeleHermite.getPropagateCartesianRays(rayH, x, y, dr, hpZi, hpZf, 12);
 
     okH = isequaln(baseH.xCoordinate, aliasH.xCoordinate) && ...
@@ -53,9 +59,12 @@ if (exist('HankeleHermite', 'class') == 8)
         fprintf('  FAIL: Hermite alias delegation with mixed slopes\n');
         failed = failed + 1;
     end
-else
+elseif aliasRemovalMode
     fprintf('  PASS: Hermite alias edge-case delegation removed with alias class\n');
     passed = passed + 1;
+else
+    fprintf('  FAIL: Hermite alias edge-case alias missing before removal mode\n');
+    failed = failed + 1;
 end
 
 % testLaguerreAliasDelegationWithMixedRadialCases
@@ -78,7 +87,8 @@ rayL.rthSlope = [Inf, -1.0, 1.0, -0.25];
 totalRays = numel(rayL.rCoordinate);
 baseL = HankelLaguerre.getPropagateCylindricalRays(rayL, totalRays, r, th, difr, lpZi, lpZf, 2);
 
-if (exist('HankeleLaguerre', 'class') == 8)
+hasHankeleLaguerre = (exist('HankeleLaguerre', 'class') == 8);
+if hasHankeleLaguerre
     aliasL = HankeleLaguerre.getPropagateCylindricalRays(rayL, totalRays, r, th, difr, lpZi, lpZf, 2);
 
     okL = isequaln(baseL.rCoordinate, aliasL.rCoordinate) && ...
@@ -98,9 +108,12 @@ if (exist('HankeleLaguerre', 'class') == 8)
         fprintf('  FAIL: Laguerre alias delegation with mixed radial cases\n');
         failed = failed + 1;
     end
-else
+elseif aliasRemovalMode
     fprintf('  PASS: Laguerre alias edge-case delegation removed with alias class\n');
     passed = passed + 1;
+else
+    fprintf('  FAIL: Laguerre alias edge-case alias missing before removal mode\n');
+    failed = failed + 1;
 end
 
 fprintf('\n=== Hankel Alias Edge Cases: %d/%d passed ===\n', passed, passed + failed);

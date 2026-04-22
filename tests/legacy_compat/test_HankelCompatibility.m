@@ -11,6 +11,11 @@ fprintf('=== Hankel Compatibility Tests ===\n\n');
 passed = 0;
 failed = 0;
 
+% Explicit mode gate:
+%   - default (LEGACY_ALIAS_REMOVAL_MODE unset/0): aliases MUST exist
+%   - post-removal mode (LEGACY_ALIAS_REMOVAL_MODE=1): aliases MUST be absent
+aliasRemovalMode = strcmp(getenv('LEGACY_ALIAS_REMOVAL_MODE'), '1');
+
 w0 = 100e-6;
 lambda = 632.8e-9;
 z = 0.01;
@@ -39,7 +44,8 @@ else
 end
 
 % testHankeleHermiteAlias
-if (exist('HankeleHermite', 'class') == 8)
+hasHankeleHermite = (exist('HankeleHermite', 'class') == 8);
+if hasHankeleHermite
     hhe11 = HankeleHermite(x, y, hp, 11);
     if (max(abs(hhe11.OpticalField - hh11.OpticalField)) < 1e-12)
         fprintf('  PASS: HankeleHermite alias\n');
@@ -48,7 +54,7 @@ if (exist('HankeleHermite', 'class') == 8)
         fprintf('  FAIL: HankeleHermite alias\n');
         failed = failed + 1;
     end
-else
+elseif aliasRemovalMode
     % Post-removal behavior: alias should be unavailable.
     try
         HankeleHermite(x, y, hp, 11); %#ok<UNRCH>
@@ -58,6 +64,9 @@ else
         fprintf('  PASS: HankeleHermite alias removed behavior\n');
         passed = passed + 1;
     end
+else
+    fprintf('  FAIL: HankeleHermite alias missing before removal mode\n');
+    failed = failed + 1;
 end
 
 % testHankelLaguerreLegacyConstructor
@@ -74,7 +83,8 @@ else
 end
 
 % testHankeleLaguerreAlias
-if (exist('HankeleLaguerre', 'class') == 8)
+hasHankeleLaguerre = (exist('HankeleLaguerre', 'class') == 8);
+if hasHankeleLaguerre
     hle1 = HankeleLaguerre(r, th, lp, 1);
     if (max(abs(hle1.OpticalFieldLaguerre - hl1.OpticalFieldLaguerre)) < 1e-12)
         fprintf('  PASS: HankeleLaguerre alias\n');
@@ -83,7 +93,7 @@ if (exist('HankeleLaguerre', 'class') == 8)
         fprintf('  FAIL: HankeleLaguerre alias\n');
         failed = failed + 1;
     end
-else
+elseif aliasRemovalMode
     % Post-removal behavior: alias should be unavailable.
     try
         HankeleLaguerre(r, th, lp, 1); %#ok<UNRCH>
@@ -93,10 +103,13 @@ else
         fprintf('  PASS: HankeleLaguerre alias removed behavior\n');
         passed = passed + 1;
     end
+else
+    fprintf('  FAIL: HankeleLaguerre alias missing before removal mode\n');
+    failed = failed + 1;
 end
 
 % testLegacyAliasStaticMethodsExposed
-hasAliasStatic = (exist('HankeleHermite', 'class') == 8) && (exist('HankeleLaguerre', 'class') == 8);
+hasAliasStatic = hasHankeleHermite && hasHankeleLaguerre;
 if hasAliasStatic
     if (ismethod('HankeleHermite', 'getPropagateCartesianRays') && ismethod('HankeleLaguerre', 'getPropagateCylindricalRays'))
         fprintf('  PASS: legacy alias static methods exposed\n');
@@ -105,9 +118,12 @@ if hasAliasStatic
         fprintf('  FAIL: legacy alias static methods exposed\n');
         failed = failed + 1;
     end
-else
+elseif aliasRemovalMode
     fprintf('  PASS: legacy alias static methods removed with alias classes\n');
     passed = passed + 1;
+else
+    fprintf('  FAIL: legacy alias static methods missing before removal mode\n');
+    failed = failed + 1;
 end
 
 fprintf('\n=== Hankel Compatibility: %d/%d passed ===\n', passed, passed + failed);

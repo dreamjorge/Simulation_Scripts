@@ -89,6 +89,10 @@ include: *.{m,md,yml,yaml,txt}
   - Temporary alias-removal run executed with full portable suite green (31/0)
   - Legacy alias tests transitioned to migration assertions so they pass both
     pre-removal and post-removal modes
+  - Post-removal mode is explicitly gated by environment flag:
+    `LEGACY_ALIAS_REMOVAL_MODE=1`
+    - default mode (flag unset): missing aliases => test failure
+    - removal mode (flag set): missing aliases => expected pass
 
 ### Gate C — Docs
 
