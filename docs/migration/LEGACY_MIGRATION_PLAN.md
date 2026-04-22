@@ -160,8 +160,8 @@ Do **not** remove `legacy/compat/*` or legacy constructor paths until all gates 
 ### Gate B — Test Gate
 
 - [x] `tests/portable_runner.m` passes with legacy aliases still present.
-- [ ] A dedicated branch run validates portable suite still passes **after** temporarily removing `legacy/compat/Hankele*.m`.
-- [ ] Legacy-only test suite is either retired or replaced with explicit migration assertions.
+- [x] A dedicated branch run validates portable suite still passes **after** temporarily removing `legacy/compat/Hankele*.m`.
+- [x] Legacy-only test suite is either retired or replaced with explicit migration assertions.
 
 ### Gate C — Documentation Gate
 

@@ -2,7 +2,7 @@ schema: spec-driven
 change: legacy-alias-removal-sdd
 status: in_progress
 created: 2026-04-22
-phase: docs-release-prep
+phase: ready-pending-usage-signal
 phase_updated: 2026-04-22
 
 artifacts:
@@ -26,5 +26,7 @@ summary: |
   Phase 1 completed with evidence (guardrail PASS, portable 31/0). Docs and
   release blockers were advanced by defining a named milestone/tag and
   breaking-change note template in ALIAS_REMOVAL_RELEASE_PLAN.md.
-  Remaining blockers: external dependency signal, temporary alias-removal run,
-  and legacy_compat transition strategy.
+  Test transition completed: legacy_compat alias tests now support both
+  pre-removal (aliases present) and post-removal (aliases absent) modes.
+  Temporary alias-removal run now passes full portable suite (31/0).
+  Remaining blocker: external dependency signal for final Usage gate item.

@@ -39,13 +39,25 @@ else
 end
 
 % testHankeleHermiteAlias
-hhe11 = HankeleHermite(x, y, hp, 11);
-if (max(abs(hhe11.OpticalField - hh11.OpticalField)) < 1e-12)
-    fprintf('  PASS: HankeleHermite alias\n');
-    passed = passed + 1;
+if (exist('HankeleHermite', 'class') == 8)
+    hhe11 = HankeleHermite(x, y, hp, 11);
+    if (max(abs(hhe11.OpticalField - hh11.OpticalField)) < 1e-12)
+        fprintf('  PASS: HankeleHermite alias\n');
+        passed = passed + 1;
+    else
+        fprintf('  FAIL: HankeleHermite alias\n');
+        failed = failed + 1;
+    end
 else
-    fprintf('  FAIL: HankeleHermite alias\n');
-    failed = failed + 1;
+    % Post-removal behavior: alias should be unavailable.
+    try
+        HankeleHermite(x, y, hp, 11); %#ok<UNRCH>
+        fprintf('  FAIL: HankeleHermite removed alias should not resolve\n');
+        failed = failed + 1;
+    catch
+        fprintf('  PASS: HankeleHermite alias removed behavior\n');
+        passed = passed + 1;
+    end
 end
 
 % testHankelLaguerreLegacyConstructor
@@ -62,22 +74,40 @@ else
 end
 
 % testHankeleLaguerreAlias
-hle1 = HankeleLaguerre(r, th, lp, 1);
-if (max(abs(hle1.OpticalFieldLaguerre - hl1.OpticalFieldLaguerre)) < 1e-12)
-    fprintf('  PASS: HankeleLaguerre alias\n');
-    passed = passed + 1;
+if (exist('HankeleLaguerre', 'class') == 8)
+    hle1 = HankeleLaguerre(r, th, lp, 1);
+    if (max(abs(hle1.OpticalFieldLaguerre - hl1.OpticalFieldLaguerre)) < 1e-12)
+        fprintf('  PASS: HankeleLaguerre alias\n');
+        passed = passed + 1;
+    else
+        fprintf('  FAIL: HankeleLaguerre alias\n');
+        failed = failed + 1;
+    end
 else
-    fprintf('  FAIL: HankeleLaguerre alias\n');
-    failed = failed + 1;
+    % Post-removal behavior: alias should be unavailable.
+    try
+        HankeleLaguerre(r, th, lp, 1); %#ok<UNRCH>
+        fprintf('  FAIL: HankeleLaguerre removed alias should not resolve\n');
+        failed = failed + 1;
+    catch
+        fprintf('  PASS: HankeleLaguerre alias removed behavior\n');
+        passed = passed + 1;
+    end
 end
 
 % testLegacyAliasStaticMethodsExposed
-if (ismethod('HankeleHermite', 'getPropagateCartesianRays') && ismethod('HankeleLaguerre', 'getPropagateCylindricalRays'))
-    fprintf('  PASS: legacy alias static methods exposed\n');
-    passed = passed + 1;
+hasAliasStatic = (exist('HankeleHermite', 'class') == 8) && (exist('HankeleLaguerre', 'class') == 8);
+if hasAliasStatic
+    if (ismethod('HankeleHermite', 'getPropagateCartesianRays') && ismethod('HankeleLaguerre', 'getPropagateCylindricalRays'))
+        fprintf('  PASS: legacy alias static methods exposed\n');
+        passed = passed + 1;
+    else
+        fprintf('  FAIL: legacy alias static methods exposed\n');
+        failed = failed + 1;
+    end
 else
-    fprintf('  FAIL: legacy alias static methods exposed\n');
-    failed = failed + 1;
+    fprintf('  PASS: legacy alias static methods removed with alias classes\n');
+    passed = passed + 1;
 end
 
 fprintf('\n=== Hankel Compatibility: %d/%d passed ===\n', passed, passed + failed);

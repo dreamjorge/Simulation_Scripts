@@ -31,6 +31,24 @@ Result:
 - `Tests Fallados: 0`
 - `ESTADO: ÉXITO`
 
+### 1.3 Temporary alias-removal portable run (Gate B.2 evidence)
+
+Method:
+
+- Temporarily renamed:
+  - `legacy/compat/HankeleHermite.m` -> `.removed`
+  - `legacy/compat/HankeleLaguerre.m` -> `.removed`
+- Ran `tests/portable_runner.m`
+- Restored both files automatically after run
+
+Result:
+
+- Initial run: `Tests Pasados: 28`, `Tests Fallados: 3`
+  - failures isolated to alias-only legacy tests
+- After transitioning legacy alias tests to migration assertions:
+  - rerun result: `Tests Pasados: 31`, `Tests Fallados: 0`
+  - full portable suite green with aliases temporarily removed
+
 ## 2) Repository reference scan (`Hankele*`)
 
 Command:
@@ -63,10 +81,11 @@ include: *.{m,md,yml,yaml,txt}
 
 ### Gate B — Test
 
-- ✅ PASS (baseline stability)
-  - `portable_runner` green (31/0)
-  - guardrail green
-- ⚠️ NOTE: legacy compatibility suites still intentionally depend on aliases.
+- ✅ PASS
+  - Baseline stability with aliases present: `portable_runner` green (31/0)
+  - Temporary alias-removal run executed with full portable suite green (31/0)
+  - Legacy alias tests transitioned to migration assertions so they pass both
+    pre-removal and post-removal modes
 
 ### Gate C — Docs
 
@@ -91,5 +110,3 @@ Current status: **PARTIALLY READY FOR ALIAS REMOVAL**.
 Blocking items:
 
 1. Complete Usage gate item for external dependency signal (user-impact check).
-2. Execute temporary alias-removal run to satisfy Gate B.2.
-3. Decide and implement post-removal strategy for `tests/legacy_compat` alias-only checks.

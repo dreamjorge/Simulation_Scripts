@@ -5,6 +5,7 @@
 - [x] 1.1 Run guardrail + portable suite and capture baseline results
 - [x] 1.2 Search repository for remaining `Hankele*` references and classify expected vs unexpected
 - [x] 1.3 Write `verify-report.md` with Usage/Test/Docs/Release gate status
+- [x] 1.4 Execute temporary alias-removal portable run and capture failure surface
 
 ## Phase 2: Alias removal implementation
 
@@ -14,9 +15,9 @@
 
 ## Phase 3: Test strategy transition
 
-- [ ] 3.1 Replace alias-constructor compatibility tests with migration assertion tests (or archive alias-only tests)
-- [ ] 3.2 Ensure `tests/portable_runner.m` remains green after transition
-- [ ] 3.3 Confirm `tests/modern/test_LegacyAliasGuardrail.m` still passes
+- [x] 3.1 Replace alias-constructor compatibility tests with migration assertion tests (or archive alias-only tests)
+- [x] 3.2 Ensure `tests/portable_runner.m` remains green after transition
+- [x] 3.3 Confirm `tests/modern/test_LegacyAliasGuardrail.m` still passes
 
 ## Phase 4: Documentation and release closeout
 
