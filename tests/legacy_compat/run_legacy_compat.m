@@ -9,6 +9,11 @@ addpath(repoRoot);
 setpaths();
 addpath(scriptPath);
 
+% Post-removal legacy mode:
+% Hankele* aliases were removed from legacy/compat, so this runner must
+% validate migration behavior with alias-removal expectations enabled.
+setenv('LEGACY_ALIAS_REMOVAL_MODE', '1');
+
 legacySuites = {
     fullfile(scriptPath, 'test_HankelCompatibility.m')
     fullfile(scriptPath, 'test_LegacyBeamConstructors.m')
