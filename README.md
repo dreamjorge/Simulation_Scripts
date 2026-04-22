@@ -58,7 +58,7 @@ Simulation_Scripts/
 ├── tests/                  % Test suite (~380 tests)
 ├── setpaths.m              % Path initialization utility
 ├── legacy/
-│   └── compat/             % Deprecated aliases (planned removal track)
+│   └── compat/             % Compatibility docs (Hankele* aliases removed)
 ├── docs/
 │   └── ARCHITECTURE.md    % Architecture documentation
 └── README.md
