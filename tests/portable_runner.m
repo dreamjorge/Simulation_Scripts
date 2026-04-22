@@ -50,6 +50,7 @@ function totalFailed = portable_runner()
         'test_OpticalRay.m',
         'test_AnalysisUtils.m',
         'test_BeamFactory.m',
+        'test_LegacyAliasGuardrail.m',
         'test_Propagators.m',
         'test_RayTracing.m',
         fullfile(testDir, 'legacy_compat', 'test_HankelCompatibility.m'),
