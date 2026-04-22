@@ -175,6 +175,39 @@ else
     failed = failed + 1;
 end
 
+% testStaticDelegationRayleighDistanceMatchesBeamComputation
+zr_static = GaussianParameters.rayleighDistance(w0, lambda);
+zr_comp = BeamComputation.rayleighDistance(w0, lambda);
+if (abs(zr_static - zr_comp) < 1e-15)
+    fprintf('  PASS: static rayleighDistance delegates to BeamComputation\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: static rayleighDistance delegation\n');
+    failed = failed + 1;
+end
+
+% testStaticDelegationGetPhaseMatchesBeamComputation
+phase_static = GaussianParameters.getPhase(0.05, zr_expected);
+phase_comp = BeamComputation.gouyPhase(0.05, zr_expected);
+if (abs(phase_static - phase_comp) < 1e-15)
+    fprintf('  PASS: static getPhase delegates to BeamComputation\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: static getPhase delegation\n');
+    failed = failed + 1;
+end
+
+% testStaticDelegationGetRadiusMatchesBeamComputation
+R_static = GaussianParameters.getRadius(0.05, zr_expected);
+R_comp = BeamComputation.radiusOfCurvature(0.05, zr_expected);
+if (abs(R_static - R_comp) < 1e-12)
+    fprintf('  PASS: static getRadius delegates to BeamComputation\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: static getRadius delegation\n');
+    failed = failed + 1;
+end
+
 % testAmplitudeCalculation
 params_amp = GaussianParameters(0.05, w0, lambda);
 if (params_amp.Amplitude > 0)
