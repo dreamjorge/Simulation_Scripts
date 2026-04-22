@@ -69,8 +69,8 @@ field0 = GB.opticalField(X, Y, 0);
 
 % Plot field
 figure(1)
-plotOpticalField(X, Y, abs(field0).^2, mapgreen, 'microns');
-plotCircle(0, 0, GaussianBeamParameters.InitialWaist);
+plotOpticalField(X(1,:), Y(:,1), abs(field0).^2, mapgreen, 'x (m)', 'y (m)');
+plotCircle(0, 0, GaussianBeamParameters.InitialWaist, 'w', 1.5);
 
 %% Compare old vs new FFT approach
 % Old way (scattered in codebase):
