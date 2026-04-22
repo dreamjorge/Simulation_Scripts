@@ -29,16 +29,28 @@ gh api repos/dreamjorge/Simulation_Scripts/discussions
 
 ## Acceptance Criteria
 
-- [ ] No unresolved user reports requesting continued support for `Hankele*` aliases
-- [ ] Any reported usage has migration path acknowledged with timeline
+- [x] No unresolved user reports requesting continued support for `Hankele*` aliases
+- [x] Any reported usage has migration path acknowledged with timeline
 - [ ] Breaking-change announcement published before removal merge
 - [ ] Observation window completed
+
+## Current Public Signal Snapshot (2026-04-22)
+
+- `gh issue list --state all --search "HankeleHermite OR HankeleLaguerre OR Hankel alias"`
+  - Result: no matching issues
+- `gh pr list --state all --search "HankeleHermite OR HankeleLaguerre OR Hankel alias"`
+  - Result: matched migration PRs only (`#17`, `#18`, `#27`), no unresolved support requests
+- `gh api repos/dreamjorge/Simulation_Scripts/discussions`
+  - Result: HTTP 410 (Discussions disabled for repo)
 
 ## Decision Log
 
 | Date | Signal Source | Finding | Action |
 |------|----------------|---------|--------|
 | 2026-04-22 | Baseline setup | Checklist initialized | Start observation window |
+| 2026-04-22 | GitHub Issues | No alias support requests found | Mark unresolved-request criterion as satisfied |
+| 2026-04-22 | GitHub PRs | Only migration-related merged PRs found (#17, #18, #27) | Keep monitoring until window closes |
+| 2026-04-22 | GitHub Discussions API | Discussions disabled (HTTP 410) | Treat as N/A source; rely on Issues/PRs |
 
 ## Final Sign-off
 
