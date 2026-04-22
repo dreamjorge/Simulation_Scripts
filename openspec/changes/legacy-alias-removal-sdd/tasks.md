@@ -23,5 +23,5 @@
 ## Phase 4: Documentation and release closeout
 
 - [x] 4.1 Update `docs/migration/LEGACY_MIGRATION_PLAN.md` with completed removal status
-- [ ] 4.2 Add/Update release checkpoint with removal commit hash and rollback command
+- [x] 4.2 Add/Update release checkpoint with removal commit hash and rollback command
 - [x] 4.3 Final review of unresolved migration risks

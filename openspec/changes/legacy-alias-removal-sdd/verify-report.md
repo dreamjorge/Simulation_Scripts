@@ -113,8 +113,12 @@ include: *.{m,md,yml,yaml,txt}
 
 ## 4) Decision
 
-Current status: **READY FOR ALIAS REMOVAL**.
+Current status: **REMOVAL EXECUTED**.
 
 Blocking items:
 
 - None.
+
+Execution note:
+
+- Aliases removed in commit `58b02b0`.

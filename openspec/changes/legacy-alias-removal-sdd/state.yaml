@@ -1,9 +1,11 @@
 schema: spec-driven
 change: legacy-alias-removal-sdd
-status: in_progress
+status: completed
 created: 2026-04-22
-phase: release-checkpoint-pending
+phase: completed
 phase_updated: 2026-04-22
+merge_mode: direct-master
+merged_commit: 58b02b0
 
 artifacts:
   proposal: openspec/changes/legacy-alias-removal-sdd/proposal.md
@@ -23,8 +25,8 @@ context: |
   Branch: feat/legacy-alias-removal-sdd
 
 summary: |
-  All readiness gates (A/B/C/D) are satisfied and legacy aliases were removed
-  from `legacy/compat`. Legacy compatibility tests now enforce strict default
-  behavior and require explicit post-removal mode (`LEGACY_ALIAS_REMOVAL_MODE=1`)
-  when aliases are intentionally absent. Remaining closeout item is release
-  checkpoint update with final removal commit hash.
+  All readiness gates (A/B/C/D) were satisfied and legacy aliases were removed
+  from `legacy/compat` in commit 58b02b0. Legacy compatibility tests enforce
+  strict default behavior and require explicit post-removal mode
+  (`LEGACY_ALIAS_REMOVAL_MODE=1`) when aliases are intentionally absent.
+  Release checkpoint was updated with rollback command.

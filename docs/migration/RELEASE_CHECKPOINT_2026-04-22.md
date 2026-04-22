@@ -29,12 +29,24 @@ Focus is architecture consistency, migration readiness, and guardrails against l
 
 ## Not Included
 
-- Removal of `legacy/compat/Hankele*.m` aliases.
 - Retirement of `tests/legacy_compat/`.
 - Package migration from `src/` to `+paraxial/`.
 
 ## Next Phase Recommendation
 
-1. Keep guardrail green for at least one release cycle.
-2. Collect user impact signal (if anyone still depends on `Hankele*`).
-3. When readiness gates are fully green, execute the documented removal checklist in `LEGACY_MIGRATION_PLAN.md`.
+1. Keep guardrail green for at least one release cycle after alias removal.
+2. Monitor post-removal support signals via `USAGE_SIGNAL_CHECKLIST.md`.
+3. Maintain rollback readiness for removal commit.
+
+## Alias Removal Execution (Completed)
+
+- Removed files:
+  - `legacy/compat/HankeleHermite.m`
+  - `legacy/compat/HankeleLaguerre.m`
+- Removal commit hash: `58b02b0`
+
+Rollback:
+
+```bash
+git revert 58b02b0
+```
