@@ -1,0 +1,30 @@
+schema: spec-driven
+change: legacy-alias-removal-sdd
+status: in_progress
+created: 2026-04-22
+phase: docs-release-prep
+phase_updated: 2026-04-22
+
+artifacts:
+  proposal: openspec/changes/legacy-alias-removal-sdd/proposal.md
+  design: openspec/changes/legacy-alias-removal-sdd/design.md
+  specs:
+    - legacy-alias-removal
+    - legacy-migration-gates
+  tasks: openspec/changes/legacy-alias-removal-sdd/tasks.md
+  verification: openspec/changes/legacy-alias-removal-sdd/verify-report.md
+
+context: |
+  Tech stack: MATLAB, Octave, classdef (.m files)
+  Constraints: keep modern API stable, avoid breaking canonical/modern surfaces,
+    preserve rollback simplicity
+  Migration baseline: readiness gates documented, alias guardrail enforced in
+    portable runner
+  Branch: feat/legacy-alias-removal-sdd
+
+summary: |
+  Phase 1 completed with evidence (guardrail PASS, portable 31/0). Docs and
+  release blockers were advanced by defining a named milestone/tag and
+  breaking-change note template in ALIAS_REMOVAL_RELEASE_PLAN.md.
+  Remaining blockers: external dependency signal, temporary alias-removal run,
+  and legacy_compat transition strategy.

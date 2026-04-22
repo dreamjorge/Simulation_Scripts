@@ -154,25 +154,25 @@ Do **not** remove `legacy/compat/*` or legacy constructor paths until all gates 
 
 ### Gate A — Usage Gate
 
-- [ ] No internal references to `HankeleHermite` / `HankeleLaguerre` in `src/`, `examples/canonical/`, and `tests/modern/`.
+- [x] No internal references to `HankeleHermite` / `HankeleLaguerre` in `src/`, `examples/canonical/`, and `tests/modern/`.
 - [ ] At least one migration checkpoint confirms no active external dependency reports from users.
 
 ### Gate B — Test Gate
 
-- [ ] `tests/portable_runner.m` passes with legacy aliases still present.
+- [x] `tests/portable_runner.m` passes with legacy aliases still present.
 - [ ] A dedicated branch run validates portable suite still passes **after** temporarily removing `legacy/compat/Hankele*.m`.
 - [ ] Legacy-only test suite is either retired or replaced with explicit migration assertions.
 
 ### Gate C — Documentation Gate
 
-- [ ] README and migration docs no longer recommend legacy aliases anywhere.
-- [ ] Canonical examples exclusively use modern APIs (`HankelHermite`, `HankelLaguerre`, `opticalField`).
-- [ ] Release notes include a breaking-change notice and replacement snippets.
+- [x] README and migration docs no longer recommend legacy aliases anywhere.
+- [x] Canonical examples exclusively use modern APIs (`HankelHermite`, `HankelLaguerre`, `opticalField`).
+- [x] Release notes include a breaking-change notice and replacement snippets.
 
 ### Gate D — Release Gate
 
-- [ ] Legacy aliases have emitted deprecation warnings for at least one stable release cycle.
-- [ ] Removal is scheduled in a named release milestone (version/tag), not ad-hoc.
+- [x] Legacy aliases have emitted deprecation warnings for at least one stable release cycle.
+- [x] Removal is scheduled in a named release milestone (version/tag), not ad-hoc.
 
 ### Removal Checklist (execute only after A+B+C+D)
 
