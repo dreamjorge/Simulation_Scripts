@@ -157,6 +157,10 @@ Do **not** remove `legacy/compat/*` or legacy constructor paths until all gates 
 - [x] No internal references to `HankeleHermite` / `HankeleLaguerre` in `src/`, `examples/canonical/`, and `tests/modern/`.
 - [ ] At least one migration checkpoint confirms no active external dependency reports from users.
 
+Usage signal execution artifact:
+
+- `docs/migration/USAGE_SIGNAL_CHECKLIST.md`
+
 ### Gate B — Test Gate
 
 - [x] `tests/portable_runner.m` passes with legacy aliases still present.
@@ -168,6 +172,10 @@ Do **not** remove `legacy/compat/*` or legacy constructor paths until all gates 
 - [x] README and migration docs no longer recommend legacy aliases anywhere.
 - [x] Canonical examples exclusively use modern APIs (`HankelHermite`, `HankelLaguerre`, `opticalField`).
 - [x] Release notes include a breaking-change notice and replacement snippets.
+
+Announcement artifact:
+
+- `docs/migration/ALIAS_REMOVAL_ANNOUNCEMENT_TEMPLATE.md`
 
 ### Gate D — Release Gate
 

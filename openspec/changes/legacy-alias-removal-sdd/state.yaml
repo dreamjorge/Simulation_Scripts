@@ -29,4 +29,5 @@ summary: |
   Test transition completed: legacy_compat alias tests now support both
   pre-removal (aliases present) and post-removal (aliases absent) modes.
   Temporary alias-removal run now passes full portable suite (31/0).
-  Remaining blocker: external dependency signal for final Usage gate item.
+  Usage-signal artifacts added (checklist + announcement template).
+  Remaining blocker: collect and sign off external dependency signal.

@@ -6,6 +6,7 @@
 - [x] 1.2 Search repository for remaining `Hankele*` references and classify expected vs unexpected
 - [x] 1.3 Write `verify-report.md` with Usage/Test/Docs/Release gate status
 - [x] 1.4 Execute temporary alias-removal portable run and capture failure surface
+- [x] 1.5 Create usage-signal checklist and announcement template artifacts
 
 ## Phase 2: Alias removal implementation
 

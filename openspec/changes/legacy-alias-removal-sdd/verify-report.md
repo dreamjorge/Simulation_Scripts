@@ -78,6 +78,9 @@ include: *.{m,md,yml,yaml,txt}
 
 - ✅ PASS (for protected modern surfaces)
   - no `Hankele*` in `src/`, `examples/canonical/`, `tests/modern` runtime usage
+- ⚠️ PENDING (external dependency signal)
+  - tracking checklist created: `docs/migration/USAGE_SIGNAL_CHECKLIST.md`
+  - announcement template prepared: `docs/migration/ALIAS_REMOVAL_ANNOUNCEMENT_TEMPLATE.md`
 
 ### Gate B — Test
 
