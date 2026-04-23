@@ -53,8 +53,13 @@ Simulation_Scripts/
 │   ├── canonical/          % ✅ Canonical examples for new users
 │   │   ├── MainGauss_refactored.m
 │   │   ├── MainMultiMode.m
-│   │   └── ExampleRayTracing.m
-│   └── ... (legacy examples)
+│   │   ├── ExampleRayTracing.m
+│   │   └── ExampleHankelPropagation.m
+│   └── legacy/
+│       ├── archive/        % Old API examples (for reference)
+│       ├── generators/     % Figure generators for papers
+│       ├── research/       % Thesis-specific scripts
+│       └── LEGACY_POLICY.md
 ├── tests/                  % Test suite (~380 tests)
 ├── setpaths.m              % Path initialization utility
 ├── legacy/
