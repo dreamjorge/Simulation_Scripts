@@ -66,7 +66,8 @@ function totalFailed = portable_runner()
         'test_GaussianBeam_edge.m',
         'test_HankelHermite_edge.m',
         'test_HankelLaguerre_edge.m',
-        'test_RayTracing_extreme.m'
+        'test_RayTracing_extreme.m',
+        'test_Wavefront.m'
     };
     
     totalPassed = 0;
