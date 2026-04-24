@@ -31,16 +31,17 @@ fprintf('  PASS: Constructor works\n\n');
 % Test 2: Get Intensity
 fprintf('Test 2: getIntensity\n');
 I = wf.getIntensity();
-assert(size(I) == [256, 256], 'Intensity size mismatch');
-assert(all(I(:) >= 0), 'Intensity should be non-negative');
+assert(size(I,1) == 256 && size(I,2) == 256, 'Intensity size mismatch');
+is_non_neg = all(I(:) >= 0);
+assert(is_non_neg, 'Intensity should be non-negative');
 fprintf('  PASS: getIntensity returns |E|^2\n\n');
 
 % Test 3: Get Phase
 fprintf('Test 3: getPhase\n');
 phi = wf.getPhase();
-assert(size(phi) == [256, 256], 'Phase size mismatch');
-assert(all(phi(:) >= -pi - 1e-10 & phi(:) <= pi + 1e-10), ...
-    'Phase should be in [-pi, pi]');
+assert(size(phi,1) == 256 && size(phi,2) == 256, 'Phase size mismatch');
+in_range = all(phi(:) >= -pi - 1e-10 & phi(:) <= pi + 1e-10);
+assert(in_range, 'Phase should be in [-pi, pi]');
 fprintf('  PASS: getPhase returns wrapped phase\n\n');
 
 % Test 4: Zernike Z1 = 1 (Piston)
@@ -48,7 +49,8 @@ fprintf('Test 4: Zernike Z1 (Piston)\n');
 rho = 0.5 * ones(10, 10);
 theta = zeros(10, 10);
 Z1 = ZernikeUtils.zernike(1, rho, theta);
-assert(all(abs(Z1(:) - 1) < 1e-10), 'Z1 should be 1');
+z1_ok = all(abs(Z1(:) - 1) < 1e-10);
+assert(z1_ok, 'Z1 should be 1');
 fprintf('  PASS: Z1 = 1 (Piston)\n\n');
 
 % Test 5: Zernike Z2 (Tilt X) formula
@@ -57,7 +59,8 @@ rho = ones(10, 10);
 theta = zeros(10, 10);  % cos(0) = 1
 Z2 = ZernikeUtils.zernike(2, rho, theta);
 expected = 2 * 1 * 1;  % 2*rho*cos(theta) = 2*1*1
-assert(all(abs(Z2(:) - expected) < 1e-10), 'Z2 should be 2');
+z2_ok = all(abs(Z2(:) - expected) < 1e-10);
+assert(z2_ok, 'Z2 should be 2');
 fprintf('  PASS: Z2 = 2*rho*cos(theta)\n\n');
 
 % Test 6: Zernike Z4 (Defocus) formula
@@ -66,7 +69,8 @@ rho = ones(10, 10);
 theta = zeros(10, 10);
 Z4 = ZernikeUtils.zernike(4, rho, theta);
 expected = sqrt(3) * (2*1 - 1);  % sqrt(3)*(2*rho^2 - 1)
-assert(all(abs(Z4(:) - expected) < 1e-10), 'Z4 should be sqrt(3)');
+z4_ok = all(abs(Z4(:) - expected) < 1e-10);
+assert(z4_ok, 'Z4 should be sqrt(3)');
 fprintf('  PASS: Z4 = sqrt(3)*(2*rho^2 - 1)\n\n');
 
 % Test 7: Zernike name lookup
@@ -86,7 +90,8 @@ wf_gauss = Wavefront(E, 632.8e-9, grid);
 coeffs = wf_gauss.fitZernike(36);
 % At waist (z=0), wavefront should be nearly flat (all coefficients small)
 % Piston term should be ~0 for ideal planar wavefront at reference
-assert(all(abs(coeffs) < 0.5), 'All Zernike terms should be small for planar wavefront');
+all_small = all(abs(coeffs) < 0.5);
+assert(all_small, 'All Zernike terms should be small for planar wavefront');
 fprintf('  PASS: Gaussian at waist gives nearly planar wavefront\n\n');
 
 % Test 9: Round-trip fit -> reconstruct
