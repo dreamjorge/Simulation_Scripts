@@ -32,7 +32,7 @@ fprintf('  PASS: Constructor works\n\n');
 fprintf('Test 2: getIntensity\n');
 I = wf.getIntensity();
 assert(size(I) == [256, 256], 'Intensity size mismatch');
-assert(all(real(I(:)) >= 0), 'Intensity should be non-negative');
+assert(all(I(:) >= 0), 'Intensity should be non-negative');
 fprintf('  PASS: getIntensity returns |E|^2\n\n');
 
 % Test 3: Get Phase
@@ -128,12 +128,14 @@ fprintf('  PASS: RMS and PV correct for constant phase\n\n');
 
 % Test 11: Strehl calculation
 fprintf('Test 11: Strehl calculation\n');
-sigma = 632.8e-9 / 10;  % lambda/10
-wf_strehl = Wavefront(exp(1i * sigma * randn(256,256)), 632.8e-9);
+sigma = 0.1;  % phase RMS in radians (flat phase = 0.1 rad)
+phi_flat = zeros(256, 256) + sigma;
+wf_strehl = Wavefront(exp(1i * phi_flat), 632.8e-9);
 strehl = wf_strehl.computeStrehl();
-expected_strehl = exp(-(2 * pi * sigma / 632.8e-9)^2);
-assert(abs(strehl - expected_strehl) < 0.01, ...
+% Maréchal: Strehl ~ exp(-sigma^2) where sigma is phase RMS in radians
+expected_strehl = exp(-sigma^2);
+assert(abs(strehl - expected_strehl) < 1e-10, ...
     sprintf('Strehl should be ~%.3f, got %.3f', expected_strehl, strehl));
-fprintf('  PASS: Strehl approx exp(-(2pi*sigma/lambda)^2)\n\n');
+fprintf('  PASS: Strehl approx exp(-sigma^2) where sigma is phase RMS in rad\n\n');
 
 fprintf('=== All Tests Passed ===\n');

@@ -124,6 +124,13 @@ classdef Wavefront
             %
             % Returns:
             %   coeffs - [nTerms x 1] column vector of Zernike coefficients
+            %
+            % Notes:
+            %   - Phase is unwrapped before fitting to handle discontinuities
+            %     from wrapped [-pi, pi] phase for large wavefront excursions.
+            %   - Only in-pupil pixels (rho <= 1) are included in the fit;
+            %     out-of-pupil pixels are masked out to avoid biasing the
+            %     recovered coefficients.
 
             if nTerms < 1 || nTerms > 36
                 error('Wavefront:invalidNTerms', ...
@@ -131,11 +138,29 @@ classdef Wavefront
             end
 
             [rho, theta] = obj.gridPolar();
-            phi = obj.getPhase();
+
+            % Build pupil mask (1 inside aperture, 0 outside)
+            pupilMask = rho <= 1;
+            inPupil = pupilMask(:);
+
+            % Get wrapped phase, then unwrap for reliable Zernike decomposition
+            phi_wrapped = obj.getPhase();
+            % Unwrap along rows, then along columns to handle 2D phase maps
+            phi_unwrapped = unwrap(unwrap(phi_wrapped, [], 2), [], 1);
+
+            % Apply pupil mask and flatten
+            phi_masked = phi_unwrapped(:);
+            rho_masked = rho(:);
+            theta_masked = theta(:);
+
+            % Keep only in-pupil points
+            phi_masked = phi_masked(inPupil);
+            rho_masked = rho_masked(inPupil);
+            theta_masked = theta_masked(inPupil);
 
             % Build design matrix and fit via pseudo-inverse
-            M = ZernikeUtils.zernikeMatrix(rho, theta, nTerms);
-            coeffs = pinv(M) * phi(:);  % least-squares solution
+            M = ZernikeUtils.zernikeMatrix(rho_masked, theta_masked, nTerms);
+            coeffs = pinv(M) * phi_masked;  % least-squares solution
             coeffs = coeffs(:);  % ensure column vector
         end
 
@@ -153,10 +178,22 @@ classdef Wavefront
 
         function residual = zernikeResidual(obj, nTerms)
             % zernikeResidual - RMS residual after fitting nTerms Zernikes
+            % Computed only over in-pupil pixels to avoid edge artifacts.
             coeffs = obj.fitZernike(nTerms);
+            [rho, theta] = obj.gridPolar();
+            pupilMask = rho <= 1;
+            inPupil = pupilMask(:);
+
             phi_fit = obj.reconstructZernike(coeffs);
-            phi_orig = obj.getPhase();
-            residual = sqrt(mean((phi_orig(:) - phi_fit(:)).^2));
+            phi_unwrapped = unwrap(unwrap(obj.getPhase(), [], 2), [], 1);
+
+            phi_fit_masked = phi_fit(:);
+            phi_orig_masked = phi_unwrapped(:);
+
+            phi_fit_masked = phi_fit_masked(inPupil);
+            phi_orig_masked = phi_orig_masked(inPupil);
+
+            residual = sqrt(mean((phi_orig_masked - phi_fit_masked).^2));
         end
 
         % -----------------------------------------------------------------
@@ -190,12 +227,17 @@ classdef Wavefront
         function strehl = computeStrehl(obj)
             % computeStrehl - Strehl ratio via Maréchal approximation
             %
-            %   strehl = exp(-(2*pi*sigma/lambda)^2)
+            %   strehl = exp(-sigma^2)
             %
-            % where sigma is RMS wavefront error.
+            % where sigma is the RMS wavefront error in radians (phase units).
+            % This is the standard Maréchal approximation: for small aberrations,
+            % the Strehl ratio is approximately exp(-(RMS wavefront error in waves)^2).
+            % Since computeRMS returns phase in radians, squaring gives (sigma_rad)^2
+            % which equals (sigma_waves * 2*pi)^2 = (2*pi * sigma_waves)^2, but the
+            % exponent exp(-sigma_rad^2) is the correct form for phase RMS in radians.
 
             sigma = obj.computeRMS();
-            strehl = exp(-(2 * pi * sigma / obj.Lambda)^2);
+            strehl = exp(-sigma^2);
 
             % Clamp to [0, 1] (numerical precision can exceed bounds)
             strehl = max(0, min(1, strehl));
