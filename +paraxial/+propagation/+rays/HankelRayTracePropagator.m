@@ -1,4 +1,4 @@
-classdef HankelRayTracePropagator < IPropagator
+classdef HankelRayTracePropagator < paraxial.propagation.field.IPropagator
     % HankelRayTracePropagator - Hankel-aware ray tracing (Strategy pattern)
     % Compatible with GNU Octave and MATLAB
     %

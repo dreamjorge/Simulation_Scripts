@@ -1,4 +1,4 @@
-classdef RayTracePropagator < IPropagator
+classdef RayTracePropagator < paraxial.propagation.field.IPropagator
     % RayTracePropagator - Phase-gradient ray tracing via RayTracer (Strategy)
     % Compatible with GNU Octave and MATLAB
     %

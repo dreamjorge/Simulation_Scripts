@@ -40,8 +40,8 @@ function setpaths()
     addpath(fullfile(scriptPath, '+paraxial', '+propagation', '+rays'));
     addpath(fullfile(scriptPath, '+paraxial', '+visualization'));
 
-    %% Utilities (retained in ParaxialBeams/)
-    addpath(fullfile(scriptPath, 'ParaxialBeams'));
+    %% +paraxial namespace package (must add parent dir so package resolution works)
+    addpath(scriptPath);
     addpath(fullfile(scriptPath, 'ParaxialBeams', 'Addons'));
 
     %% Legacy compatibility aliases
