@@ -79,19 +79,29 @@ Every beam type inherits from `ParaxialBeam` and implements:
 | `getParameters(z)` | `GaussianParameters` | Beam params at position z |
 | `beamName()` | `char` | String identifier like 'hermite_3_2' |
 
+## Namespace Convention
+
+**`+paraxial/` is the canonical namespace** for beam classes. The `src/` directory is deprecated but remains functional during the Strangler Fig migration transition.
+
+| Location | Status | Usage |
+|----------|--------|-------|
+| `+paraxial/+beams/*.m` | ✅ Canonical | New code should use these classes directly |
+| `src/beams/*.m` | ⚠️ Deprecated | Emits warning on instantiation; functional but being phased out |
+| `BeamFactory.create()` | ✅ Preferred | Routes to `+paraxial/` automatically |
+
 ## Quick Start
 
 ### MATLAB/Octave
 
 ```matlab
-% Option 1: Use setpaths() utility
+% Option 1: Use setpaths() utility (adds both +paraxial/ and src/ paths)
 setpaths
 
-% Option 2: Add paths manually
-addpath('src/beams', 'src/parameters', 'src/propagation/field', 'src/propagation/rays', 'src/visualization');
-addpath('ParaxialBeams', 'ParaxialBeams/Addons');
+% Option 2: Use +paraxial/ directly (recommended)
+addpath('+paraxial/+beams', '+paraxial/+parameters', '+paraxial/+computation');
+addpath('ParaxialBeams');
 
-% Create beam via Factory
+% Create beam via Factory (routes to +paraxial/ automatically)
 beam = BeamFactory.create('gaussian', 100e-6, 632.8e-9);
 
 % Use beam directly
