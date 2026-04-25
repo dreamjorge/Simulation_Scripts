@@ -193,7 +193,7 @@ end
 
 % testRayTraceConstructor
 rp = RayTracePropagator(grid);
-if (isa(rp, 'IPropagator') && isa(rp, 'RayTracePropagator'))
+if (isa(rp, 'paraxial.propagation.field.IPropagator') && isa(rp, 'RayTracePropagator'))
     fprintf('  PASS: RayTracePropagator constructor\n');
     passed = passed + 1;
 else
