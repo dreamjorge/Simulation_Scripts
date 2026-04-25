@@ -39,6 +39,10 @@ classdef BeamFactory
         function beam = create(type, w0, lambda, varargin)
             % create - Instantiate a ParaxialBeam by name.
             %
+            % Resolves beam class via Strangler Fig pattern:
+            %   1. Try +paraxial/ (canonical) namespace first
+            %   2. Fall back to src/ with deprecation warning
+            %
             % Parameters:
             %   type   (char):   beam type identifier (see class header)
             %   w0     (scalar): beam waist at z = 0 (m)
@@ -49,39 +53,30 @@ classdef BeamFactory
             %   beam (ParaxialBeam subclass)
 
             % Parse optional Name-Value pairs
-            n    = BeamFactory.getOpt(varargin, 'n',    0);
-            m    = BeamFactory.getOpt(varargin, 'm',    0);
-            l    = BeamFactory.getOpt(varargin, 'l',    0);
-            p    = BeamFactory.getOpt(varargin, 'p',    0);
+            n     = BeamFactory.getOpt(varargin, 'n',    0);
+            m     = BeamFactory.getOpt(varargin, 'm',    0);
+            l     = BeamFactory.getOpt(varargin, 'l',    0);
+            p     = BeamFactory.getOpt(varargin, 'p',    0);
             htype = BeamFactory.getOpt(varargin, 'type', 1);
 
-            switch lower(type)
-                case 'gaussian'
-                    beam = GaussianBeam(w0, lambda);
+            % Resolve class location (canonical vs legacy)
+            [className, canonical, legacy] = BeamFactory.resolveClass(type, n, m, l, p, htype);
 
-                case 'hermite'
-                    beam = HermiteBeam(w0, lambda, n, m);
+            % Try +paraxial/ first (canonical)
+            if BeamFactory.classExists(canonical)
+                beam = feval(className, w0, lambda, varargin{:});
 
-                case 'laguerre'
-                    beam = LaguerreBeam(w0, lambda, l, p);
+            % Fallback to src/ with deprecation warning
+            elseif exist(legacy, 'file')
+                warning('BeamFactory:deprecatedSrc', ...
+                    ['src/beams/%s is deprecated. ' ...
+                     'Use BeamFactory.create(''%s'', ...) or %s directly.'], ...
+                    className, type, canonical);
+                beam = feval(className, w0, lambda, varargin{:});
 
-                case {'elegant_hermite', 'eleganth', 'elegant_hg'}
-                    beam = ElegantHermiteBeam(w0, lambda, n, m);
-
-                case {'elegant_laguerre', 'elegantl', 'elegant_lg'}
-                    beam = ElegantLaguerreBeam(w0, lambda, l, p);
-
-                case {'hankel', 'hankel_laguerre'}
-                    beam = HankelLaguerre(w0, lambda, l, p, htype);
-
-                case {'hankel_hermite', 'hankelh'}
-                    if htype < 10, htype = 11; end
-                    beam = HankelHermite(w0, lambda, n, m, htype);
-
-                otherwise
-                    error('BeamFactory:unknownType', ...
-                        'Unknown beam type "%s". Supported: gaussian, hermite, laguerre, elegant_hermite, elegant_laguerre, hankel, hankel_hermite.', ...
-                        type);
+            else
+                error('BeamFactory:classNotFound', ...
+                    'Neither +paraxial nor src/ version of %s found.', className);
             end
         end
 
@@ -90,6 +85,86 @@ classdef BeamFactory
             types = {'gaussian', 'hermite', 'laguerre', ...
                      'elegant_hermite', 'elegant_laguerre', ...
                      'hankel', 'hankel_hermite'};
+        end
+    end
+
+    % -----------------------------------------------------------------
+    % Class resolution (Strangler Fig routing)
+    % -----------------------------------------------------------------
+    methods (Static)
+        function [className, canonical, legacy] = resolveClass(type, n, m, l, p, htype)
+            % resolveClass - Map beam type to canonical and legacy class paths.
+            %
+            % Returns:
+            %   className  (char):  plain class name for feval
+            %   canonical (char):   +paraxial/ package.class path
+            %   legacy    (char):   src/beams/ClassName.m path
+
+            if nargin < 2, n = 0; end
+            if nargin < 3, m = 0; end
+            if nargin < 4, l = 0; end
+            if nargin < 5, p = 0; end
+            if nargin < 6, htype = 1; end
+
+            switch lower(type)
+                case 'gaussian'
+                    className = 'GaussianBeam';
+                    canonical = 'paraxial.beams.GaussianBeam';
+                    legacy = 'src/beams/GaussianBeam.m';
+
+                case 'hermite'
+                    className = 'HermiteBeam';
+                    canonical = 'paraxial.beams.HermiteBeam';
+                    legacy = 'src/beams/HermiteBeam.m';
+
+                case 'laguerre'
+                    className = 'LaguerreBeam';
+                    canonical = 'paraxial.beams.LaguerreBeam';
+                    legacy = 'src/beams/LaguerreBeam.m';
+
+                case {'elegant_hermite', 'eleganth', 'elegant_hg'}
+                    className = 'ElegantHermiteBeam';
+                    canonical = 'paraxial.beams.ElegantHermiteBeam';
+                    legacy = 'src/beams/ElegantHermiteBeam.m';
+
+                case {'elegant_laguerre', 'elegantl', 'elegant_lg'}
+                    className = 'ElegantLaguerreBeam';
+                    canonical = 'paraxial.beams.ElegantLaguerreBeam';
+                    legacy = 'src/beams/ElegantLaguerreBeam.m';
+
+                case {'hankel', 'hankel_laguerre'}
+                    className = 'HankelLaguerre';
+                    canonical = 'paraxial.beams.HankelLaguerre';
+                    legacy = 'src/beams/HankelLaguerre.m';
+
+                case {'hankel_hermite', 'hankelh'}
+                    if htype < 10, htype = 11; end
+                    className = 'HankelHermite';
+                    canonical = 'paraxial.beams.HankelHermite';
+                    legacy = 'src/beams/HankelHermite.m';
+
+                otherwise
+                    error('BeamFactory:unknownType', ...
+                        'Unknown beam type "%s". Supported: gaussian, hermite, laguerre, elegant_hermite, elegant_laguerre, hankel, hankel_hermite.', ...
+                        type);
+            end
+        end
+
+        function exists = classExists(className)
+            % classExists - Check if a class is available on the path.
+            %
+            % Uses which() to locate the class — if it resolves to +paraxial/
+            % directory, it's the canonical version. Otherwise checks plain class.
+            %
+            % Note: exist('package.class', 'class') does not work in Octave
+            % for +package directories, so we use which() instead.
+            resolved = which(className);
+            if isempty(resolved)
+                exists = false;
+            else
+                % Class found — check if it's from +paraxial/ (canonical)
+                exists = ~isempty(strfind(resolved, '+paraxial'));
+            end
         end
     end
 

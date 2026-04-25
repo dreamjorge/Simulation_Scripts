@@ -83,6 +83,10 @@ classdef HankelHermite < ParaxialBeam
 
             obj = obj@ParaxialBeam();
 
+            % Emit deprecation warning (Strangler Fig migration)
+            warning('BeamFactory:deprecated', ...
+                'src/beams/HankelHermite is deprecated. Use BeamFactory.create(''hankel_hermite'', ...) or +paraxial/+beams/HankelHermite directly.');
+
             if nargin == 0
                 obj.HankelType = 11;
                 obj.OpticalField = [];

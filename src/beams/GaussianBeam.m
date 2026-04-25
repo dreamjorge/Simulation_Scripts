@@ -41,6 +41,10 @@ classdef GaussianBeam < ParaxialBeam
                 return;
             end
 
+            % Emit deprecation warning (Strangler Fig migration)
+            warning('BeamFactory:deprecated', ...
+                'src/beams/GaussianBeam is deprecated. Use BeamFactory.create(''gaussian'', ...) or +paraxial/+beams/GaussianBeam directly.');
+
             % Determine parameters from input using static helper
             [w0, lambda, legacyCoords, legacyZ] = GaussianBeam.parseArgs(arg1, arg2, varargin{:});
 

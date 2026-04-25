@@ -48,6 +48,10 @@ classdef ElegantHermiteBeam < ParaxialBeam
             % Call superclass constructor first (MATLAB requirement)
             obj = obj@ParaxialBeam();
 
+            % Emit deprecation warning (Strangler Fig migration)
+            warning('BeamFactory:deprecated', ...
+                'src/beams/ElegantHermiteBeam is deprecated. Use BeamFactory.create(''elegant_hermite'', ...) or +paraxial/+beams/ElegantHermiteBeam directly.');
+
             % Determine parameters from input using static helper
             [w0, lambda, n, m, legacyCoords, legacyZ] = ...
                 ElegantHermiteBeam.parseArgs(arg1, arg2, varargin{:});

@@ -61,6 +61,10 @@ classdef HankelLaguerre < ParaxialBeam
             % Call superclass constructor first (MATLAB requirement)
             obj = obj@ParaxialBeam();
 
+            % Emit deprecation warning (Strangler Fig migration)
+            warning('BeamFactory:deprecated', ...
+                'src/beams/HankelLaguerre is deprecated. Use BeamFactory.create(''hankel'', ...) or +paraxial/+beams/HankelLaguerre directly.');
+
             % Detect legacy API by checking the type of the 3rd argument.
             % Legacy: HankelLaguerre(r, theta, laguerreParams, hankelType)
             %   — arg3 is a LaguerreParameters object

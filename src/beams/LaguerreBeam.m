@@ -47,6 +47,10 @@ classdef LaguerreBeam < ParaxialBeam
             % Call superclass constructor first (MATLAB requirement)
             obj = obj@ParaxialBeam();
 
+            % Emit deprecation warning (Strangler Fig migration)
+            warning('BeamFactory:deprecated', ...
+                'src/beams/LaguerreBeam is deprecated. Use BeamFactory.create(''laguerre'', ...) or +paraxial/+beams/LaguerreBeam directly.');
+
             % Determine parameters from input using static helper
             [w0, lambda, l, p, legacyCoords, legacyZ] = ...
                 LaguerreBeam.parseArgs(arg1, arg2, varargin{:});
