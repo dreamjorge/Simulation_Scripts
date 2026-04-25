@@ -1,0 +1,37 @@
+# Tasks: +paraxial/ Package Migration (Phase 3)
+
+## Phase 1: BeamFactory Routing Foundation
+
+- [ ] 1.1 Modify `ParaxialBeams/BeamFactory.m` — refactor `create()` to use `exist(canonical, 'class')` lookup for `+paraxial/` first, `exist(legacy, 'file')` fallback with warning
+- [ ] 1.2 Add helper function `BeamFactory.resolveClass(type, canonical, legacy)` to encapsulate routing logic
+- [ ] 1.3 Run `tests/modern/test_BeamFactory.m` — verify factory works in current state before proceeding
+
+## Phase 2: Per-Class Migration (Strangler Fig — one beam at a time)
+
+- [ ] 2.1 Add deprecation warning to `src/beams/GaussianBeam.m` constructor — `warning('BeamFactory:deprecated', ...)` after super() call
+- [ ] 2.2 Run `octave --no-gui --eval "run('tests/test_all.m')"` — verify GaussianBeam tests pass with deprecation warning
+- [ ] 2.3 Add deprecation warning to `src/beams/HermiteBeam.m` constructor
+- [ ] 2.4 Run tests — verify HermiteBeam tests pass
+- [ ] 2.5 Add deprecation warning to `src/beams/LaguerreBeam.m` constructor
+- [ ] 2.6 Run tests — verify LaguerreBeam tests pass
+- [ ] 2.7 Add deprecation warning to `src/beams/ElegantHermiteBeam.m` constructor
+- [ ] 2.8 Run tests — verify ElegantHermiteBeam tests pass
+- [ ] 2.9 Add deprecation warning to `src/beams/ElegantLaguerreBeam.m` constructor
+- [ ] 2.10 Run tests — verify ElegantLaguerreBeam tests pass
+- [ ] 2.11 Add deprecation warning to `src/beams/HankelLaguerre.m` constructor
+- [ ] 2.12 Run tests — verify HankelLaguerre tests pass
+- [ ] 2.13 Add deprecation warning to `src/beams/HankelHermite.m` constructor
+- [ ] 2.14 Run tests — verify HankelHermite tests pass
+
+## Phase 3: Integration Verification
+
+- [ ] 3.1 Run `tests/test_all.m` (full suite) — all tests must pass
+- [ ] 3.2 Run `tests/legacy_compat/run_legacy_compat.m` — legacy compat tests pass
+- [ ] 3.3 Verify `which('paraxial.beams.GaussianBeam')` resolves correctly in Octave and MATLAB
+- [ ] 3.4 Test standalone +paraxial/ path: comment out `src/beams/` from path, run `BeamFactory.create('gaussian', ...)`, verify it still works
+
+## Phase 4: Documentation
+
+- [ ] 4.1 Update `README.md` — mark `+paraxial/` as canonical namespace
+- [ ] 4.2 Add note in `README.md` that `src/beams/` is deprecated but functional during transition
+- [ ] 4.3 Commit "feat: complete +paraxial/ package migration Phase 3"
