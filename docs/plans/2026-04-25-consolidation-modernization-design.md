@@ -1,7 +1,27 @@
 # Consolidation & Modernization Roadmap — Design
 
 **Date:** 2026-04-25
-**Status:** Approved
+**Status:** Phase A Complete — Phase B In Progress
+
+---
+
+## Integration Result (2026-04-25)
+
+**Master merged with `integration/modernization-v1` (commit `5010c12`)**
+
+| Change | Status |
+|--------|--------|
+| MATLAB constructor fix (super() first) | ✅ Integrated |
+| ~380 test suite | ✅ Integrated |
+| OpticalRay / CylindricalRay classes | ✅ Integrated |
+| GridUtils asymmetric grids fix | ✅ Integrated |
+| HankelLaguerre H1/H2 formula fix | ✅ Integrated |
+| CI split portable/legacy | ✅ Integrated |
+| Legacy compat layer (16 tests, 16/16 pass) | ✅ Integrated |
+| src/ + +paraxial/ structure | ✅ Integrated |
+| Documentation alignment | ✅ Integrated |
+
+**Tagged:** `v2.0.0`
 
 ---
 
