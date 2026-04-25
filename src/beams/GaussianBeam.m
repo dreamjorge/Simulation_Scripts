@@ -52,7 +52,6 @@ classdef GaussianBeam < ParaxialBeam
 
             % Initialize subclass state
             obj.InitialWaist = w0;
-
             if ~isempty(legacyCoords{1})
                 obj.OpticalField = obj.opticalFieldLegacy(legacyCoords{1}, legacyCoords{2}, legacyZ);
             else
