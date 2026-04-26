@@ -1,8 +1,10 @@
 schema: spec-driven
 change: pre-merge-hardening
-status: planned
+status: completed
 created: 2026-04-13
-phase: tasks
+phase: completed
+phase_updated: 2026-04-26
+merged_commit: 2d2179d
 
 artifacts:
   proposal: openspec/changes/pre-merge-hardening/proposal.md
