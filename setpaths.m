@@ -42,6 +42,7 @@ function setpaths()
 
     %% +paraxial namespace package (must add parent dir so package resolution works)
     addpath(scriptPath);
+    addpath(fullfile(scriptPath, 'ParaxialBeams'));     % BeamFactory and utilities
     addpath(fullfile(scriptPath, 'ParaxialBeams', 'Addons'));
 
     %% Legacy compatibility aliases

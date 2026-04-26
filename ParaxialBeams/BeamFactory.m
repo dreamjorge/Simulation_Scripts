@@ -60,11 +60,15 @@ classdef BeamFactory
             htype = BeamFactory.getOpt(varargin, 'type', 1);
 
             % Resolve class location (canonical vs legacy)
-            [className, canonical, legacy] = BeamFactory.resolveClass(type, n, m, l, p, htype);
+            [className, canonical, legacy, htype_out] = BeamFactory.resolveClass(type, n, m, l, p, htype);
+
+            % Build positional constructor args (NOT name-value pairs)
+            % Use htype_out (normalized) instead of htype for hankel_hermite
+            constructorArgs = BeamFactory.buildConstructorArgs(type, w0, lambda, n, m, l, p, htype_out);
 
             % Try +paraxial/ first (canonical)
             if BeamFactory.classExists(canonical)
-                beam = feval(className, w0, lambda, varargin{:});
+                beam = feval(className, constructorArgs{:});
 
             % Fallback to src/ with deprecation warning
             elseif exist(legacy, 'file')
@@ -72,7 +76,7 @@ classdef BeamFactory
                     ['src/beams/%s is deprecated. ' ...
                      'Use BeamFactory.create(''%s'', ...) or %s directly.'], ...
                     className, type, canonical);
-                beam = feval(className, w0, lambda, varargin{:});
+                beam = feval(className, constructorArgs{:});
 
             else
                 error('BeamFactory:classNotFound', ...
@@ -92,19 +96,22 @@ classdef BeamFactory
     % Class resolution (Strangler Fig routing)
     % -----------------------------------------------------------------
     methods (Static)
-        function [className, canonical, legacy] = resolveClass(type, n, m, l, p, htype)
+        function [className, canonical, legacy, htype_out] = resolveClass(type, n, m, l, p, htype)
             % resolveClass - Map beam type to canonical and legacy class paths.
             %
             % Returns:
             %   className  (char):  plain class name for feval
             %   canonical (char):   +paraxial/ package.class path
             %   legacy    (char):   src/beams/ClassName.m path
+            %   htype_out (scalar): normalized hankel type (for hankel_hermite)
 
             if nargin < 2, n = 0; end
             if nargin < 3, m = 0; end
             if nargin < 4, l = 0; end
             if nargin < 5, p = 0; end
             if nargin < 6, htype = 1; end
+
+            htype_out = htype;  % default: no change
 
             switch lower(type)
                 case 'gaussian'
@@ -138,7 +145,7 @@ classdef BeamFactory
                     legacy = 'src/beams/HankelLaguerre.m';
 
                 case {'hankel_hermite', 'hankelh'}
-                    if htype < 10, htype = 11; end
+                    if htype < 10, htype_out = 11; end
                     className = 'HankelHermite';
                     canonical = 'paraxial.beams.HankelHermite';
                     legacy = 'src/beams/HankelHermite.m';
@@ -178,8 +185,45 @@ classdef BeamFactory
             for i = 1:2:numel(args)-1
                 if strcmpi(args{i}, key)
                     val = args{i+1};
-                    return;
+                    return
                 end
+            end
+        end
+
+        function args = buildConstructorArgs(type, w0, lambda, n, m, l, p, htype)
+            % buildConstructorArgs - Build positional args for beam constructor.
+            %
+            % Beam constructors expect positional args, NOT name-value pairs.
+            % This helper maps beam type to the correct constructor signature.
+            %
+            % Constructor signatures:
+            %   gaussian          -> (w0, lambda)
+            %   hermite          -> (w0, lambda, n, m)
+            %   laguerre         -> (w0, lambda, l, p)
+            %   elegant_hermite  -> (w0, lambda, n, m)
+            %   elegant_laguerre -> (w0, lambda, l, p)
+            %   hankel           -> (w0, lambda, l, p, htype)
+            %   hankel_hermite  -> (w0, lambda, n, m, htype)
+
+            switch lower(type)
+                case 'gaussian'
+                    args = {w0, lambda};
+
+                case {'hermite', 'elegant_hermite'}
+                    args = {w0, lambda, n, m};
+
+                case {'laguerre', 'elegant_laguerre'}
+                    args = {w0, lambda, l, p};
+
+                case {'hankel', 'hankel_laguerre'}
+                    args = {w0, lambda, l, p, htype};
+
+                case {'hankel_hermite', 'hankelh'}
+                    args = {w0, lambda, n, m, htype};
+
+                otherwise
+                    error('BeamFactory:unknownType', ...
+                        'Unknown beam type "%s".', type);
             end
         end
     end
