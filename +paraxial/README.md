@@ -1,14 +1,16 @@
-# +paraxial Package (Future Development)
+# +paraxial Package
 
-This directory contains the future MATLAB package structure for `paraxial`. 
+Canonical MATLAB package namespace for Simulation_Scripts beam physics library.
 
 ## Status
 
-**⚠️ This is a placeholder for future development. The current code uses individual `.m` files in `src/` and is NOT yet migrated to this package structure.**
+**This is the canonical (recommended) namespace.** The `+paraxial/` package is fully populated and is the default location for all beam, propagation, and visualization classes.
 
-## Planned Structure
+Legacy classes in `src/` remain functional but emit deprecation warnings. Use `BeamFactory.create()` or `setpaths()` to initialize.
 
-```text
+## Structure
+
+```
 +paraxial/
 ├── +beams/                  % Beam classes
 │   ├── ParaxialBeam.m      % Abstract base class
@@ -19,12 +21,15 @@ This directory contains the future MATLAB package structure for `paraxial`.
 │   ├── ElegantLaguerreBeam.m
 │   ├── HankelHermite.m
 │   └── HankelLaguerre.m
-├── +parameters/             % Beam parameters
+├── +parameters/             % Beam parameter classes
 │   ├── GaussianParameters.m
 │   ├── HermiteParameters.m
 │   ├── LaguerreParameters.m
 │   ├── ElegantHermiteParameters.m
 │   └── ElegantLaguerreParameters.m
+├── +computation/            % Formula/logic layer
+│   ├── BeamComputation.m
+│   └── HermiteComputation.m
 ├── +propagation/
 │   ├── +field/             % Field-based propagation
 │   │   ├── IPropagator.m
@@ -35,48 +40,63 @@ This directory contains the future MATLAB package structure for `paraxial`.
 │       ├── RayBundle.m
 │       ├── RayTracer.m
 │       ├── OpticalRay.m
-│       └── CylindricalRay.m
-└── +visualization/
-    └── VisualizationUtils.m
+│       ├── CylindricalRay.m
+│       ├── HankelRayTracer.m
+│       └── HankelRayTracePropagator.m
+├── +visualization/
+│   ├── VisualizationUtils.m
+│   ├── Wavefront.m
+│   └── ZernikeUtils.m
+├── init.m                   % Package initialization
+└── README.md               % This file
 ```
 
-## Migration Notes
-
-### Why Package Migration?
-
-Moving to `+paraxial/` package structure provides:
-- **Namespace isolation**: `paraxial.GaussianBeam` vs `GaussianBeam`
-- **Better collision avoidance**: No conflicts with other toolboxes
-- **Cleaner imports**: `import paraxial.*` or `import paraxial.beams.*`
-
-### Migration Path
-
-1. Current state: Individual `.m` files in `src/`
-2. Next step: Keep `src/` for compatibility, develop `+paraxial/` in parallel
-3. Final step: Deprecate `src/` once `+paraxial/` is stable
-
-### Usage Example (Future)
+## Usage
 
 ```matlab
-% Import the entire package
-import paraxial.*
+% Initialize paths
+setpaths();
 
-% Create a beam using package namespace
-beam = paraxial.beams.GaussianBeam(w0, lambda);
+% Recommended: use BeamFactory for beam creation
+beam = BeamFactory.create('hermite', w0, lambda, 'n', 1, 'm', 2);
 
-% Or import specific submodule
-import paraxial.beams.GaussianBeam
-beam = GaussianBeam(w0, lambda);
+% Alternative: use package directly (Octave: import not supported)
+beam = paraxial.beams.HermiteBeam(w0, lambda, 'n', 1, 'm', 2);
+
+% Field computation
+field = beam.opticalField(X, Y, z);
+
+% Propagation
+grid = GridUtils(256, 256, 1e-3, 1e-3);
+prop = paraxial.propagation.field.AnalyticPropagator(grid);
+result = prop.propagate(beam, 0.1);
 ```
 
-## Current vs Future
+## Migration from `src/`
 
-| Aspect | Current (`src/`) | Future (`+paraxial/`) |
-|--------|------------------|------------------------|
-| Namespace | Global | `paraxial.*` |
-| Import | Manual addpath | `import paraxial.*` |
-| Collision risk | High | Low |
-| MATLAB best practice | Legacy | Modern |
+The `src/` directory is deprecated. Migration:
+
+```matlab
+% Before (deprecated)
+addpath('src/beams');
+GB = GaussianBeam(w0, lambda);
+
+% After (canonical)
+setpaths();
+GB = BeamFactory.create('gaussian', w0, lambda);
+% or
+GB = paraxial.beams.GaussianBeam(w0, lambda);
+```
+
+## Strangler Fig Pattern
+
+This project uses the Strangler Fig migration pattern:
+
+1. **`+paraxial/`** — canonical namespace (new code)
+2. **`src/`** — deprecated legacy (emits warnings, will be removed)
+3. **`BeamFactory`** — routes automatically to `+paraxial/` by default
+
+See `docs/migration/LEGACY_MIGRATION_PLAN.md` for full details.
 
 ## References
 

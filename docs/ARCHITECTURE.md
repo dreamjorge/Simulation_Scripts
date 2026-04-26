@@ -13,7 +13,8 @@ ParaxialBeam (abstract base)
 ├── LaguerreBeam
 ├── ElegantHermiteBeam
 ├── ElegantLaguerreBeam
-└── HankelLaguerre
+├── HankelLaguerre
+└── HankelHermite
 ```
 
 ## Design Patterns
