@@ -36,7 +36,7 @@ This document defines the policy for managing legacy examples in `examples/`.
 - Not intended for general use
 - Preserved for reproducibility of published results
 
-**Files**: Currently empty (no thesis-specific scripts identified)
+**Files**: 5 thesis-specific scripts (MainHermiteThesis.m, MainHermite2Obstrucion.m, etc.)
 
 #### `examples/legacy/generators/`
 

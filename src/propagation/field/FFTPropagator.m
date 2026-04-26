@@ -37,6 +37,11 @@ classdef FFTPropagator < IPropagator
             % grid:   GridUtils object
             % lambda: wavelength (m)
             % z0:     initial z plane (default 0)
+
+            % Emit deprecation warning (Strangler Fig migration)
+            warning('BeamFactory:deprecated', ...
+                'src/propagation/field/FFTPropagator is deprecated. Use +paraxial/+propagation/+field/FFTPropagator directly.');
+
             obj.Grid   = grid;
             obj.Lambda = lambda;
             obj.FFT    = FFTUtils();

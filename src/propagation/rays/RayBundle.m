@@ -28,6 +28,11 @@ classdef RayBundle < handle
         function obj = RayBundle(x0, y0, z0)
             % Initialize a bundle of rays at a starting z plane
             % x0, y0 are matrices/arrays of initial coordinates
+
+            % Emit deprecation warning (Strangler Fig migration)
+            warning('BeamFactory:deprecated', ...
+                'src/propagation/rays/RayBundle is deprecated. Use +paraxial/+propagation/+rays/RayBundle directly.');
+
             if nargin > 0
                 obj.x = x0;
                 obj.y = y0;

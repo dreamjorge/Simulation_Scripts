@@ -23,6 +23,10 @@ classdef CylindricalRay
         function obj = CylindricalRay(varargin)
             % Default constructor creates an empty ray at the origin.
             % No arguments required; all properties have defaults.
+
+            % Emit deprecation warning (Strangler Fig migration)
+            warning('BeamFactory:deprecated', ...
+                'src/propagation/rays/CylindricalRay is deprecated. Use +paraxial/+propagation/+rays/CylindricalRay directly.');
         end
     end
 end

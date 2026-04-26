@@ -45,6 +45,11 @@ classdef RayTracePropagator < IPropagator
             % method: 'RK4' (default) or 'Euler'
             % dz:     step size (default auto = z_final/100)
             % z0:     initial z plane (default 0)
+
+            % Emit deprecation warning (Strangler Fig migration)
+            warning('BeamFactory:deprecated', ...
+                'src/propagation/rays/RayTracePropagator is deprecated. Use +paraxial/+propagation/+rays/RayTracePropagator directly.');
+
             obj.Grid = grid;
             if nargin >= 2 && ~isempty(method)
                 obj.Method = method;

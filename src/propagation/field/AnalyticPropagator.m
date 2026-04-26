@@ -31,6 +31,11 @@ classdef AnalyticPropagator < IPropagator
             % Constructor
             % grid: GridUtils object
             % z0:   initial z plane (default 0)
+
+            % Emit deprecation warning (Strangler Fig migration)
+            warning('BeamFactory:deprecated', ...
+                'src/propagation/field/AnalyticPropagator is deprecated. Use +paraxial/+propagation/+field/AnalyticPropagator directly.');
+
             obj.Grid = grid;
             if nargin >= 2
                 obj.z0 = z0;
