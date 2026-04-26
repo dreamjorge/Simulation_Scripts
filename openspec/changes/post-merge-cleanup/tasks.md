@@ -35,6 +35,6 @@
 
 ## Phase 6: Verification
 
-- [ ] 6.1 Run `tests/portable_runner.m` — verify test_Wavefront is included
-- [x] 6.2 Verify all deprecation warnings emit correctly
-- [ ] 6.3 Verify CI passes (MATLAB + Octave)
+- [x] 6.1 Run `tests/portable_runner.m` — verify test_Wavefront is included (10/10 passed)
+- [x] 6.2 Verify all deprecation warnings emit correctly (confirmed in CI output)
+- [x] 6.3 Verify CI passes (MATLAB + Octave) — both ✅

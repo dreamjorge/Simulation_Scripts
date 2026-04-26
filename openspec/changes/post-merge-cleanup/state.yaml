@@ -1,8 +1,10 @@
 schema: spec-driven
 change: post-merge-cleanup
-status: planned
+status: completed
 created: 2026-04-26
-phase: proposal
+phase: completed
+phase_updated: 2026-04-26
+merged_commit: 3947956
 
 artifacts:
   proposal: openspec/changes/post-merge-cleanup/proposal.md
