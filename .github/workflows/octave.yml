@@ -26,7 +26,7 @@ jobs:
       - name: Run portable suite
         run: |
           set -o pipefail
-          octave --no-gui --eval "addpath('tests'); portable_runner();" 2>&1 | tee portable-tests.log
+          octave --no-gui --eval "addpath('tests'); status = portable_runner(); if status ~= 0, error('portable_runner failed with %d failing tests', status); end" 2>&1 | tee portable-tests.log
 
       - name: Upload portable logs
         if: always()
