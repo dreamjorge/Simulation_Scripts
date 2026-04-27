@@ -30,17 +30,10 @@ function setpaths()
     addpath(fullfile(scriptPath, 'src', 'propagation', 'rays'));
     addpath(fullfile(scriptPath, 'src', 'visualization'));
 
-    %% Modern +paraxial/ package structure
-    addpath(fullfile(scriptPath, '+paraxial'));
-    addpath(fullfile(scriptPath, '+paraxial', '+beams'));
-    addpath(fullfile(scriptPath, '+paraxial', '+parameters'));
-    addpath(fullfile(scriptPath, '+paraxial', '+computation'));
-    addpath(fullfile(scriptPath, '+paraxial', '+propagation'));
-    addpath(fullfile(scriptPath, '+paraxial', '+propagation', '+field'));
-    addpath(fullfile(scriptPath, '+paraxial', '+propagation', '+rays'));
-    addpath(fullfile(scriptPath, '+paraxial', '+visualization'));
-
-    %% +paraxial namespace package (must add parent dir so package resolution works)
+    %% +paraxial namespace package
+    % MATLAB/Octave packages are resolved by adding the parent directory.
+    % Do not add internal +package folders directly; doing so pollutes
+    % unqualified class resolution and produces Octave package-path warnings.
     addpath(scriptPath);
     addpath(fullfile(scriptPath, 'ParaxialBeams'));     % BeamFactory and utilities
     addpath(fullfile(scriptPath, 'ParaxialBeams', 'Addons'));
