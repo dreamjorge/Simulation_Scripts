@@ -59,6 +59,7 @@ Compliance summary: 0/3 scenarios fully runtime-compliant in current session.
 
 ### WARNING
 - Git reports LF/CRLF normalization warning for `.github/workflows/octave.yml`.
+- CI surfaced an existing `test_Wavefront` failure after failure propagation was fixed. Root cause: canonical `+paraxial/+visualization/Wavefront.m` still used a wavelength-scaled Strehl formula while `computeRMS()` and tests use phase RMS in radians.
 
 ### SUGGESTION
 - If non-interactive cross-user execution is required, provide a repeatable wrapper or CI-only validation path rather than relying on interactive Windows user switching.

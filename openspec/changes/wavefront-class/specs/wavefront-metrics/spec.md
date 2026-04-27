@@ -38,16 +38,16 @@ The system MUST estimate Strehl ratio from wavefront error using the Maréchal a
 
 #### Scenario: Compute Strehl
 
-- GIVEN `Wavefront` instance with RMS wavefront error `sigma`
+- GIVEN `Wavefront` instance with RMS phase error `sigma` in radians
 - WHEN user calls `strehl = wf.computeStrehl()`
-- THEN `strehl` SHALL be `exp(-(2*pi*sigma/lambda)^2)` for small sigma
+- THEN `strehl` SHALL be `exp(-sigma^2)` for small sigma
 - AND `strehl` SHALL be between 0 and 1
 
 #### Scenario: Strehl with Known WFE
 
-- GIVEN `Wavefront` instance with `sigma = lambda/10`
+- GIVEN `Wavefront` instance with phase RMS `sigma = 0.1` radians
 - WHEN user calls `strehl = wf.computeStrehl()`
-- THEN `strehl` SHALL be approximately `exp(-(2*pi/10)^2) ≈ 0.67`
+- THEN `strehl` SHALL be approximately `exp(-0.1^2) ≈ 0.990`
 
 ### Requirement: Wavefront Error Structure
 

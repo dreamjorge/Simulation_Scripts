@@ -190,12 +190,13 @@ classdef Wavefront
         function strehl = computeStrehl(obj)
             % computeStrehl - Strehl ratio via Maréchal approximation
             %
-            %   strehl = exp(-(2*pi*sigma/lambda)^2)
+            %   strehl = exp(-sigma^2)
             %
-            % where sigma is RMS wavefront error.
+            % where sigma is the RMS wavefront error in radians (phase units).
+            % This matches computeRMS(), which returns phase RMS from angle(Field).
 
             sigma = obj.computeRMS();
-            strehl = exp(-(2 * pi * sigma / obj.Lambda)^2);
+            strehl = exp(-sigma^2);
 
             % Clamp to [0, 1] (numerical precision can exceed bounds)
             strehl = max(0, min(1, strehl));
