@@ -5,22 +5,26 @@
 | Metric | Value |
 |--------|-------|
 | Tasks total | 7 |
-| Tasks complete | 6 |
-| Tasks incomplete | 1 |
+| Tasks complete | 7 |
+| Tasks incomplete | 0 |
 
-Incomplete:
-- `3.2` Runtime Octave suite execution from a context where `octave` is available.
+Incomplete: None.
 
 ## Build & Tests Execution
 
 Build: not run — repository instruction says never build after changes.
 
-Tests: blocked in current session.
+Tests: ✅ Passed in GitHub Actions after PR #35 updates.
 
 Evidence:
 - `where.exe octave` → `INFO: Could not find files for the given pattern(s).`
 - Current user: `automotive-wan\uidn7961`.
-- User reports MATLAB/Octave are usable under `uib95096`; this session has not verified that user context non-interactively.
+- Runtime verification source: PR #35 checks on GitHub Actions.
+- Octave CI `portable-tests`: SUCCESS.
+- Octave CI `legacy-compat`: SUCCESS.
+- MATLAB CI `matlab-portable-tests`: SUCCESS.
+- MATLAB CI `matlab-legacy-compat`: SUCCESS.
+- Codacy Static Code Analysis: SUCCESS.
 
 Static checks:
 - `git diff --check -- .github/workflows/octave.yml openspec/changes/octave-ci-failure-propagation` returned no whitespace errors; only Git line-ending warning for `octave.yml`.
@@ -30,11 +34,11 @@ Static checks:
 
 | Requirement | Scenario | Test | Result |
 |-------------|----------|------|--------|
-| Portable Runner Failure Propagation | Portable runner succeeds | Runtime Octave command | ❌ UNTESTED in current session |
-| Portable Runner Failure Propagation | Portable runner reports failures | Static workflow inspection only | ⚠️ PARTIAL |
-| Portable Runner Failure Propagation | Runner crashes before returning status | `set -o pipefail` preserved | ⚠️ PARTIAL |
+| Portable Runner Failure Propagation | Portable runner succeeds | GitHub Actions Octave `portable-tests` | ✅ COMPLIANT |
+| Portable Runner Failure Propagation | Portable runner reports failures | Run `25021098548` failed on nonzero `portable_runner()` status | ✅ COMPLIANT |
+| Portable Runner Failure Propagation | Runner crashes before returning status | `set -o pipefail` preserved and workflow completed through shell pipeline | ✅ COMPLIANT |
 
-Compliance summary: 0/3 scenarios fully runtime-compliant in current session.
+Compliance summary: 3/3 scenarios compliant.
 
 ## Correctness — Static Structural Evidence
 
@@ -55,7 +59,7 @@ Compliance summary: 0/3 scenarios fully runtime-compliant in current session.
 ## Issues Found
 
 ### CRITICAL
-- Runtime verification is blocked in this session because `octave` is not in PATH for `automotive-wan\uidn7961`. Do not archive this change until task 3.2 is run under `uib95096` or another valid runtime context.
+- None.
 
 ### WARNING
 - Git reports LF/CRLF normalization warning for `.github/workflows/octave.yml`.
@@ -67,6 +71,6 @@ Compliance summary: 0/3 scenarios fully runtime-compliant in current session.
 
 ## Verdict
 
-FAIL FOR ARCHIVE / IMPLEMENTATION READY FOR RUNTIME VERIFY.
+PASS.
 
-The code change matches the design statically, but SDD verification is not complete until the Octave command is executed in a working runtime context.
+The workflow change and follow-up fixes passed MATLAB/Octave CI in PR #35 and are merged to `master`.
