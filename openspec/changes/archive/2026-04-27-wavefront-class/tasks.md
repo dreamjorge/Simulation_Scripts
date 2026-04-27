@@ -30,7 +30,7 @@
 
 - [x] 5.1 Implement `computeRMS()` returning scalar RMS of phase
 - [x] 5.2 Implement `computePV()` returning `max(phi) - min(phi)`
-- [x] 5.3 Implement `computeStrehl()` using Maréchal approximation: `exp(-(2*pi*sigma/lambda)^2)`
+- [x] 5.3 Implement `computeStrehl()` using Maréchal approximation: `exp(-sigma^2)`
 - [x] 5.4 Implement `getMetrics()` returning struct with rms, pv, strehl
 
 ## Phase 6: Visualization
@@ -40,15 +40,17 @@
 - [x] 6.3 Implement `plotZernikeCoeffs(coeffs)` bar chart with Zernike names
 - [x] 6.4 Implement `plotPhaseSlice(plane, idx)` 1D cross-section
 
-- [x] 7.1 Create `tests/test_Wavefront.m` with basic constructor tests
+## Phase 7: Tests
+
+- [x] 7.1 Create `tests/modern/test_Wavefront.m` with basic constructor tests
 - [x] 7.2 Test Zernike Z1=1 (piston), Z2∝cos (tilt X), Z4=sqrt(3)*(2ρ²-1) (defocus)
 - [x] 7.3 Test: Gaussian beam at waist → only piston term ≠ 0 (all others ~0)
 - [x] 7.4 Test: fitZernike → reconstructZernike round-trip residual < 1e-10
 - [x] 7.5 Test: RMS/PV calculations against known values
-- [x] 7.6 Test: Strehl calculation for sigma = lambda/10 → ~0.67
+- [x] 7.6 Test: Strehl calculation for sigma = 0.1 rad → ~0.990
 
 ## Phase 8: Documentation & Examples
 
 - [x] 8.1 Create `examples/canonical/ExampleWavefront.m` demonstrating all features
 - [x] 8.2 Update `docs/ARCHITECTURE.md` with Wavefront section
-- [ ] 8.3 Register `tests/test_Wavefront.m` in `tests/test_all.m`
+- [x] 8.3 Register `tests/modern/test_Wavefront.m` in `tests/portable_runner.m`
