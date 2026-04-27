@@ -13,7 +13,7 @@
 ## Phase 3: Runtime Verification
 
 - [x] 3.1 Check whether `octave` is executable in this session.
-- [ ] 3.2 If available, run `octave --no-gui --eval "addpath('tests'); status = portable_runner(); if status ~= 0, error('portable_runner failed with %d failing tests', status); end"`.
+- [x] 3.2 If available, run `octave --no-gui --eval "addpath('tests'); status = portable_runner(); if status ~= 0, error('portable_runner failed with %d failing tests', status); end"` — verified by GitHub Actions Octave portable-tests job in PR #35.
 - [x] 3.3 If unavailable, document local verification blocker and command for user `uib95096`.
 
-> Runtime note: current session user is `automotive-wan\uidn7961`; `where.exe octave` did not find Octave in PATH. MATLAB is in PATH, but this session previously failed license checkout. User reports Octave/MATLAB are usable under `uib95096`; run task 3.2 from that user context.
+> Runtime note: current session user is `automotive-wan\uidn7961`; local `where.exe octave` did not find Octave in PATH. Runtime verification was completed by GitHub Actions on PR #35: Octave portable-tests and legacy-compat passed after the workflow/status fixes.
