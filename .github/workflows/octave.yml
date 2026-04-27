@@ -63,3 +63,38 @@ jobs:
           name: legacy-compat-log
           path: legacy-compat.log
           retention-days: 14
+
+  benchmark:
+    name: benchmark-baseline
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Octave
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y octave
+
+      - name: Run quick benchmark
+        run: |
+          set -o pipefail
+          octave --no-gui --eval "addpath('tests/performance'); run_benchmarks('quick');" 2>&1 | tee benchmark.log
+
+      - name: Upload baseline CSV
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-baseline
+          path: docs/performance/baseline_quick_*.csv
+          retention-days: 30
+
+      - name: Upload benchmark log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-log
+          path: benchmark.log
+          retention-days: 14
