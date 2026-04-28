@@ -31,15 +31,15 @@ jobs:
         run: |
           set -o pipefail
           VERSION=${GITHUB_REF#refs/tags/v}
-          # Replace version placeholder in DESCR.ini
-          sed "s/__VERSION__/${VERSION}/g" DESCR.ini > _tmp_DESCR.ini
-          mv _tmp_DESCR.ini DESCR.ini
+          # Replace version placeholder in DESCRIPTION
+          sed "s/__VERSION__/${VERSION}/g" DESCRIPTION > _tmp_DESCRIPTION
+          mv _tmp_DESCRIPTION DESCRIPTION
           # Build tarball via Octave pkg tool
-          octave --no-gui --eval "pkg tarball package simulation_scripts-${VERSION}.tar.gz"
+          octave --no-gui --eval "pkg build DESCRIPTION"
           ls -lh simulation_scripts-${VERSION}.tar.gz
 
       - name: Upload Octave package
-        uses: actions/upload-release-artifact@v4
+        uses: actions/upload-artifact@v4
         with:
           name: octave-package
           path: simulation_scripts-*.tar.gz
@@ -75,7 +75,7 @@ jobs:
           ls -lh simulation_scripts-*.mltbx
 
       - name: Upload MATLAB toolbox
-        uses: actions/upload-release-artifact@v4
+        uses: actions/upload-artifact@v4
         with:
           name: matlab-toolbox
           path: simulation_scripts-*.mltbx
@@ -91,13 +91,13 @@ jobs:
       contents: write
     steps:
       - name: Download Octave package
-        uses: actions/download-release-artifact@v4
+        uses: actions/download-artifact@v4
         with:
           name: octave-package
           path: artifacts
 
       - name: Download MATLAB toolbox
-        uses: actions/download-release-artifact@v4
+        uses: actions/download-artifact@v4
         with:
           name: matlab-toolbox
           path: artifacts
@@ -107,7 +107,6 @@ jobs:
         with:
           draft: false
           generate_release_notes: true
-          artifacts: artifacts/*
-          artifact_errors_report_in_comment: true
+          files: artifacts/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
