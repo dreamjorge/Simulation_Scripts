@@ -91,7 +91,39 @@ Every beam type inherits from `ParaxialBeam` and implements:
 
 ## Quick Start
 
-### MATLAB/Octave
+### Install the Package
+
+**Octave:**
+
+```matlab
+pkg install 'https://github.com/dreamjorge/Simulation_Scripts/releases/latest/download/simulation_scripts-<VERSION>.tar.gz'
+```
+
+Or download a specific release from the [GitHub Releases](https://github.com/dreamjorge/Simulation_Scripts/releases) page and install locally:
+
+```matlab
+pkg install simulation_scripts-<VERSION>.tar.gz
+```
+
+**MATLAB:**
+
+Double-click the `.mltbx` file from the [GitHub Releases](https://github.com/dreamjorge/Simulation_Scripts/releases) page, or install from URL:
+
+```matlab
+matlab.addons.install('https://github.com/dreamjorge/Simulation_Scripts/releases/latest/download/simulation_scripts-<VERSION>.mltbx')
+```
+
+> **Note:** Replace `<VERSION>` with the desired release version (e.g. `2.0.0`). Omit the `v` prefix.
+
+To check the installed version:
+
+```matlab
+ver = simulation_scripts_version()
+```
+
+### Manual Installation (fallback)
+
+If you prefer not to use the package, add paths manually:
 
 ```matlab
 % Option 1: Use setpaths() utility (adds both +paraxial/ and src/ paths)
@@ -202,6 +234,16 @@ octave --no-gui --eval "run('tests/legacy_compat/run_legacy_compat.m')"
 matlab -batch "run('tests/test_all.m')"
 ```
 
+## Version
+
+The package version is derived from Git tags. To check the version programmatically:
+
+```matlab
+ver = simulation_scripts_version()
+```
+
+This returns the Git tag (e.g. `'v2.0.0'`) or `'0.0.0-unknown'` if Git is not available.
+
 ## References
 
 - Kogelnik, H., & Li, T. (1966). Laser beams and resonators. *Applied Optics*.
@@ -214,6 +256,22 @@ matlab -batch "run('tests/test_all.m')"
 - Release checkpoint (2026-04-15): `docs/migration/RELEASE_CHECKPOINT_2026-04-15.md`
 - Release checkpoint (2026-04-22): `docs/migration/RELEASE_CHECKPOINT_2026-04-22.md`
 - Alias removal release plan: `docs/migration/ALIAS_REMOVAL_RELEASE_PLAN.md`
+
+## Uninstall
+
+**Octave:**
+
+```matlab
+pkg uninstall simulation_scripts
+```
+
+**MATLAB:**
+
+```matlab
+matlab.addons.uninstall('Simulation_Scripts')
+```
+
+Or run `uninstall.m` manually.
 
 ## Changelog
 
