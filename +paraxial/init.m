@@ -27,3 +27,21 @@ function init()
 
     fprintf('[+paraxial] Package initialized\n');
 end
+
+function ver = simulation_scripts_version()
+    % simulation_scripts_version - Get Simulation_Scripts version
+    %
+    % Usage:
+    %   ver = simulation_scripts_version()
+    %
+    % Output:
+    %   ver - version string from Git tag (e.g. 'v2.0.0' or 'v2.0.0-3-gabc1234'
+    %        if the commit is not an exact tag), '0.0.0-unknown' if Git is unavailable
+
+    [status, result] = system('git describe --tags --match "v*" --always');
+    if status == 0
+        ver = strtrim(result);
+    else
+        ver = '0.0.0-unknown';
+    end
+end

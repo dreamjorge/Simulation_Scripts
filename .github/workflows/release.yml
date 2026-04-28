@@ -1,0 +1,113 @@
+name: Release Packages
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  # ─── Octave Package ───────────────────────────────────────────────────────────
+  build-octave:
+    name: Build Octave Package
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # need all tags for git describe
+
+      - name: Setup Octave
+        run: sudo apt-get update && sudo apt-get install -y octave
+
+      - name: Run portable test suite
+        run: |
+          set -o pipefail
+          octave --no-gui --eval "addpath('tests'); status = portable_runner(); if status ~= 0, error('portable_runner failed with %d failing tests', status); end"
+
+      - name: Build .tar.gz package
+        run: |
+          set -o pipefail
+          VERSION=${GITHUB_REF#refs/tags/v}
+          # Replace version placeholder in DESCR.ini
+          sed "s/__VERSION__/${VERSION}/g" DESCR.ini > _tmp_DESCR.ini
+          mv _tmp_DESCR.ini DESCR.ini
+          # Build tarball via Octave pkg tool
+          octave --no-gui --eval "pkg tarball package simulation_scripts-${VERSION}.tar.gz"
+          ls -lh simulation_scripts-${VERSION}.tar.gz
+
+      - name: Upload Octave package
+        uses: actions/upload-release-artifact@v4
+        with:
+          name: octave-package
+          path: simulation_scripts-*.tar.gz
+          retention-days: 90
+
+  # ─── MATLAB Toolbox ────────────────────────────────────────────────────────────
+  build-matlab:
+    name: Build MATLAB Toolbox
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup MATLAB
+        uses: matlab-actions/setup-matlab@v3
+        with:
+          release: latest
+
+      - name: Run portable test suite via MATLAB
+        run: |
+          matlab -batch "addpath('tests'); status = portable_runner(); if status ~= 0, error('portable_runner failed with %d failing tests', status); end"
+
+      - name: Build .mltbx toolbox
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          # Build toolbox bundle (all folders under project root are included)
+          matlab -batch "matlab.addons.createToolbox(pwd, 'OutputFile', ['simulation_scripts-${VERSION}.mltbx'], 'ProductName', 'Simulation_Scripts', 'ProductAuthor', 'Ugalde-Ontiveros J.A.', 'ProductVersion', '${VERSION}', 'ProductDescription', 'Paraxial beam propagation and wavefront analysis'); disp('Toolbox created successfully');"
+          ls -lh simulation_scripts-*.mltbx
+
+      - name: Upload MATLAB toolbox
+        uses: actions/upload-release-artifact@v4
+        with:
+          name: matlab-toolbox
+          path: simulation_scripts-*.mltbx
+          retention-days: 90
+
+  # ─── GitHub Release ────────────────────────────────────────────────────────────
+  create-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [build-octave, build-matlab]
+    permissions:
+      contents: write
+    steps:
+      - name: Download Octave package
+        uses: actions/download-release-artifact@v4
+        with:
+          name: octave-package
+          path: artifacts
+
+      - name: Download MATLAB toolbox
+        uses: actions/download-release-artifact@v4
+        with:
+          name: matlab-toolbox
+          path: artifacts
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: false
+          generate_release_notes: true
+          artifacts: artifacts/*
+          artifact_errors_report_in_comment: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
