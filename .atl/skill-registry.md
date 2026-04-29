@@ -6,7 +6,7 @@
 - Use `classdef` for new components.
 - Document methods with help headers.
 - Use SI units for physical simulations.
-- Ensure compatibility with Octave 6+.
+- Ensure compatibility with Octave 11.1.0+ and MATLAB R2020b+.
 
 ### Testing Standards
 - All new logic must have corresponding tests in `tests/`.
@@ -30,5 +30,5 @@
 ## Project Conventions
 - **Tests**: `tests/test_all.m` — run with `& "C:\Users\uidn7961\AppData\Local\Programs\GNU Octave\Octave-11.1.0\mingw64\bin\octave-cli.exe" --no-gui --eval "run('tests/test_all.m')"`
 - **Octave Path**: `C:\Users\uidn7961\AppData\Local\Programs\GNU Octave\Octave-11.1.0\mingw64\bin\octave-cli.exe`
-- **CI**: GitHub Actions (`.github/workflows/octave.yml`)
+- **CI**: GitHub Actions (`.github/workflows/octave.yml`, `.github/workflows/matlab.yml`, `.github/workflows/release.yml`)
 - **No linting/type-checking**: MATLAB/Octave doesn't have standard tooling

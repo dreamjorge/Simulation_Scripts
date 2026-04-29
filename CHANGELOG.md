@@ -2,6 +2,20 @@
 
 All notable changes to this project are documented in this file.
 
+## [Unreleased]
+
+### Added
+- OpenSpec change plan for cleanup and modernization alignment.
+- Repository guardrail test covering local tooling policy, active CI docs, canonical API docs, canonical examples, and BeamFactory registry.
+- Post-v2 modernization roadmap.
+
+### Changed
+- Aligned documentation around GitHub Actions as canonical CI, Octave 11.1.0+ / MATLAB R2020b+ support, and `+paraxial/` / `BeamFactory` as canonical APIs.
+- Marked the root pre-merge implementation plan as historical.
+
+### Removed
+- Stale CircleCI welcome-only configuration.
+
 ## [2026-04-15] - Legacy Migration Checkpoint
 
 ### Added

@@ -4,15 +4,25 @@ This directory contains tests for the ParaxialBeams simulation library.
 
 ## Running Tests
 
+`tests/portable_runner.m` is the canonical non-interactive runner. `tests/test_all.m` is the portable wrapper used by humans and CI.
+
 ```bash
-cd /root/Simulation_Scripts
 octave --no-gui --eval "run('tests/test_all.m')"
 ```
 
-Or in MATLAB:
-```matlab
-run('tests/test_all.m')
+Or run the runner directly in Octave:
+
+```bash
+octave --no-gui --eval "addpath('tests'); status = portable_runner(); if status ~= 0, error('portable_runner failed with %d failing tests', status); end"
 ```
+
+MATLAB:
+
+```bash
+matlab -batch "addpath('tests'); status = portable_runner(); if status ~= 0, error('portable_runner failed with %d failing tests', status); end"
+```
+
+GitHub Actions is the canonical CI system and uses the same non-zero `portable_runner()` status contract.
 
 ## Test Coverage
 
@@ -51,6 +61,10 @@ run('tests/test_all.m')
 - `legacy_compat/test_HankelAliasEdgeCases.m`
 
 These suites ensure backward compatibility for historical scripts while modern APIs remain the canonical entrypoint.
+
+### Repository Guardrails
+- `modern/test_RepositoryGuardrails.m`
+- Verifies local tooling policy, active CI documentation, canonical API documentation, canonical example boundaries, and BeamFactory type registry.
 
 ### AnalysisUtils
 - **gradientRZ**: Calculate ray slope in r-z plane

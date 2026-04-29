@@ -7,11 +7,27 @@ Scripts for simulation of optical beam propagation (Gaussian, Hermite-Gauss, Lag
 [![Octave CI](https://github.com/dreamjorge/Simulation_Scripts/actions/workflows/octave.yml/badge.svg)](https://github.com/dreamjorge/Simulation_Scripts/actions/workflows/octave.yml)
 [![MATLAB CI](https://github.com/dreamjorge/Simulation_Scripts/actions/workflows/matlab.yml/badge.svg)](https://github.com/dreamjorge/Simulation_Scripts/actions/workflows/matlab.yml)
 
+## Project Status
+
+GitHub Actions is the canonical CI system for this repository. The active workflows are:
+
+- `.github/workflows/octave.yml` — Octave portable, legacy compatibility, and benchmark checks.
+- `.github/workflows/matlab.yml` — MATLAB portable and legacy compatibility checks.
+- `.github/workflows/release.yml` — release artifact generation for tagged versions.
+
+The current modernization roadmap lives in `docs/ROADMAP.md`; historical implementation plans remain under `docs/plans/` or are marked as historical.
+
 ## Project Structure
 
 ```
 Simulation_Scripts/
-├── src/                        % Modern library (organized by responsibility)
+├── +paraxial/                  % Canonical package namespace for new code
+│   ├── +beams/                 % Beam classes
+│   ├── +parameters/            % Beam parameter classes
+│   ├── +computation/           % Formula/logic layer
+│   ├── +propagation/           % Field and ray propagation strategies
+│   └── +visualization/         % Visualization and wavefront utilities
+├── src/                        % Deprecated transition adapters / legacy layout
 │   ├── beams/                  % Beam classes
 │   │   ├── ParaxialBeam.m      % ⭐ Abstract base class
 │   │   ├── GaussianBeam.m
@@ -60,12 +76,13 @@ Simulation_Scripts/
 │       ├── generators/     % Figure generators for papers
 │       ├── research/       % Thesis-specific scripts
 │       └── LEGACY_POLICY.md
-├── tests/                  % Test suite (~380 tests)
+├── tests/                  % Portable Octave/MATLAB test suite
 ├── setpaths.m              % Path initialization utility
 ├── legacy/
 │   └── compat/             % Compatibility docs (Hankele* aliases removed)
 ├── docs/
-│   └── ARCHITECTURE.md    % Architecture documentation
+│   ├── ARCHITECTURE.md    % Architecture documentation
+│   └── ROADMAP.md         % Active modernization roadmap
 └── README.md
 ```
 
@@ -126,10 +143,10 @@ ver = simulation_scripts_version()
 If you prefer not to use the package, add paths manually:
 
 ```matlab
-% Option 1: Use setpaths() utility (adds both +paraxial/ and src/ paths)
+% Option 1: Use setpaths() utility (adds +paraxial/, utilities, and adapters)
 setpaths
 
-% Option 2: Use +paraxial/ directly (recommended)
+% Option 2: Use +paraxial/ directly (recommended for direct class access)
 addpath('+paraxial/+beams', '+paraxial/+parameters', '+paraxial/+computation');
 addpath('ParaxialBeams');
 
@@ -223,6 +240,8 @@ No `classdef` folders are used. All files are individual `.m` files.
 
 ## Tests
 
+`tests/test_all.m` is a thin wrapper around `tests/portable_runner.m`, which is the canonical non-interactive runner used by CI.
+
 ```bash
 # Octave
 octave --no-gui --eval "run('tests/test_all.m')"
@@ -234,6 +253,8 @@ octave --no-gui --eval "run('tests/legacy_compat/run_legacy_compat.m')"
 matlab -batch "run('tests/test_all.m')"
 ```
 
+CI uses the same runner and fails the job when `portable_runner()` returns a non-zero failure count.
+
 ## Version
 
 The package version is derived from Git tags. To check the version programmatically:
@@ -243,6 +264,15 @@ ver = simulation_scripts_version()
 ```
 
 This returns the Git tag (e.g. `'v2.0.0'`) or `'0.0.0-unknown'` if Git is not available.
+
+## Release Packaging
+
+Tagged releases (`v*`) trigger `.github/workflows/release.yml`, which runs the portable tests and uploads:
+
+- `simulation_scripts-<VERSION>.tar.gz` for GNU Octave packages.
+- `simulation_scripts-<VERSION>.mltbx` for MATLAB toolbox installs.
+
+Before tagging a release, follow the release checklist in `docs/ROADMAP.md`.
 
 ## References
 

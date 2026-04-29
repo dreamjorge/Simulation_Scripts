@@ -4,6 +4,8 @@
 
 MATLAB/Octave library for paraxial optical beam propagation simulation. Supports Gaussian, Hermite-Gaussian, Laguerre-Gaussian, and Elegant beam modes with multiple propagation methods.
 
+`+paraxial/` is the canonical package namespace for new code. The historical `src/` layout remains as a deprecated transitional surface during the Strangler Fig migration, and `BeamFactory.create()` is the preferred high-level construction API.
+
 ## Class Hierarchy
 
 ```
@@ -34,7 +36,7 @@ IPropagator (interface)
 
 **Usage**:
 ```matlab
-beam = GaussianBeam(100e-6, 632.8e-9);
+beam = BeamFactory.create('gaussian', 100e-6, 632.8e-9);
 grid = GridUtils(256, 256, 1e-3, 1e-3);
 
 prop = FFTPropagator(grid, 632.8e-9);
@@ -118,7 +120,7 @@ Every `ParaxialBeam` subclass MUST implement:
 │                         User Script                                   │
 │   examples/canonical/MainGauss_refactored.m, etc.                    │
 └──────────────────────────────┬───────────────────────────────────────┘
-                               │ setpaths / addpath src + ParaxialBeams
+                               │ setpaths / BeamFactory / +paraxial
                                ▼
 ┌──────────────────────────────────────────────────────────────────────┐
 │                         BeamFactory                                   │
@@ -169,7 +171,13 @@ Every `ParaxialBeam` subclass MUST implement:
 
 ```
 Simulation_Scripts/
-├── src/
+├── +paraxial/                  ← Canonical package namespace
+│   ├── +beams/
+│   ├── +parameters/
+│   ├── +computation/
+│   ├── +propagation/
+│   └── +visualization/
+├── src/                        ← Deprecated transitional adapters/layout
 │   ├── beams/
 │   │   ├── ParaxialBeam.m        ← Abstract base (contract)
 │   │   ├── GaussianBeam.m
@@ -216,10 +224,20 @@ Simulation_Scripts/
 │   └── ... (many legacy scripts)
 ├── tests/                     ← Test suite (~380 tests)
 ├── docs/
-│   └── ARCHITECTURE.md
+│   ├── ARCHITECTURE.md
+│   └── ROADMAP.md
 ├── README.md
-└── plan.md
+└── plan.md                     ← Historical pre-merge plan
 ```
+
+## API Surface Policy
+
+| Surface | Status | Intended usage |
+|---------|--------|----------------|
+| `+paraxial/` | Canonical | New direct class access and package namespace. |
+| `BeamFactory.create()` | Preferred | Stable high-level construction API for examples and users. |
+| `src/` | Deprecated transitional | Compatibility/adapters during migration; not recommended for new code. |
+| `examples/legacy/` | Historical/compatibility | Archive, research, and generator scripts; not the default onboarding path. |
 
 ## Dependencies
 
@@ -254,14 +272,14 @@ No `classdef` folders (@Folder). All classes in single `.m` files.
 
 ## References by Implementation
 
-### GaussianBeam (`src/beams/GaussianBeam.m`)
+### GaussianBeam (`+paraxial/+beams/GaussianBeam.m`, adapter: `src/beams/GaussianBeam.m`)
 
 - Kogelnik, H., & Li, T. (1966). *Laser Beams and Resonators*. Applied Optics, 5(10), 1550-1567.
   - Foundation for the paraxial formalism: waist `w(z)`, radius of curvature `R(z)`, Gouy phase `psi(z)`.
 - Siegman, A. E. (1986). *Lasers*. University Science Books.
   - Classic reference for notation and phase conventions of Gaussian beams.
 
-### HermiteBeam / LaguerreBeam (`src/beams/HermiteBeam.m`, `src/beams/LaguerreBeam.m`)
+### HermiteBeam / LaguerreBeam (`+paraxial/+beams/HermiteBeam.m`, `+paraxial/+beams/LaguerreBeam.m`)
 
 - Saleh, B. E. A., & Teich, M. C. (2007). *Fundamentals of Photonics* (2nd ed.). Wiley.
   - Derivation of transverse HG/LG modes and modal structure in Cartesian/polar coordinates.
@@ -270,14 +288,14 @@ No `classdef` folders (@Folder). All classes in single `.m` files.
   Physical Review A, 45(11), 8185-8189.
   - Framework for azimuthal index `l`, radial order `p`, and azimuthal phase `exp(i*l*theta)`.
 
-### ElegantHermiteBeam / ElegantLaguerreBeam (`src/beams/ElegantHermiteBeam.m`, `src/beams/ElegantLaguerreBeam.m`)
+### ElegantHermiteBeam / ElegantLaguerreBeam (`+paraxial/+beams/ElegantHermiteBeam.m`, `+paraxial/+beams/ElegantLaguerreBeam.m`)
 
 - Siegman, A. E. (1996). *Defining and measuring laser beam quality*. JOSA A, 13(5), 952-964.
   - Use of the complex beam parameter `q(z)` and the "elegant" formulation with complex arguments.
 - Siegman, A. E. (1986). *Lasers*. University Science Books.
   - Theoretical context for the amplitude-phase coupling in elegant beam families.
 
-### HankelLaguerre (`src/beams/HankelLaguerre.m`)
+### HankelLaguerre (`+paraxial/+beams/HankelLaguerre.m`)
 
 - Kotlyar, V. V., Kovalev, A. A., & Porfirev, A. P. (2012). *Hankel beams and their properties*.
   Optics Letters / JOSA A literature on Hankel-type structured beams.

@@ -1,4 +1,6 @@
-# Integration Pre-Merge Hardening Implementation Plan
+# Historical: Integration Pre-Merge Hardening Implementation Plan
+
+> **Status:** Historical. This pre-merge hardening plan has been superseded by the v2 modernization integration and the active post-v2 roadmap in `docs/ROADMAP.md`.
 
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
