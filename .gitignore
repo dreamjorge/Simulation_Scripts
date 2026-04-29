@@ -3,3 +3,4 @@
 *.mat
 .DS_Store
 .worktrees/
+.opencode/
