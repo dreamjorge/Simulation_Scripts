@@ -5,13 +5,20 @@
 % Or: matlab -batch "run('tests/test_Wavefront.m')"
 
 testDir = fileparts(mfilename('fullpath'));
-repoRoot = fullfile(testDir, '..');
+repoRoot = fullfile(testDir, '..', '..');
+
+% Canonical package namespace (+paraxial/) is resolved by adding its parent.
+addpath(repoRoot);
+
+% Deprecated compatibility paths (src/) remain available for direct test runs.
 addpath(fullfile(repoRoot, 'src', 'beams'));
 addpath(fullfile(repoRoot, 'src', 'parameters'));
 addpath(fullfile(repoRoot, 'src', 'computation'));
 addpath(fullfile(repoRoot, 'src', 'propagation', 'field'));
 addpath(fullfile(repoRoot, 'src', 'propagation', 'rays'));
 addpath(fullfile(repoRoot, 'src', 'visualization'));
+
+% Utilities and legacy addons.
 addpath(fullfile(repoRoot, 'ParaxialBeams'));
 addpath(fullfile(repoRoot, 'ParaxialBeams', 'Addons'));
 
