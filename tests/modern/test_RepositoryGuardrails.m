@@ -1,6 +1,7 @@
 % Guardrail: keep repository cleanup and canonical API documentation aligned
 
 repoRoot = fullfile(fileparts(fileparts(fileparts(mfilename('fullpath')))));
+addpath(fullfile(repoRoot, 'ParaxialBeams'));
 
 fprintf('=== Repository Guardrail Tests ===\n\n');
 passed = 0;

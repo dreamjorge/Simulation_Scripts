@@ -24,7 +24,7 @@ Public docs MUST present `BeamFactory.create()` as the stable high-level constru
 
 ### Requirement: Factory beam type registry
 
-BeamFactory SHALL maintain a mapping of beam type names to their canonical class names/locations, supporting: 'gaussian', 'hermite', 'laguerre', 'elegant-hermite', 'elegant-laguerre', 'hankel-hermite', 'hankel-laguerre'. Public docs SHALL list only supported names as default API.
+BeamFactory SHALL maintain a mapping of beam type names to their canonical class names/locations, supporting the default public names returned by `BeamFactory.supportedTypes()`: 'gaussian', 'hermite', 'laguerre', 'elegant_hermite', 'elegant_laguerre', 'hankel', and 'hankel_hermite'. Public docs SHALL list only supported names as default API.
 (Previously: the registry requirement did not require public docs to stay aligned with supported names.)
 
 #### Scenario: Supported beam types
