@@ -36,7 +36,7 @@ Command:
 C:\Users\uidn7961\AppData\Local\Programs\GNU Octave\Octave-11.1.0\mingw64\bin\octave-cli.exe --no-gui --eval "run('tests/modern/test_RepositoryGuardrails.m')"
 
 Result:
-=== Repository Guardrails: 12/12 passed ===
+=== Repository Guardrails: 13/13 passed ===
 ```
 
 **Coverage**: Not available — no coverage tool is configured for this repository.
@@ -45,15 +45,15 @@ Result:
 
 | Requirement | Scenario | Evidence | Result |
 |-------------|----------|----------|--------|
-| Canonical Package Parent Path | Portable runner initializes canonical package | `test_RepositoryGuardrails.m` checks canonical package section and `addpath(repoRoot)`; guardrails 12/12 passed. | ✅ COMPLIANT |
-| Deprecated Paths Are Explicit | Runner keeps compatibility paths | `test_RepositoryGuardrails.m` checks `Deprecated compatibility paths (src/)`; guardrails 12/12 passed. | ✅ COMPLIANT |
+| Canonical Package Parent Path | Portable runner initializes canonical package | `test_RepositoryGuardrails.m` checks canonical package section and `addpath(repoRoot)`; guardrails 13/13 passed. | ✅ COMPLIANT |
+| Deprecated Paths Are Explicit | Runner keeps compatibility paths | `test_RepositoryGuardrails.m` checks `Deprecated compatibility paths (src/)`; guardrails 13/13 passed. | ✅ COMPLIANT |
 | setpaths Remains Preferred Dev Setup | Docs describe manual setup | `tests/README.md` documents `setpaths()` and package-parent semantics; full suite passed. | ✅ COMPLIANT |
-| Addon Classification | Inventory is created | `docs/ADDONS_INVENTORY.md` exists and guardrail validates required classifications; guardrails 12/12 passed. | ✅ COMPLIANT |
+| Addon Classification | Inventory is created | `docs/ADDONS_INVENTORY.md` exists and guardrail validates every top-level addon entry; guardrails 13/13 passed. | ✅ COMPLIANT |
 | Supported Classifications | Unknown usage | Inventory includes `needs-investigation` entries and no addon deletion occurred. | ✅ COMPLIANT |
 | No Deletion Without Follow-up SDD | Removable candidate found | Inventory policy requires follow-up SDD before deletion; no addon files removed. | ✅ COMPLIANT |
-| Roadmap Owns Active Next Steps | New modernization SDD exists | `docs/ROADMAP.md` references `post-v2-modernization-next-steps`; guardrails 12/12 passed. | ✅ COMPLIANT |
-| Compatibility Reduction Is Planned Separately | `src/` cleanup is discussed | `docs/COMPATIBILITY_REDUCTION.md` defines gates and cleanup non-goals; guardrails 12/12 passed. | ✅ COMPLIANT |
-| Guardrails Track Stable Invariants | Docs wording changes | Structural guardrails validate stable policy text; guardrails 12/12 passed. | ✅ COMPLIANT |
+| Roadmap Owns Active Next Steps | New modernization SDD exists | `docs/ROADMAP.md` references `post-v2-modernization-next-steps`; guardrails 13/13 passed. | ✅ COMPLIANT |
+| Compatibility Reduction Is Planned Separately | `src/` cleanup is discussed | `docs/COMPATIBILITY_REDUCTION.md` defines gates and cleanup non-goals; guardrails 13/13 passed. | ✅ COMPLIANT |
+| Guardrails Track Stable Invariants | Docs wording changes | Structural guardrails validate stable policy text; guardrails 13/13 passed. | ✅ COMPLIANT |
 
 **Compliance summary**: 9/9 scenarios compliant.
 

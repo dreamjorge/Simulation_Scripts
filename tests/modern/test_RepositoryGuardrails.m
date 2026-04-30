@@ -44,6 +44,7 @@ addonsInventoryPath = fullfile(repoRoot, 'docs', 'ADDONS_INVENTORY.md');
 compatReductionPath = fullfile(repoRoot, 'docs', 'COMPATIBILITY_REDUCTION.md');
 planPath = fullfile(repoRoot, 'plan.md');
 portableRunnerPath = fullfile(repoRoot, 'tests', 'portable_runner.m');
+addonsDir = fullfile(repoRoot, 'ParaxialBeams', 'Addons');
 if exist(readmePath, 'file')
     readmeContent = fileread(readmePath);
 else
@@ -143,6 +144,35 @@ if ~isempty(strfind(addonsInventoryContent, 'runtime-required')) && ...
     passed = passed + 1;
 else
     fprintf('  FAIL: addons inventory is missing required classifications\n');
+    failed = failed + 1;
+end
+
+addonEntries = dir(addonsDir);
+missingAddonEntries = {};
+for i = 1:numel(addonEntries)
+    entryName = addonEntries(i).name;
+    if strcmp(entryName, '.') || strcmp(entryName, '..')
+        continue;
+    end
+
+    inventoryEntry = ['ParaxialBeams/Addons/' entryName];
+    if addonEntries(i).isdir
+        inventoryEntry = [inventoryEntry '/'];
+    end
+
+    if isempty(strfind(addonsInventoryContent, inventoryEntry))
+        missingAddonEntries{end+1} = inventoryEntry; %#ok<AGROW>
+    end
+end
+
+if isempty(missingAddonEntries)
+    fprintf('  PASS: addons inventory lists every top-level addon entry\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: addons inventory is missing top-level addon entries\n');
+    for i = 1:numel(missingAddonEntries)
+        fprintf('    - %s\n', missingAddonEntries{i});
+    end
     failed = failed + 1;
 end
 
