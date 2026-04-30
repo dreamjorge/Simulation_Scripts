@@ -6,6 +6,8 @@ This directory contains tests for the ParaxialBeams simulation library.
 
 `tests/portable_runner.m` is the canonical non-interactive runner. `tests/test_all.m` is the portable wrapper used by humans and CI.
 
+For local development setup before direct script invocation, run `setpaths()` from the repository root. This preserves MATLAB/Octave package semantics by adding the repo root as the parent of `+paraxial/` instead of adding internal `+package` folders directly.
+
 ```bash
 octave --no-gui --eval "run('tests/test_all.m')"
 ```
@@ -97,7 +99,7 @@ Tests follow consistent patterns:
 ## Portable Runner
 
 `tests/portable_runner.m` is the canonical non-interactive runner used by `tests/test_all.m`.
-It executes both modern and legacy compatibility suites.
+It executes canonical tests and legacy compatibility suites. The runner adds the repository root for `+paraxial/` package resolution and keeps `src/` paths only as deprecated/transitional compatibility paths.
 
 For a faster legacy-only check during migration work:
 

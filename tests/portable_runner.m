@@ -8,7 +8,15 @@ function totalFailed = portable_runner()
     testDir = fileparts(mfilename('fullpath'));
     repoRoot = fullfile(testDir, '..');
     
-    % Add modern library paths (src/)
+    % Canonical package namespace (+paraxial/)
+    % MATLAB/Octave packages are resolved by adding the parent directory.
+    % Do not add internal +package folders directly.
+    addpath(repoRoot);
+
+    % Deprecated compatibility paths (src/)
+    % Keep these during the Strangler Fig migration so legacy adapters and
+    % compatibility tests remain executable. New code should prefer +paraxial/
+    % or BeamFactory.create().
     addpath(fullfile(repoRoot, 'src', 'beams'));
     addpath(fullfile(repoRoot, 'src', 'parameters'));
     addpath(fullfile(repoRoot, 'src', 'computation'));
@@ -16,7 +24,7 @@ function totalFailed = portable_runner()
     addpath(fullfile(repoRoot, 'src', 'propagation', 'rays'));
     addpath(fullfile(repoRoot, 'src', 'visualization'));
     
-    % Add utilities (ParaxialBeams/)
+    % Add utilities and legacy addons (ParaxialBeams/)
     addpath(fullfile(repoRoot, 'ParaxialBeams'));
     addpath(fullfile(repoRoot, 'ParaxialBeams', 'Addons'));
     

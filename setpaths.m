@@ -13,7 +13,7 @@ function setpaths()
     %   ...
     %
     % Modern package (+paraxial/):
-    %   addpath('+paraxial');  % enables 'import paraxial.*'
+    %   addpath(repoRoot);  % package parent enables 'import paraxial.*'
     %   import paraxial.beams.GaussianBeam
     %
     % Utilities (ParaxialBeams/):
