@@ -39,6 +39,12 @@ end
 % -------------------------------------------------------------------------
 readmePath = fullfile(repoRoot, 'README.md');
 registryPath = fullfile(repoRoot, '.atl', 'skill-registry.md');
+roadmapPath = fullfile(repoRoot, 'docs', 'ROADMAP.md');
+addonsInventoryPath = fullfile(repoRoot, 'docs', 'ADDONS_INVENTORY.md');
+compatReductionPath = fullfile(repoRoot, 'docs', 'COMPATIBILITY_REDUCTION.md');
+planPath = fullfile(repoRoot, 'plan.md');
+portableRunnerPath = fullfile(repoRoot, 'tests', 'portable_runner.m');
+addonsDir = fullfile(repoRoot, 'ParaxialBeams', 'Addons');
 if exist(readmePath, 'file')
     readmeContent = fileread(readmePath);
 else
@@ -48,6 +54,31 @@ if exist(registryPath, 'file')
     registryContent = fileread(registryPath);
 else
     registryContent = '';
+end
+if exist(roadmapPath, 'file')
+    roadmapContent = fileread(roadmapPath);
+else
+    roadmapContent = '';
+end
+if exist(addonsInventoryPath, 'file')
+    addonsInventoryContent = fileread(addonsInventoryPath);
+else
+    addonsInventoryContent = '';
+end
+if exist(compatReductionPath, 'file')
+    compatReductionContent = fileread(compatReductionPath);
+else
+    compatReductionContent = '';
+end
+if exist(planPath, 'file')
+    planContent = fileread(planPath);
+else
+    planContent = '';
+end
+if exist(portableRunnerPath, 'file')
+    portableRunnerContent = fileread(portableRunnerPath);
+else
+    portableRunnerContent = '';
 end
 
 if ~isempty(strfind(readmeContent, 'GitHub Actions is the canonical CI system'))
@@ -71,6 +102,87 @@ if ~isempty(strfind(registryContent, 'Octave 11.1.0+')) && isempty(strfind(regis
     passed = passed + 1;
 else
     fprintf('  FAIL: skill registry Octave baseline is stale or inconsistent\n');
+    failed = failed + 1;
+end
+
+% -------------------------------------------------------------------------
+% Runner path policy and roadmap governance
+% -------------------------------------------------------------------------
+if ~isempty(strfind(portableRunnerContent, 'Canonical package namespace')) && ...
+   ~isempty(strfind(portableRunnerContent, "addpath(repoRoot)")) && ...
+   isempty(strfind(portableRunnerContent, 'Add modern library paths (src/)'))
+    fprintf('  PASS: portable runner documents canonical package parent path policy\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: portable runner path policy is stale or ambiguous\n');
+    failed = failed + 1;
+end
+
+if ~isempty(strfind(portableRunnerContent, 'Deprecated compatibility paths (src/)'))
+    fprintf('  PASS: portable runner labels src/ paths as deprecated compatibility\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: portable runner does not label src/ paths as deprecated compatibility\n');
+    failed = failed + 1;
+end
+
+if ~isempty(strfind(roadmapContent, 'post-v2-modernization-next-steps')) && ...
+   ~isempty(strfind(roadmapContent, 'No removal of `src/` without a dedicated migration SDD')) && ...
+   ~isempty(strfind(planContent, 'Historical'))
+    fprintf('  PASS: roadmap owns active modernization next steps\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: roadmap governance for active modernization next steps is incomplete\n');
+    failed = failed + 1;
+end
+
+if ~isempty(strfind(addonsInventoryContent, 'runtime-required')) && ...
+   ~isempty(strfind(addonsInventoryContent, 'plotting-only')) && ...
+   ~isempty(strfind(addonsInventoryContent, 'needs-investigation')) && ...
+   ~isempty(strfind(addonsInventoryContent, 'Plots_Functions'))
+    fprintf('  PASS: addons inventory classifies legacy addon surfaces\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: addons inventory is missing required classifications\n');
+    failed = failed + 1;
+end
+
+addonEntries = dir(addonsDir);
+missingAddonEntries = {};
+for i = 1:numel(addonEntries)
+    entryName = addonEntries(i).name;
+    if strcmp(entryName, '.') || strcmp(entryName, '..')
+        continue;
+    end
+
+    inventoryEntry = ['ParaxialBeams/Addons/' entryName];
+    if addonEntries(i).isdir
+        inventoryEntry = [inventoryEntry '/'];
+    end
+
+    if isempty(strfind(addonsInventoryContent, inventoryEntry))
+        missingAddonEntries{end+1} = inventoryEntry; %#ok<AGROW>
+    end
+end
+
+if isempty(missingAddonEntries)
+    fprintf('  PASS: addons inventory lists every top-level addon entry\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: addons inventory is missing top-level addon entries\n');
+    for i = 1:numel(missingAddonEntries)
+        fprintf('    - %s\n', missingAddonEntries{i});
+    end
+    failed = failed + 1;
+end
+
+if ~isempty(strfind(compatReductionContent, 'Cleanup-only changes MUST NOT remove `src/`')) && ...
+   ~isempty(strfind(compatReductionContent, 'tests/legacy_compat/')) && ...
+   ~isempty(strfind(compatReductionContent, 'Dedicated SDD change'))
+    fprintf('  PASS: compatibility reduction plan defines src/ migration gates\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: compatibility reduction plan is missing src/ migration gates\n');
     failed = failed + 1;
 end
 
