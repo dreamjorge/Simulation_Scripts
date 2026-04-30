@@ -8,7 +8,7 @@ Define how CI jobs propagate MATLAB/Octave test runner status.
 
 ### Requirement: Portable Runner Failure Propagation
 
-CI jobs that execute `portable_runner()` MUST fail when the returned failure count is non-zero.
+CI jobs that execute `portable_runner()` MUST fail when the returned failure count is non-zero. Documentation that references CI MUST identify GitHub Actions as the active CI system and MUST describe runner failure propagation consistently with workflow commands.
 
 #### Scenario: Portable runner succeeds
 
@@ -30,3 +30,10 @@ CI jobs that execute `portable_runner()` MUST fail when the returned failure cou
 - GIVEN Octave raises an exception while executing the runner
 - WHEN the workflow command is piped through `tee`
 - THEN the pipeline MUST fail through shell `pipefail`
+
+#### Scenario: Documentation references CI
+
+- GIVEN public docs describe CI or test execution
+- WHEN cleanup is applied
+- THEN docs MUST match `.github/workflows/octave.yml` and `.github/workflows/matlab.yml`
+- AND stale CI systems MUST NOT be described as active

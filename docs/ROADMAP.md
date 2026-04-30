@@ -50,9 +50,9 @@ Before tagging a release:
 - Keep legacy examples documented as archive/generator/research material.
 - Avoid presenting legacy examples as the default user path.
 
-## Active Follow-up: `post-v2-modernization-next-steps`
+## Completed Follow-up: `post-v2-modernization-next-steps`
 
-The active OpenSpec change `openspec/changes/post-v2-modernization-next-steps/` tracks the next bounded cleanup wave:
+The archived OpenSpec change `openspec/changes/archive/2026-04-30-post-v2-modernization-next-steps/` completed the bounded cleanup wave for:
 
 - Clarify runner path setup so `+paraxial/` is resolved via the repo root package parent.
 - Keep `src/` paths available only as deprecated/transitional compatibility paths.
