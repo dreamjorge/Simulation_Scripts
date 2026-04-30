@@ -44,6 +44,7 @@ addonsInventoryPath = fullfile(repoRoot, 'docs', 'ADDONS_INVENTORY.md');
 compatReductionPath = fullfile(repoRoot, 'docs', 'COMPATIBILITY_REDUCTION.md');
 planPath = fullfile(repoRoot, 'plan.md');
 portableRunnerPath = fullfile(repoRoot, 'tests', 'portable_runner.m');
+wavefrontTestPath = fullfile(repoRoot, 'tests', 'modern', 'test_Wavefront.m');
 addonsDir = fullfile(repoRoot, 'ParaxialBeams', 'Addons');
 if exist(readmePath, 'file')
     readmeContent = fileread(readmePath);
@@ -79,6 +80,11 @@ if exist(portableRunnerPath, 'file')
     portableRunnerContent = fileread(portableRunnerPath);
 else
     portableRunnerContent = '';
+end
+if exist(wavefrontTestPath, 'file')
+    wavefrontTestContent = fileread(wavefrontTestPath);
+else
+    wavefrontTestContent = '';
 end
 
 if ~isempty(strfind(readmeContent, 'GitHub Actions is the canonical CI system'))
@@ -123,6 +129,23 @@ if ~isempty(strfind(portableRunnerContent, 'Deprecated compatibility paths (src/
     passed = passed + 1;
 else
     fprintf('  FAIL: portable runner does not label src/ paths as deprecated compatibility\n');
+    failed = failed + 1;
+end
+
+staleWavefrontRoot = ~isempty(strfind(wavefrontTestContent, "repoRoot = fullfile(testDir, '..');"));
+addsProjectPaths = ~isempty(strfind(wavefrontTestContent, "addpath(fullfile(repoRoot, 'src'")) || ...
+                   ~isempty(strfind(wavefrontTestContent, "addpath(fullfile(repoRoot, 'ParaxialBeams'"));
+usesRepoRootParent = ~isempty(strfind(wavefrontTestContent, "repoRoot = fullfile(testDir, '..', '..');")) && ...
+                     ~isempty(strfind(wavefrontTestContent, 'addpath(repoRoot)'));
+
+if ~staleWavefrontRoot && ~addsProjectPaths && usesRepoRootParent
+    fprintf('  PASS: Wavefront direct test uses repo-root package parent path setup\n');
+    passed = passed + 1;
+elseif ~staleWavefrontRoot && usesRepoRootParent
+    fprintf('  PASS: Wavefront direct test uses repo-root package parent path setup\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: Wavefront direct test has stale repo-root path setup\n');
     failed = failed + 1;
 end
 
