@@ -276,6 +276,26 @@ end
 
 fprintf('\n=== Repository Guardrails: %d/%d passed ===\n', passed, passed + failed);
 
+% -------------------------------------------------------------------------
+% Addons cleanup readiness gates
+% -------------------------------------------------------------------------
+readinessPath = fullfile(repoRoot, 'docs', 'ADDONS_CLEANUP_READINESS.md');
+if exist(readinessPath, 'file')
+    readinessContent = fileread(readinessPath);
+else
+    readinessContent = '';
+end
+
+if ~isempty(strfind(readinessContent, 'License and Origin Review Required')) && ...
+   ~isempty(strfind(readinessContent, 'Required Follow-up SDDs')) && ...
+   ~isempty(strfind(readinessContent, 'Keep During Compatibility Window'))
+    fprintf('  PASS: addons cleanup readiness defines review gates\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: addons cleanup readiness is missing review gates\n');
+    failed = failed + 1;
+end
+
 if failed ~= 0
     error('Repository guardrails failed: %d violation group(s).', failed);
 end
