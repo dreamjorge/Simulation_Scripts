@@ -132,8 +132,10 @@ else
     failed = failed + 1;
 end
 
+% onCleanup guarantees restoration on ANY exit (normal, error, interrupt).
+% The cleanup anonymous function holds the restoration call inline.
 if ~isempty(strfind(portableRunnerContent, "warning('off', 'BeamFactory:deprecated')")) && ...
-   ~isempty(strfind(portableRunnerContent, "warning(previousDeprecatedWarningState.state, 'BeamFactory:deprecated')"))
+   ~isempty(strfind(portableRunnerContent, 'cleanupObj = onCleanup(@() warning(previousDeprecatedWarningState.state, '))
     fprintf('  PASS: portable runner suppresses expected deprecated-adapter warning storm\n');
     passed = passed + 1;
 else
