@@ -40,6 +40,13 @@ function totalFailed = portable_runner()
     % Hankele* aliases were removed; legacy_compat tests assert post-removal
     % migration behavior when this flag is enabled.
     setenv('LEGACY_ALIAS_REMOVAL_MODE', '1');
+
+    % Expected deprecation warnings from transitional src/ adapters can occur
+    % in tight numerical loops (notably Hankel ray tracing). Suppress only
+    % this known warning ID for the portable suite, then restore it before
+    % returning so normal interactive sessions still surface deprecations.
+    previousDeprecatedWarningState = warning('query', 'BeamFactory:deprecated');
+    warning('off', 'BeamFactory:deprecated');
     
     % Canonical list of tests to run (from tests/modern/)
     testFiles = {
@@ -122,6 +129,8 @@ function totalFailed = portable_runner()
         fprintf('ESTADO: ÉXITO\n');
         % exit(0);
     end
+
+    warning(previousDeprecatedWarningState.state, 'BeamFactory:deprecated');
 end
 
 function [passed, failed] = run_class_test(className)
