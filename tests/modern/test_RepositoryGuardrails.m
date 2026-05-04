@@ -132,6 +132,17 @@ else
     failed = failed + 1;
 end
 
+% onCleanup guarantees restoration on ANY exit (normal, error, interrupt).
+% The cleanup anonymous function holds the restoration call inline.
+if ~isempty(strfind(portableRunnerContent, "warning('off', 'BeamFactory:deprecated')")) && ...
+   ~isempty(strfind(portableRunnerContent, 'cleanupObj = onCleanup(@() warning(previousDeprecatedWarningState.state, '))
+    fprintf('  PASS: portable runner suppresses expected deprecated-adapter warning storm\n');
+    passed = passed + 1;
+else
+    fprintf('  FAIL: portable runner does not suppress/restore expected deprecated-adapter warnings\n');
+    failed = failed + 1;
+end
+
 staleWavefrontRoot = ~isempty(strfind(wavefrontTestContent, "repoRoot = fullfile(testDir, '..');"));
 addsProjectPaths = ~isempty(strfind(wavefrontTestContent, "addpath(fullfile(repoRoot, 'src'")) || ...
                    ~isempty(strfind(wavefrontTestContent, "addpath(fullfile(repoRoot, 'ParaxialBeams'"));
